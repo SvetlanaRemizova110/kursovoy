@@ -1,0 +1,181 @@
+﻿
+namespace kursovoy
+{
+    partial class Authorization
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBoxLogin = new System.Windows.Forms.TextBox();
+            this.label_login = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBoxPwd = new System.Windows.Forms.TextBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // label1
+            // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.LightGreen;
+            this.label1.Font = new System.Drawing.Font("Comic Sans MS", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(30, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(197, 40);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Авторизация";
+            // 
+            // textBoxLogin
+            // 
+            this.textBoxLogin.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.textBoxLogin.BackColor = System.Drawing.Color.White;
+            this.textBoxLogin.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxLogin.Location = new System.Drawing.Point(30, 121);
+            this.textBoxLogin.Name = "textBoxLogin";
+            this.textBoxLogin.Size = new System.Drawing.Size(190, 37);
+            this.textBoxLogin.TabIndex = 3;
+            this.textBoxLogin.Text = "admin";
+            // 
+            // label_login
+            // 
+            this.label_login.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.label_login.AutoSize = true;
+            this.label_login.BackColor = System.Drawing.Color.LightGreen;
+            this.label_login.Font = new System.Drawing.Font("Comic Sans MS", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label_login.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label_login.Location = new System.Drawing.Point(31, 85);
+            this.label_login.Name = "label_login";
+            this.label_login.Size = new System.Drawing.Size(93, 33);
+            this.label_login.TabIndex = 0;
+            this.label_login.Text = "Логин:";
+            // 
+            // label2
+            // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.LightGreen;
+            this.label2.Font = new System.Drawing.Font("Comic Sans MS", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.label2.Location = new System.Drawing.Point(31, 177);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(111, 33);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Пароль:";
+            // 
+            // textBoxPwd
+            // 
+            this.textBoxPwd.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.textBoxPwd.BackColor = System.Drawing.Color.White;
+            this.textBoxPwd.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxPwd.Location = new System.Drawing.Point(30, 213);
+            this.textBoxPwd.Name = "textBoxPwd";
+            this.textBoxPwd.PasswordChar = '*';
+            this.textBoxPwd.Size = new System.Drawing.Size(190, 37);
+            this.textBoxPwd.TabIndex = 3;
+            this.textBoxPwd.Text = "admin";
+            this.textBoxPwd.TextChanged += new System.EventHandler(this.textBoxPwd_TextChanged);
+            // 
+            // button2
+            // 
+            this.button2.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.button2.BackColor = System.Drawing.Color.ForestGreen;
+            this.button2.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button2.Location = new System.Drawing.Point(12, 332);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(236, 39);
+            this.button2.TabIndex = 2;
+            this.button2.Text = "выход из программы";
+            this.button2.UseVisualStyleBackColor = false;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.button1.BackColor = System.Drawing.Color.LimeGreen;
+            this.button1.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button1.Location = new System.Drawing.Point(52, 273);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(148, 43);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Войти";
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.pictureBox1.Image = global::kursovoy.Properties.Resources._3aef7174ebd411efb39922ac96e53444_1;
+            this.pictureBox1.Location = new System.Drawing.Point(264, 9);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(278, 362);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // Authorization
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.Honeydew;
+            this.ClientSize = new System.Drawing.Size(554, 383);
+            this.ControlBox = false;
+            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.textBoxPwd);
+            this.Controls.Add(this.textBoxLogin);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label_login);
+            this.Controls.Add(this.label1);
+            this.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Name = "Authorization";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Авторизация";
+            this.Load += new System.EventHandler(this.Authorization_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBoxLogin;
+        private System.Windows.Forms.Label label_login;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBoxPwd;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.PictureBox pictureBox1;
+    }
+}
+
