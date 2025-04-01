@@ -17,7 +17,8 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
-            public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=pets_shop";
+            //public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=pets_shop";
+            public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
         }
         public Authorization()
         {

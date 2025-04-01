@@ -40,5 +40,12 @@ namespace kursovoy
             st.Show();
             this.Hide();
         }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            import i = new import();
+            this.Hide();
+            i.Show();
+        }
     }
 }
