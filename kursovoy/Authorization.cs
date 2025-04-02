@@ -8,8 +8,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MySql.Data.MySqlClient;
 using System.Configuration;
+using MySql.Data.MySqlClient;
+using System.IO;
 namespace kursovoy
 {
     public partial class Authorization : Form
@@ -70,8 +71,18 @@ namespace kursovoy
         {
             string login = textBoxLogin.Text;
             string password = textBoxPwd.Text;
+            string defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
+            string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
+
             User user = AuthorizeUser(login, password);
-            if (user != null)
+            if (login == defaultUser && password == defaultPassword)
+            {
+                // Успешная авторизация
+                import i = new import();
+                i.Show();
+                this.Hide();
+            }
+            else if (user != null)
             {
                 switchRole(user);
             }

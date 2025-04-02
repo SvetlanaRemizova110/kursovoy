@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using System.Configuration;
+using System.IO;
 namespace kursovoy
 {
     public partial class import : Form
@@ -16,7 +17,29 @@ namespace kursovoy
         public import()
         {
             InitializeComponent();
+
+            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand("USE db45; SHOW TABLES;", conn);
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            comboBoxTables.Items.Add(reader.GetString(0));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при загрузке таблиц: " + ex.Message);
+                }
+            }
         }
+
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -42,7 +65,6 @@ namespace kursovoy
                 Console.WriteLine($"Database {dbName} created or already exists.");
             }
         }
-
         static void CreateTables(string connectionString, string dbName)
         {
             string fullConnectionString = $"{connectionString};";
@@ -120,10 +142,8 @@ namespace kursovoy
                       `Login` varchar(45) NOT NULL,
                       `Password` varchar(100) NOT NULL,
                       PRIMARY KEY (`UserID`),
-                      KEY `Role_idx` (`RoleID`),
-                      KEY `userrrr_idx` (`UserFIO`),
-                      CONSTRAINT `Role` FOREIGN KEY (`RoleID`) REFERENCES `Role` (`RoleID`) ON DELETE CASCADE ON UPDATE CASCADE,
-                      CONSTRAINT `userrrr` FOREIGN KEY (`UserFIO`) REFERENCES `Employee` (`EmployeeID`) ON DELETE CASCADE ON UPDATE CASCADE);";
+                      FOREIGN KEY (`RoleID`) REFERENCES `Role` (`RoleID`) ON DELETE CASCADE ON UPDATE CASCADE,
+                      FOREIGN KEY (`UserFIO`) REFERENCES `Employee` (`EmployeeID`) ON DELETE CASCADE ON UPDATE CASCADE);";
 
                     MySqlCommand roleCommand = new MySqlCommand(createRoleTable, connection);
                     MySqlCommand employeeCommand = new MySqlCommand(createEmployeeTable, connection);
@@ -151,6 +171,134 @@ namespace kursovoy
                     MessageBox.Show("Ошибка восстановления БД " + ex.Message + Environment.NewLine);
                 }
             }
+        }
+
+        private void btnSelectCsv_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    txtCSVFile.Text = openFileDialog.FileName;
+                }
+            }
+        }
+
+        private void btnImportData_Click(object sender, EventArgs e)
+        {
+            if (comboBoxTables.SelectedItem == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите таблицу");
+                return;
+            }
+            string tableName = comboBoxTables.SelectedItem.ToString();
+
+            OpenFileAndImportData(tableName);
+        }
+        public void OpenFileAndImportData(string selectedTable)
+        {
+            string filePath = txtCSVFile.Text;
+            ImportData(filePath, selectedTable);
+        }
+        private void ImportData(string filePath, string selectedTable)
+        {
+            //string fullConnectionString = $"{connectionString}database=db45;";
+            string fullConnectionString = Authorization.Program.ConnectionString;
+            if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(selectedTable))
+            {
+                MessageBox.Show("Пожалуйста, выберите файл и таблицу.");
+                return;
+            }
+
+            try
+            {
+                using (var connection = new MySqlConnection(fullConnectionString))
+                {
+                    connection.Open();
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (var reader = new StreamReader(filePath, Encoding.UTF8))
+                            {
+                                string line;
+                                // Пропускаем заголовок файла (если есть)
+                                if ((line = reader.ReadLine()) != null)
+                                {
+                                    while ((line = reader.ReadLine()) != null)
+                                    {
+                                        var values = line.Split(';');
+
+                                        string insertCommand = GenerateInsertCommand(selectedTable, values);
+
+                                        using (var command = new MySqlCommand(insertCommand, connection, transaction))
+                                        {
+                                            // Добавляем параметры для предотвращения SQL-инъекций
+                                            for (int i = 0; i < values.Length; i++)
+                                            {
+                                                command.Parameters.AddWithValue($"@param{i}", values[i]);
+                                            }
+                                            command.ExecuteNonQuery();
+                                        }
+                                    }
+                                }
+                            }
+                            transaction.Commit();
+                            MessageBox.Show("Импорт данных завершен успешно.");
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                            MessageBox.Show($"Ошибка при импорте данных: {ex.Message}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка подключения к базе данных: {ex.Message}");
+            }
+        }
+        private string GenerateInsertCommand(string tableName, string[] values)
+        {
+            if (tableName == "user" || tableName == "User")
+            {
+                return $"INSERT INTO user (UserID, UserFIO, RoleID, Login, Password) VALUES (@param0, @param1, @param2, @param3, @param4)";
+            }
+            else if (tableName == "role" || tableName == "Role")
+            {
+                return $"INSERT INTO role (RoleID, Role) VALUES (@param0, @param1)";
+            }
+            if (tableName == "order" || tableName == "Order")
+            {
+                return $"INSERT INTO `Order` (OrderID, OrderDate, OrderStatus, OrderUser, OrderPrice) VALUES (@param0, @param1, @param2, @param3, @param4)";
+            }
+            if (tableName == "productorder" || tableName == "ProductOrder")
+            {
+                return $"INSERT INTO productorder (ProductID, ProductCount, OrderID) VALUES (@param0, @param1, @param2)";
+            }
+            if (tableName == "product" || tableName == "Product")
+            {
+                return $"INSERT INTO Product (ProductArticul, Name, Description, Cost, Unit, ProductQuantityInStock, ProductCategory, ProductManufactur, ProductSupplier, ProductPhoto) VALUES (@param0, @param1, @param2, @param3, @param4, @param5, @param6, @param7, @param8, @param9)";
+            }
+            else if (tableName == "employee" || tableName == "Employee")
+            {
+                return $"INSERT INTO employee (EmployeeID, EmployeeFIO, telephone, pasport) VALUES (@param0, @param1,@param2, @param3)";
+            }
+            else if (tableName == "productmanufactur" || tableName == "ProductManufactur")
+            {
+                return $"INSERT INTO productmanufactur (ProductManufacturID, ProductManufacturName) VALUES (@param0, @param1)";
+            }
+            else if (tableName == "supplier" || tableName == "Supplier")
+            {
+                return $"INSERT INTO Supplier (SupplierID, SupplierName) VALUES (@param0, @param1)";
+            }
+            else if (tableName == "category" || tableName == "Category")
+            {
+                return $"INSERT INTO Category (CategoryID, CategoryName) VALUES (@param0, @param1)";
+            }
+            return "ошмбкаааааааа123";
         }
     }
 }
