@@ -25,7 +25,7 @@ namespace kursovoy
         {
             InitializeComponent();
         }
-
+        //
         /// <summary>
         /// Класс User - получение информации о пользователе
         /// </summary>
