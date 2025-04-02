@@ -16,7 +16,7 @@ namespace kursovoy
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new import());
+            Application.Run(new Authorization());
         }
     }
 }

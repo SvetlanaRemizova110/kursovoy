@@ -17,7 +17,7 @@ namespace kursovoy
         public import()
         {
             InitializeComponent();
-            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString + "database=db45;"))
+            using (MySqlConnection conn = new MySqlConnection("host=localhost;uid=root;pwd=;database=db45"))
             {
                 try
                 {
@@ -29,6 +29,13 @@ namespace kursovoy
                         {
                             comboBoxTables.Items.Add(reader.GetString(0));
                         }
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    if (ex.Number == 1049) // Error 1049 - Unknown database
+                    {
+                        return;
                     }
                 }
                 catch (Exception ex)
@@ -50,7 +57,7 @@ namespace kursovoy
         private void btnRestoreDatabase_Click(object sender, EventArgs e)
         {
             string dbName = $"db45";
-            CreateDatabase(Authorization.Program.ConnectionString, dbName);
+            CreateDatabase("host=localhost;uid=root;pwd=;", dbName);
             CreateTables(Authorization.Program.ConnectionString, dbName);
         }
         static void CreateDatabase(string connentionString, string dbName)
@@ -67,9 +74,7 @@ namespace kursovoy
         }
         static void CreateTables(string connectionString, string dbName)
         {
-            string fullConnectionString = $"{connectionString}database={dbName};";
-            
-            using (MySqlConnection connection = new MySqlConnection(fullConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 try
                 {
@@ -165,6 +170,7 @@ namespace kursovoy
                     orderCommand.ExecuteNonQuery();
                     orderproductCommand.ExecuteNonQuery();
                     MessageBox.Show("База данных восстановлена.");
+                    connection.Close();
                 }
                 catch (Exception ex)
                 {
@@ -203,7 +209,6 @@ namespace kursovoy
         }
         private void ImportData(string filePath, string selectedTable)
         {
-            //string fullConnectionString = $"{connectionString}database=db45;";
             string fullConnectionString = Authorization.Program.ConnectionString;
             if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(selectedTable))
             {
@@ -247,6 +252,7 @@ namespace kursovoy
                             transaction.Commit();
                             MessageBox.Show("Импорт данных завершен успешно.");
                         }
+
                         catch (Exception ex)
                         {
                             transaction.Rollback();

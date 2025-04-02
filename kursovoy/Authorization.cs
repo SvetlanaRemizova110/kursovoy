@@ -18,8 +18,8 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
-           // public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
-            public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
+            public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
+            //public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
         }
         public class CaptchaGenerator
         {
@@ -85,25 +85,22 @@ namespace kursovoy
             {
                 //Ищем пользователей по логину и паролю в БД
                 User authorizedUser = AuthorizeUser(login, password);
-
-                if (authorizedUser != null)
+                //Если пользователь найден, то проверяем логин и пароль администратора
+                if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
                 {
-                    //Если пользователь найден, то проверяем логин и пароль администратора
-                    if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
-                    {
-                        //Если введены логин и пароль администратора, то открываем форму admin
-                        import admin = new import();
-                        this.Hide();
-                        admin.ShowDialog();
-                        this.Close();
-                    }
-                    else
-                    {
-                        //Если найден пользователь, то устанавливаем свойства его роли и переключаем
-                        SwitchRole(authorizedUser.Role);
-                    }
-
+                    //Если введены логин и пароль администратора, то открываем форму admin
+                    import admin = new import();
+                    this.Hide();
+                    admin.ShowDialog();
+                    this.Close();
                 }
+                else if (authorizedUser != null)
+                {
+                    //Если найден пользователь, то устанавливаем свойства его роли и переключаем
+                    SwitchRole(authorizedUser.Role);
+                }
+
+
                 else
                 {
                     //Если пользователь с указанным логином и паролем не найден выводим сообщение об ошибке
@@ -127,66 +124,6 @@ namespace kursovoy
             {
                 MessageBox.Show("Неверная CAPTCHA!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-        
-        //string login = textBoxLogin.Text;
-        //string password = textBoxPwd.Text;
-        //string defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
-        //string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
-
-        ////if (isBlocked)
-        ////{
-        ////    MessageBox.Show("Система заблокирована. Пожалуйста, подождите.");
-        ////    blockTimer.Start();// Запускаем таймер блокировки
-        ////    button1.Enabled = false; // Разблокировка кнопки
-        ////    return;
-        ////}
-        //if (login == defaultUser && password == defaultPassword)
-        //{
-        //    // Успешная авторизация
-        //    import admin = new import();
-        //    admin.Show();
-        //    this.Hide();
-        //}
-        //else if (Authorize(textBoxLogin.Text, textBoxPwd.Text))
-        //{
-        //    //switchRole();
-        //}
-        //else
-        //{
-        //    MessageBox.Show("Неверные данные!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        //    if (!captchaTextBox.Visible)
-        //    {
-        //        LoadCaptcha();
-        //        captchaPictureBox.Visible = true;
-        //        button3.Visible = true;
-        //        label4.Visible = true;
-        //        captchaTextBox.Visible = true;
-        //    }
-        //    else
-        //    {
-        //        // Проверка CAPTCHA
-        //        if (login == defaultUser && password == defaultPassword && captchaTextBox.Text == captchaText)
-        //        {
-        //            // Успешная авторизация с CAPTCHA
-        //            import admin = new import();
-        //            this.Hide();
-        //            admin.ShowDialog();
-        //            this.Close();
-        //        }
-        //        else if (Authorize(textBoxLogin.Text, textBoxPwd.Text) && captchaTextBox.Text == captchaText)
-        //        {
-        //            //switchRole(user);
-        //        }
-        //        else
-        //        {
-        //            // Неуспешная попытка с CAPTCHA
-        //            MessageBox.Show("Неверная CAPTCHA!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //            button1.Enabled = false; // Отключаем кнопку входа
-        //        }
-        //    }
-        //}
 
     }
         //
@@ -226,9 +163,6 @@ namespace kursovoy
             }
         }
 
-
-
-
         /// <summary>
         /// Метод для авторизации пользователя по логину и паролю
         /// </summary>
@@ -246,14 +180,7 @@ namespace kursovoy
                 using (MySqlConnection con = new MySqlConnection(Program.ConnectionString))
                 {
                     con.Open();
-                    //MySqlCommand cmd = new MySqlCommand("SELECT User.*, e.EmployeeFIO " +
-                    //    "FROM User " +
-                    //    "INNER JOIN Employee e ON User.UserFIO = e.EmployeeID " +
-                    //    "WHERE User.Login = @login AND User.Password = @password", con);
-
-                    MySqlCommand cmd = new MySqlCommand($"SELECT * FROM user WHERE Login='{login}' and Password='{password}'", con);
-                    cmd.Parameters.AddWithValue("@login", login);
-                    cmd.Parameters.AddWithValue("@password", hashedPassword); // Используем хешированный пароль
+                    MySqlCommand cmd = new MySqlCommand($"SELECT * FROM user INNER JOIN Employee e ON User.UserFIO = e.EmployeeID WHERE Login='{login}' and Password='{hashedPassword}'", con);
                     MySqlDataAdapter ad = new MySqlDataAdapter(cmd);
                     DataTable tb = new DataTable();
                     ad.Fill(tb);
@@ -264,13 +191,26 @@ namespace kursovoy
                         DataRow row = tb.Rows[0];
                         user = new User
                         {
-                            Role = Convert.ToInt32(row["UserRole"]),// Используем имя столбца
+                            Role = Convert.ToInt32(row["RoleID"]),// Используем имя столбца
                             UserID = Convert.ToInt32(row["UserID"]),// Используем имя столбца
                             EmployeeID = Convert.ToInt32(row["UserFIO"]),// Используем имя столбца
                             FIO = row["EmployeeFIO"].ToString() // Получаем ФИО
                         };
                     }
                 }
+            }
+            catch (MySqlException ex)
+            {
+                if (ex.Number == 1049) // Error 1049 - Unknown database
+                {
+                    MessageBox.Show("База данных не существует.  Создайте базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    user = new User { };
+                }
+                else
+                {
+                    user = null;
+                }
+                return user;
             }
             catch (Exception ex)
             {
@@ -281,83 +221,7 @@ namespace kursovoy
             }
             return user;
         }
-        //private User AuthorizeUser(string login, string password)
-        //{
-        //    User user = null;
-        //    try
-        //    {
-        //        // Хешируем введённый пароль
-        //        string hashedPassword = HashPassword(password);
-
-        //        using (MySqlConnection con = new MySqlConnection(Program.ConnectionString))
-        //        {
-        //            con.Open();
-        //            MySqlCommand cmd = new MySqlCommand("SELECT User.*, e.EmployeeFIO " +
-        //                "FROM User  " +
-        //                "INNER JOIN Employee e ON User.UserFIO = e.EmployeeID " +
-        //                "WHERE User.Login = @login AND User.Password = @password", con);
-        //            cmd.Parameters.AddWithValue("@login", login);
-        //            cmd.Parameters.AddWithValue("@password", hashedPassword); // Используем хешированный пароль
-        //            MySqlDataAdapter ad = new MySqlDataAdapter(cmd);
-        //            DataTable tb = new DataTable();
-        //            ad.Fill(tb);
-
-        //            // Получаем данные о пользователе
-        //            if (tb.Rows.Count == 1)
-        //            {
-        //                DataRow row = tb.Rows[0];
-        //                user = new User
-        //                {
-        //                    Role = Convert.ToInt32(tb.Rows[0].ItemArray.GetValue(2)),
-        //                    UserID = Convert.ToInt32(row.ItemArray.GetValue(0)),
-        //                    EmployeeID = Convert.ToInt32(row.ItemArray.GetValue(1))
-        //                };
-        //                User2.UserID = Convert.ToInt32(row.ItemArray.GetValue(0));
-        //                User2.Role = Convert.ToInt32(tb.Rows[0].ItemArray.GetValue(2));
-        //                User2.EmployeeID = Convert.ToInt32(row.ItemArray.GetValue(1));
-        //                User2.FIO = row["EmployeeFIO"].ToString();
-        //            }
-        //            con.Close();
-        //        }
-        //        return user;
-        //    }
-        //    catch (MySqlException ex) 
-        //    {
-        //        MessageBox.Show("Ошибка базы данных: " + ex.Message);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Неизвестная ошибка: " + ex.Message);
-        //    }
-        //    return user;
-        //}
-        //private bool Authorize(string login, string password)
-        //{
-        //    try
-        //    {
-        //        MySqlConnection con = new MySqlConnection(Program.ConnectionString);
-        //        con.Open();
-        //        MySqlCommand cmd = new MySqlCommand($"SELECT * FROM user WHERE UserLogin='{login}' and UserPassword='{password}'", con);
-        //        MySqlDataAdapter ad = new MySqlDataAdapter(cmd);
-        //        DataTable tb = new DataTable();
-
-        //        ad.Fill(tb);
-
-        //        if (tb.Rows.Count != 1)
-        //        {
-        //            return false;
-        //        }
-
-        //        con.Close();
-
-        //        return true;
-        //    }
-        //    catch
-        //    {
-        //        return false;
-        //    }
-        //}
-
+       
         /// <summary>
         /// Метод для хеширования пароля
         /// </summary>
@@ -383,33 +247,7 @@ namespace kursovoy
         /// Метод для входа в учетную запись в зависимости от роли
         /// </summary>
         /// <param name="user"></param>
-        //private void switchRole(User user)
-        //{
-        //    switch (user.Role)
-        //    {
-        //        case 1:
-        //            User2.Role = 1;
-        //            Admin ad = new Admin();
-        //            ad.Show();
-        //            this.Hide();
-        //            break;
-        //        case 2:
-        //            User2.Role = 2;
-        //            СommoditySpecialist CS = new СommoditySpecialist();
-        //            CS.Show();
-        //            this.Hide();
-        //            break;
-        //        case 3:
-        //            User2.Role = 3;
-        //            Seller sl = new Seller();
-        //            sl.Show();
-        //            this.Hide();
-        //            break;
-        //        default:
-        //            MessageBox.Show("Неизвестная роль", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        //            break;
-        //    }
-        //}
+      
 
         private void SwitchRole(int role)
         {
