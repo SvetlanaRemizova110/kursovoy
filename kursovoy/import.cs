@@ -17,8 +17,7 @@ namespace kursovoy
         public import()
         {
             InitializeComponent();
-
-            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString + "database=db45;"))
             {
                 try
                 {
@@ -56,6 +55,7 @@ namespace kursovoy
         }
         static void CreateDatabase(string connentionString, string dbName)
         {
+
             using (MySqlConnection connection = new MySqlConnection(connentionString))
             {
                 connection.Open();
@@ -67,8 +67,8 @@ namespace kursovoy
         }
         static void CreateTables(string connectionString, string dbName)
         {
-            string fullConnectionString = $"{connectionString};";
-            //database={dbName}
+            string fullConnectionString = $"{connectionString}database={dbName};";
+            
             using (MySqlConnection connection = new MySqlConnection(fullConnectionString))
             {
                 try

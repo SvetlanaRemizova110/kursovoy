@@ -37,7 +37,12 @@ namespace kursovoy
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.captchaPictureBox = new System.Windows.Forms.PictureBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.captchaTextBox = new System.Windows.Forms.TextBox();
+            this.button3 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.captchaPictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -46,7 +51,7 @@ namespace kursovoy
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.LightGreen;
             this.label1.Font = new System.Drawing.Font("Comic Sans MS", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(30, 9);
+            this.label1.Location = new System.Drawing.Point(253, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(197, 40);
             this.label1.TabIndex = 0;
@@ -57,7 +62,7 @@ namespace kursovoy
             this.textBoxLogin.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.textBoxLogin.BackColor = System.Drawing.Color.White;
             this.textBoxLogin.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxLogin.Location = new System.Drawing.Point(30, 121);
+            this.textBoxLogin.Location = new System.Drawing.Point(253, 121);
             this.textBoxLogin.Name = "textBoxLogin";
             this.textBoxLogin.Size = new System.Drawing.Size(190, 37);
             this.textBoxLogin.TabIndex = 3;
@@ -70,7 +75,7 @@ namespace kursovoy
             this.label_login.BackColor = System.Drawing.Color.LightGreen;
             this.label_login.Font = new System.Drawing.Font("Comic Sans MS", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label_login.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label_login.Location = new System.Drawing.Point(31, 85);
+            this.label_login.Location = new System.Drawing.Point(254, 85);
             this.label_login.Name = "label_login";
             this.label_login.Size = new System.Drawing.Size(93, 33);
             this.label_login.TabIndex = 0;
@@ -83,7 +88,7 @@ namespace kursovoy
             this.label2.BackColor = System.Drawing.Color.LightGreen;
             this.label2.Font = new System.Drawing.Font("Comic Sans MS", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label2.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.label2.Location = new System.Drawing.Point(31, 177);
+            this.label2.Location = new System.Drawing.Point(254, 177);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(111, 33);
             this.label2.TabIndex = 0;
@@ -94,7 +99,7 @@ namespace kursovoy
             this.textBoxPwd.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.textBoxPwd.BackColor = System.Drawing.Color.White;
             this.textBoxPwd.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxPwd.Location = new System.Drawing.Point(30, 213);
+            this.textBoxPwd.Location = new System.Drawing.Point(253, 213);
             this.textBoxPwd.Name = "textBoxPwd";
             this.textBoxPwd.PasswordChar = '*';
             this.textBoxPwd.Size = new System.Drawing.Size(190, 37);
@@ -107,7 +112,7 @@ namespace kursovoy
             this.button2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.button2.BackColor = System.Drawing.Color.ForestGreen;
             this.button2.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button2.Location = new System.Drawing.Point(12, 332);
+            this.button2.Location = new System.Drawing.Point(235, 332);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(236, 39);
             this.button2.TabIndex = 2;
@@ -120,7 +125,7 @@ namespace kursovoy
             this.button1.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.button1.BackColor = System.Drawing.Color.LimeGreen;
             this.button1.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button1.Location = new System.Drawing.Point(52, 273);
+            this.button1.Location = new System.Drawing.Point(275, 273);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(148, 43);
             this.button1.TabIndex = 1;
@@ -132,22 +137,66 @@ namespace kursovoy
             // 
             this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.pictureBox1.Image = global::kursovoy.Properties.Resources._3aef7174ebd411efb39922ac96e53444_1;
-            this.pictureBox1.Location = new System.Drawing.Point(264, 9);
+            this.pictureBox1.Location = new System.Drawing.Point(487, 9);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(278, 362);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
+            // captchaPictureBox
+            // 
+            this.captchaPictureBox.Location = new System.Drawing.Point(12, 89);
+            this.captchaPictureBox.Name = "captchaPictureBox";
+            this.captchaPictureBox.Size = new System.Drawing.Size(212, 69);
+            this.captchaPictureBox.TabIndex = 8;
+            this.captchaPictureBox.TabStop = false;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label4.Location = new System.Drawing.Point(63, 169);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(165, 26);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Введите CAPCHA";
+            // 
+            // captchaTextBox
+            // 
+            this.captchaTextBox.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.captchaTextBox.Location = new System.Drawing.Point(12, 201);
+            this.captchaTextBox.Name = "captchaTextBox";
+            this.captchaTextBox.Size = new System.Drawing.Size(212, 34);
+            this.captchaTextBox.TabIndex = 5;
+            this.captchaTextBox.TabStop = false;
+            // 
+            // button3
+            // 
+            this.button3.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.button3.BackColor = System.Drawing.Color.LimeGreen;
+            this.button3.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.button3.Image = global::kursovoy.Properties.Resources._1247719_200;
+            this.button3.Location = new System.Drawing.Point(20, 164);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(37, 32);
+            this.button3.TabIndex = 1;
+            this.button3.UseVisualStyleBackColor = false;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // Authorization
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Honeydew;
-            this.ClientSize = new System.Drawing.Size(554, 383);
+            this.ClientSize = new System.Drawing.Size(1000, 383);
             this.ControlBox = false;
+            this.Controls.Add(this.captchaPictureBox);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.captchaTextBox);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button2);
+            this.Controls.Add(this.button3);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBoxPwd);
             this.Controls.Add(this.textBoxLogin);
@@ -161,6 +210,7 @@ namespace kursovoy
             this.Text = "Авторизация";
             this.Load += new System.EventHandler(this.Authorization_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.captchaPictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -176,6 +226,10 @@ namespace kursovoy
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox captchaPictureBox;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox captchaTextBox;
+        private System.Windows.Forms.Button button3;
     }
 }
 
