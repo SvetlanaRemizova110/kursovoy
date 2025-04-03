@@ -13,6 +13,11 @@ namespace kursovoy
     public partial class Products : Form
     {
         // Для заказа
+        private int currentPage1 = 1;
+        private int rowsPerPage1 = 20;
+        private int totalRows1 = 0;
+        private int totalRecords;//кол-во строк всего
+        private List<DataGridViewRow> allRows1 = new List<DataGridViewRow>();
         private Dictionary<string, int> currentOrder = new Dictionary<string, int>();
         public static class Value
         {
@@ -50,6 +55,17 @@ namespace kursovoy
             // Для запрета изменять ComboBox
             comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            
+            UpdateDataGrid();
+            UpdatePag();
+            labelCount.Text = "Количество записей: ";
+            labelCount.Text += dataGridView1.Rows.Count;
+            FillCount();
+            
+            //label6.Text += dataGridView1.Rows.Count;
+            //label6.Text = "Количество записей: ";
+            //label6.Text += dataGridView1.Rows.Count;
         }
 
         /// <summary>
@@ -75,6 +91,7 @@ namespace kursovoy
                 {
                     dataGridView1.Rows[i].Visible = true;
                 }
+                allRows1.Clear();
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
 
@@ -158,12 +175,50 @@ namespace kursovoy
                     row.Cells["Cost"].Value = rdr[3];
                     row.Cells["ProductQuantityInStock"].Value = rdr[5];
                     row.Cells["ProductCategory"].Value = rdr[8];
+                    allRows1.Add(row);
                 }
+                totalRows1 = allRows1.Count;
                 con.Close();
             }
             catch (Exception ex)
             {
                 throw new Exception($"Ошибка: {ex}");
+            }
+        }
+
+        //Пагинация
+        private void UpdatePag()
+        {
+            dataGridView1.Rows.Clear(); // Очистка существующих строк
+
+            int startIndex = (currentPage1 - 1) * rowsPerPage1;
+            int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
+
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
+            }
+        }
+        //Количество строк всего
+        public void FillCount()
+        {
+            string connectionString = Authorization.Program.ConnectionString;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM Product", connection))
+                {
+                    totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
+                }
+
+                labelVSE.Text = $"/{totalRecords}";
+                //if (SearchText.Text == "" && comboBox2.Text == "Все категории")
+                //{
+                //    labelVSE.Visible = false;
+
+                //}
             }
         }
 
@@ -266,14 +321,26 @@ namespace kursovoy
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
+            FillCount();
+            UpdatePag();
+            labelCount.Text = "Количество записей: ";
+            labelCount.Text += dataGridView1.Rows.Count;
         }
         private void SearchText_TextChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
+            FillCount();
+            UpdatePag();
+            labelCount.Text = "Количество записей: ";
+            labelCount.Text += dataGridView1.Rows.Count;
         }
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
+            FillCount();
+            UpdatePag();
+            labelCount.Text = "Количество записей: ";
+            labelCount.Text += dataGridView1.Rows.Count;
         }
 
         /// <summary>
@@ -388,6 +455,10 @@ namespace kursovoy
                     ProductsEdit editForm = new ProductsEdit(productId);
                     editForm.ShowDialog();
                     UpdateDataGrid();
+                    FillCount();
+                    UpdatePag();
+                    labelCount.Text = "Количество записей: ";
+                    labelCount.Text += dataGridView1.Rows.Count;
                 }
             }
             if (Authorization.User2.Role != 3 && Authorization.User2.Role != 2)
@@ -432,6 +503,10 @@ namespace kursovoy
             ProductsAdd ProductsAdd = new ProductsAdd();
             ProductsAdd.ShowDialog();
             UpdateDataGrid();
+            FillCount();
+            UpdatePag();
+            labelCount.Text = "Количество записей: ";
+            labelCount.Text += dataGridView1.Rows.Count;
         }
 
         /// <summary>
@@ -454,6 +529,35 @@ namespace kursovoy
                     dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff00"); 
                 }
             }
+        }
+
+        private void buttonPag2_Click(object sender, EventArgs e)
+        {
+            if (currentPage1 * rowsPerPage1 < totalRows1)
+            {
+                currentPage1++;
+                UpdateDataGrid();
+                UpdatePag();
+                FillCount();
+                labelCount.Text = "Количество записей: ";
+                labelCount.Text += dataGridView1.Rows.Count;
+
+            }
+        }
+
+        private void buttonPag1_Click(object sender, EventArgs e)
+        {
+            if (currentPage1 > 1)
+            {
+                currentPage1--;
+                UpdateDataGrid();
+                UpdatePag();
+                FillCount();
+                labelCount.Text = "Количество записей: ";
+                labelCount.Text += dataGridView1.Rows.Count;
+
+            }
+
         }
     }
 }
