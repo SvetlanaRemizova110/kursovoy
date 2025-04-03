@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 using System.IO;
+using System.Threading;
 namespace kursovoy
 {
     public partial class Authorization : Form
@@ -18,8 +19,10 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
-            public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
-            //public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
+           // public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
+            public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
+            public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
+            
         }
         public class CaptchaGenerator
         {
@@ -47,7 +50,6 @@ namespace kursovoy
         }
         private string captchaText;
         private int failedLoginAttempts = 0;
-        private int maxFailedLoginAttempts = 3;
         public Authorization()
         {
             InitializeComponent(); 
@@ -92,7 +94,6 @@ namespace kursovoy
                     import admin = new import();
                     this.Hide();
                     admin.ShowDialog();
-                    this.Close();
                 }
                 else if (authorizedUser != null)
                 {
@@ -107,7 +108,7 @@ namespace kursovoy
                     MessageBox.Show("Неверный логин или пароль", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     failedLoginAttempts++;
                     //Проверка кол-ва неверных попыток ввода логина/пароля, если кол-во попыток больше или равно допустимому кол-ву - выводим панель CAPTCHA
-                    if (failedLoginAttempts >= maxFailedLoginAttempts)
+                    if (failedLoginAttempts >= 1)
                     {
                         //Делаем видимыми элементы CAPTCHA
                         LoadCaptcha();
@@ -116,7 +117,11 @@ namespace kursovoy
                         label4.Visible = true;
                         captchaTextBox.Visible = true;
                         //Блокируем кнопку для входа 
-                        button1.Enabled = false;
+                        button1.Enabled = false;                        
+                        MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        Thread.Sleep(10000);
+                        button1.Enabled = true;
+                        MessageBox.Show("Система разблокирована!", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
             }
@@ -301,6 +306,11 @@ namespace kursovoy
             button3.Visible = true;
             label4.Visible = true;
             captchaTextBox.Visible = true;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -17,7 +17,20 @@ namespace kursovoy
         public import()
         {
             InitializeComponent();
-            using (MySqlConnection conn = new MySqlConnection("host=localhost;uid=root;pwd=;database=db45"))
+            ComboBoxTables();
+        }
+
+
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Authorization a = new Authorization();
+            this.Hide();
+            a.Show();
+        }
+        private void ComboBoxTables()
+        {
+            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionStringNotDB))
             {
                 try
                 {
@@ -27,7 +40,7 @@ namespace kursovoy
                     {
                         while (reader.Read())
                         {
-                            comboBoxTables.Items.Add(reader.GetString(0));
+                            comboBox1.Items.Add(reader.GetString(0));
                         }
                     }
                 }
@@ -44,21 +57,12 @@ namespace kursovoy
                 }
             }
         }
-
-
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Authorization a = new Authorization();
-            this.Hide();
-            a.Show();
-        }
-
         private void btnRestoreDatabase_Click(object sender, EventArgs e)
         {
             string dbName = $"db45";
-            CreateDatabase("host=localhost;uid=root;pwd=;", dbName);
+            CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
             CreateTables(Authorization.Program.ConnectionString, dbName);
+            ComboBoxTables();
         }
         static void CreateDatabase(string connentionString, string dbName)
         {
@@ -186,25 +190,25 @@ namespace kursovoy
                 openFileDialog.Filter = "CSV files (*.csv)|*.csv";
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    txtCSVFile.Text = openFileDialog.FileName;
+                    textBox1.Text = openFileDialog.FileName;
                 }
             }
         }
 
         private void btnImportData_Click(object sender, EventArgs e)
         {
-            if (comboBoxTables.SelectedItem == null)
+            if (comboBox1.SelectedItem == null)
             {
                 MessageBox.Show("Пожалуйста, выберите таблицу");
                 return;
             }
-            string tableName = comboBoxTables.SelectedItem.ToString();
+            string tableName = comboBox1.SelectedItem.ToString();
 
             OpenFileAndImportData(tableName);
         }
         public void OpenFileAndImportData(string selectedTable)
         {
-            string filePath = txtCSVFile.Text;
+            string filePath = textBox1.Text;
             ImportData(filePath, selectedTable);
         }
         private void ImportData(string filePath, string selectedTable)
