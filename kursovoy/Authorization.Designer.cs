@@ -66,7 +66,7 @@ namespace kursovoy
             this.textBoxLogin.Name = "textBoxLogin";
             this.textBoxLogin.Size = new System.Drawing.Size(190, 37);
             this.textBoxLogin.TabIndex = 3;
-            this.textBoxLogin.Text = "admin";
+            this.textBoxLogin.Text = "ad";
             // 
             // label_login
             // 
@@ -104,7 +104,7 @@ namespace kursovoy
             this.textBoxPwd.PasswordChar = '*';
             this.textBoxPwd.Size = new System.Drawing.Size(190, 37);
             this.textBoxPwd.TabIndex = 3;
-            this.textBoxPwd.Text = "admin";
+            this.textBoxPwd.Text = "ad";
             this.textBoxPwd.TextChanged += new System.EventHandler(this.textBoxPwd_TextChanged);
             // 
             // button2

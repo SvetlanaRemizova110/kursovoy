@@ -81,10 +81,10 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            if (textBox6.Text == "" || textBoxName.Text == "" || textBox5.Text == "" || textBox7.Text == "" || textBox2.Text == "" || textBox1.Text == "" || comboBox1.Text == "" || comboBox2.Text == "" || comboBox3.Text == "")
+            if ( textBoxName.Text == "" || textBox5.Text == "" || textBox7.Text == "" || textBox2.Text == "" || textBox1.Text == "" || comboBox1.Text == "" || comboBox2.Text == "" || comboBox3.Text == "")
             {
                 MessageBox.Show("Необходимо заполнить все поля!");
-            }
+            }//textBox6.Text == "" ||
             else
             {
                 using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
@@ -130,7 +130,6 @@ namespace kursovoy
                             }
                             // Запрос добавления
                             string query2 = "INSERT INTO Product (" +
-                               "ProductArticul," +
                                "Name," +
                                "Description," +
                                "Cost," +
@@ -141,10 +140,10 @@ namespace kursovoy
                                "ProductSupplier," +
                                "ProductPhoto" +
                                ")" +
-                               " VALUES (@value0,@value1,@value2,@value3,@value4,@value5,@value6,@value7,@value8,@value9)";
+                               " VALUES (@value1,@value2,@value3,@value4,@value5,@value6,@value7,@value8,@value9)";
                             using (MySqlCommand cmd = new MySqlCommand(query2, connection))
                             {
-                                cmd.Parameters.AddWithValue("@value0", textBox6.Text);//Art
+                               // cmd.Parameters.AddWithValue("@value0", textBox6.Text);//Art@value0, "ProductArticul," +
                                 cmd.Parameters.AddWithValue("@value1", textBoxName.Text);//Name
                                 cmd.Parameters.AddWithValue("@value2", textBox5.Text);//description
                                 cmd.Parameters.AddWithValue("@value3", textBox7.Text);//Cost

@@ -524,11 +524,11 @@ namespace kursovoy
                 
                 if (ProductQuantityInStock == 0)
                 {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#FF0000"); 
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ff4e33"); 
 
                 } else if (ProductQuantityInStock <= 3)
                 {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff00"); 
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff66"); 
                 }
             }
         }
