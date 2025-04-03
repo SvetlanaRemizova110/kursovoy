@@ -199,7 +199,9 @@ namespace kursovoy
                 dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
             }
         }
-        //Количество строк всего
+        /// <summary>
+        /// Количество строк всего
+        /// </summary>
         public void FillCount()
         {
             string connectionString = Authorization.Program.ConnectionString;
@@ -214,11 +216,6 @@ namespace kursovoy
                 }
 
                 labelVSE.Text = $"/{totalRecords}";
-                //if (SearchText.Text == "" && comboBox2.Text == "Все категории")
-                //{
-                //    labelVSE.Visible = false;
-
-                //}
             }
         }
 
@@ -473,6 +470,11 @@ namespace kursovoy
                         MessageBox.Show("Запись удалена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         DeleteRecord(id); // Удаляем запись из базы данных
                         dataGridView1.Rows.RemoveAt(e.RowIndex); // Удаляем строку из DataGridView
+                        UpdateDataGrid();
+                        FillCount();
+                        UpdatePag();
+                        labelCount.Text = "Количество записей: ";
+                        labelCount.Text += dataGridView1.Rows.Count;
                     }
                 }
             }
