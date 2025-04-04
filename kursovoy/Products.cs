@@ -13,7 +13,7 @@ namespace kursovoy
     public partial class Products : Form
     {
         // Для заказа
-        private int currentPage1 = 1;
+        private int currentPage1 = 0;
         private int rowsPerPage1 = 20;
         private int totalRows1 = 0;
         private int totalRecords;//кол-во строк всего
@@ -23,7 +23,7 @@ namespace kursovoy
         {
             public static bool clearOrder;
         }
-        
+
         public Products()
         {
             InitializeComponent();
@@ -56,16 +56,11 @@ namespace kursovoy
             comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            
             UpdateDataGrid();
             UpdatePag();
             labelCount.Text = "Количество записей: ";
             labelCount.Text += dataGridView1.Rows.Count;
             FillCount();
-            
-            //label6.Text += dataGridView1.Rows.Count;
-            //label6.Text = "Количество записей: ";
-            //label6.Text += dataGridView1.Rows.Count;
         }
 
         /// <summary>
@@ -186,18 +181,77 @@ namespace kursovoy
             }
         }
 
+        // выбор страницы пагинации
+        // те строки которые нам не нужны на выбраной странице - скрываем
+        private void LinkLabel_Click(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
+            dataGridView1.CurrentCell = null;
+
+            // узнаём какая страница выбрана
+            LinkLabel l = sender as LinkLabel;
+            if (l != null)
+            {
+                currentPage1 = Convert.ToInt32(l.Text) - 1;
+                UpdatePag(); //Перерисовываем интерфейс
+            }
+        }
+
         //Пагинация
         private void UpdatePag()
         {
-            dataGridView1.Rows.Clear(); // Очистка существующих строк
+            // Очищаем только строки, не трогая столбцы
+            dataGridView1.Rows.Clear();
 
-            int startIndex = (currentPage1 - 1) * rowsPerPage1;
+            int startIndex = currentPage1 * rowsPerPage1;
             int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
 
+            // Добавляем строки для текущей страницы
             for (int i = startIndex; i < endIndex; i++)
             {
                 dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
             }
+
+            // Удаляем старые LinkLabel страниц
+            foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
+            {
+                this.Controls.Remove(control);
+            }
+
+            // Рассчитываем общее количество страниц
+            int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
+            int x = 252;
+            int y = 669, step = 15;
+
+            // Создаем новые LinkLabel для страниц
+            for (int i = 0; i < totalPages; i++)
+            {
+                var linkLabel = new LinkLabel();
+                linkLabel.Text = (i + 1).ToString();
+                linkLabel.Name = "page" + i;
+                linkLabel.ForeColor = Color.Black;
+                linkLabel.Font = new Font(linkLabel.Font.FontFamily, 14);
+                linkLabel.AutoSize = true;
+                linkLabel.Location = new Point(x, y);
+                linkLabel.Click += LinkLabel_Click;
+
+                // Убираем подчеркивание только у текущей страницы
+                if (i == currentPage1)
+                {
+                    linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;
+                }
+
+                this.Controls.Add(linkLabel);
+                x += step;
+            }
+
+            // Обновляем состояние кнопок
+            buttonPag1.Enabled = currentPage1 > 0;
+            buttonPag2.Enabled = currentPage1 < totalPages - 1;
+
+            // Обновляем счетчик записей
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}";
+            labelVSE.Text = $"/ {totalRows1}";
         }
         /// <summary>
         /// Количество строк всего
@@ -215,7 +269,7 @@ namespace kursovoy
                     totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
                 }
 
-                labelVSE.Text = $"/{totalRecords}";
+                labelVSE.Text = $"/ {totalRecords}";
             }
         }
 
@@ -248,96 +302,82 @@ namespace kursovoy
         /// <summary>
         /// Фильтр, сортировка, поиск
         /// </summary>
-        private void UpdateDataGrid() 
+        private void UpdateDataGrid()
         {
             string searchStr = SearchText.Text;
             string orderBy = comboBox1.SelectedItem?.ToString() == "По убыванию" ? "DESC" : "ASC";
-
-            // Получение выбранной категории
             string selectedCategory = comboBox2.SelectedItem?.ToString();
             int categoryId = -1;
 
-            if (!string.IsNullOrEmpty(selectedCategory))
+            if (!string.IsNullOrEmpty(selectedCategory) && selectedCategory != "Все категории")
             {
-                categoryId = GetCategoryIdByName(selectedCategory); //метод для получения категории
+                categoryId = GetCategoryIdByName(selectedCategory);
             }
 
-            string strCmd = "SELECT " +
-            "ProductArticul AS 'Артикул'," +
-             "Name AS 'Наименование товара'," +
-             "Description AS 'Описание'," +
-             "Cost AS 'Стоимость'," +
-             "Unit AS 'Единица измерения'," +
-             "ProductQuantityInStock AS 'Количество на складе'," +
-             "ProductManufactur.ProductManufacturName AS 'Производитель'," +
-             "Supplier.SupplierName AS 'Поставщик'," +
-             "Category.CategoryName AS 'Категория'," +
-             "ProductPhoto " +
-             "FROM Product " +
-             "INNER JOIN ProductManufactur ON Product.ProductManufactur = ProductManufactur.ProductManufacturID " +
-             "INNER JOIN Supplier ON Product.ProductSupplier = Supplier.SupplierID " +
-             "INNER JOIN Category ON Product.ProductCategory = Category.CategoryID";
+            string strCmd = BuildSqlQuery(searchStr, orderBy, categoryId);
+            FillDataGrid(strCmd, categoryId);
+            currentPage1 = 0; // Сбрасываем на первую страницу
+            UpdatePag(); // Обновляем пагинацию
+        }
 
-            if (SearchText.Text == "")
-            {
-                // Заполнение DataGrid
-                FillDataGrid(strCmd, categoryId);
-            }
-            // Поиск
+        private string BuildSqlQuery(string searchStr, string orderBy, int categoryId)
+        {
+            string strCmd = "SELECT ProductArticul, Name, Description, Cost, Unit, " +
+                           "ProductQuantityInStock, ProductManufactur.ProductManufacturName, " +
+                           "Supplier.SupplierName, Category.CategoryName, ProductPhoto " +
+                           "FROM Product " +
+                           "INNER JOIN ProductManufactur ON Product.ProductManufactur = ProductManufactur.ProductManufacturID " +
+                           "INNER JOIN Supplier ON Product.ProductSupplier = Supplier.SupplierID " +
+                           "INNER JOIN Category ON Product.ProductCategory = Category.CategoryID";
+
+            List<string> conditions = new List<string>();
+
             if (!string.IsNullOrWhiteSpace(searchStr) && searchStr.Length >= 3)
             {
-                strCmd += $" AND (Name LIKE '%{searchStr}%' OR ProductArticul LIKE '%{searchStr}%')";
-                // Заполнение DataGrid
-                FillDataGrid(strCmd, categoryId);
+                conditions.Add($"(Name LIKE '%{searchStr}%' OR ProductArticul LIKE '%{searchStr}%')");
             }
-            if (comboBox2.Text != "")
+
+            if (categoryId != -1)
             {
-                // Фильтрация по категориям
-                if (categoryId != -1) // Проверяем, если categoryId был найден
-                {
-                    strCmd += $" AND ProductCategory = @categoryId";
-                    // Заполнение DataGrid
-                    FillDataGrid(strCmd, categoryId);
-                }
+                conditions.Add($"ProductCategory = {categoryId}");
             }
-            else if (comboBox2.Text == "Все категории")
+
+            if (conditions.Count > 0)
             {
-                _ = strCmd;
-                // Заполнение DataGrid
-                FillDataGrid(strCmd, categoryId);
+                strCmd += " WHERE " + string.Join(" AND ", conditions);
             }
-            if (comboBox1.Text != "")
+
+            if (!string.IsNullOrEmpty(orderBy))
             {
-                // Сортировка
                 strCmd += $" ORDER BY Cost {orderBy}";
-                // Заполнение DataGrid
-                FillDataGrid(strCmd, categoryId);
             }
+
+            return strCmd;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
-            FillCount();
             UpdatePag();
             labelCount.Text = "Количество записей: ";
             labelCount.Text += dataGridView1.Rows.Count;
+            FillCount();
         }
         private void SearchText_TextChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
-            FillCount();
             UpdatePag();
             labelCount.Text = "Количество записей: ";
             labelCount.Text += dataGridView1.Rows.Count;
+            FillCount();
         }
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
-            FillCount();
             UpdatePag();
             labelCount.Text = "Количество записей: ";
             labelCount.Text += dataGridView1.Rows.Count;
+            FillCount();
         }
 
         /// <summary>
@@ -419,7 +459,7 @@ namespace kursovoy
                     if (currentOrder[productArticleNumber] + 1 > productCount)
                     {
                         MessageBox.Show("Невозможно добавить больше товара, чем есть на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return; 
+                        return;
                     }
                     currentOrder[productArticleNumber]++;
                 }
@@ -429,13 +469,13 @@ namespace kursovoy
                     if (productCount <= 0)
                     {
                         MessageBox.Show("Товара нет на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return; 
+                        return;
                     }
                     currentOrder[productArticleNumber] = 1;
                 }
             }
         }
-       
+
         /// <summary>
         /// Кнопки Редактирования и удаления товара
         /// </summary>
@@ -521,45 +561,36 @@ namespace kursovoy
             if (e.ColumnIndex == dataGridView1.Columns["ProductQuantityInStock"].Index && e.Value != null)
             {
                 int ProductQuantityInStock = Convert.ToInt32(e.Value);
-                
+
                 if (ProductQuantityInStock == 0)
                 {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ff4e33"); 
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ff4e33");
 
-                } else if (ProductQuantityInStock <= 3)
-                {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff66"); 
                 }
-            }
-        }
-
-        private void buttonPag2_Click(object sender, EventArgs e)
-        {
-            if (currentPage1 * rowsPerPage1 < totalRows1)
-            {
-                currentPage1++;
-                UpdateDataGrid();
-                UpdatePag();
-                FillCount();
-                labelCount.Text = "Количество записей: ";
-                labelCount.Text += dataGridView1.Rows.Count;
-
+                else if (ProductQuantityInStock <= 3)
+                {
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff66");
+                }
             }
         }
 
         private void buttonPag1_Click(object sender, EventArgs e)
         {
-            if (currentPage1 > 1)
+            if (currentPage1 > 0)
             {
                 currentPage1--;
-                UpdateDataGrid();
-                UpdatePag();
-                FillCount();
-                labelCount.Text = "Количество записей: ";
-                labelCount.Text += dataGridView1.Rows.Count;
-
+                UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
             }
+        }
 
+        private void buttonPag2_Click(object sender, EventArgs e)
+        {
+            int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
+            if (currentPage1 < totalPages - 1)
+            {
+                currentPage1++;
+                UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
+            }
         }
     }
 }

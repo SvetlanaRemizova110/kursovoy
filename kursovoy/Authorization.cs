@@ -19,10 +19,11 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
-           // public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
-            public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
-            public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
-            
+            public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
+            // public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
+            // public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
+            public static string ConnectionStringNotDB { get; } = "host=localhost;uid=кщще;pwd=;";
+
         }
         public class CaptchaGenerator
         {
@@ -52,7 +53,7 @@ namespace kursovoy
         private int failedLoginAttempts = 0;
         public Authorization()
         {
-            InitializeComponent(); 
+            InitializeComponent();
             LoadCaptcha();
         }
         private void LoadCaptcha()
@@ -117,7 +118,7 @@ namespace kursovoy
                         label4.Visible = true;
                         captchaTextBox.Visible = true;
                         //Блокируем кнопку для входа 
-                        button1.Enabled = false;                        
+                        button1.Enabled = false;
                         MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         Thread.Sleep(10000);
                         button1.Enabled = true;
@@ -130,7 +131,7 @@ namespace kursovoy
                 MessageBox.Show("Неверная CAPTCHA!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
-    }
+        }
         //
         /// <summary>
         /// Класс User - получение информации о пользователе
@@ -226,7 +227,7 @@ namespace kursovoy
             }
             return user;
         }
-       
+
         /// <summary>
         /// Метод для хеширования пароля
         /// </summary>
@@ -252,7 +253,7 @@ namespace kursovoy
         /// Метод для входа в учетную запись в зависимости от роли
         /// </summary>
         /// <param name="user"></param>
-      
+
 
         private void SwitchRole(int role)
         {
