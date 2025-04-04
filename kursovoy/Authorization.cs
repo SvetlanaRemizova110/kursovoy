@@ -19,10 +19,11 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
-            public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
-            // public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
-            // public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
-            public static string ConnectionStringNotDB { get; } = "host=localhost;uid=root;pwd=;";
+            //public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
+            //public static string ConnectionStringNotDB { get; } = "host=localhost;uid=root;pwd=;";
+            public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
+            public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
+
 
         }
         public class CaptchaGenerator
