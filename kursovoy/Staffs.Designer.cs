@@ -29,12 +29,18 @@ namespace kursovoy
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.button4 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.textBoxI = new System.Windows.Forms.TextBox();
+            this.textBoxO = new System.Windows.Forms.TextBox();
             this.button2 = new System.Windows.Forms.Button();
+            this.textBoxF = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.maskedTextBox1 = new System.Windows.Forms.MaskedTextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
@@ -44,11 +50,7 @@ namespace kursovoy
             this.button3 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.textBoxF = new System.Windows.Forms.TextBox();
-            this.textBoxO = new System.Windows.Forms.TextBox();
-            this.textBoxI = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.Timer = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -87,6 +89,26 @@ namespace kursovoy
             this.panel1.Size = new System.Drawing.Size(542, 254);
             this.panel1.TabIndex = 105;
             // 
+            // textBoxI
+            // 
+            this.textBoxI.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxI.Location = new System.Drawing.Point(129, 59);
+            this.textBoxI.MaxLength = 30;
+            this.textBoxI.Name = "textBoxI";
+            this.textBoxI.Size = new System.Drawing.Size(212, 34);
+            this.textBoxI.TabIndex = 110;
+            this.textBoxI.TabStop = false;
+            // 
+            // textBoxO
+            // 
+            this.textBoxO.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxO.Location = new System.Drawing.Point(129, 99);
+            this.textBoxO.MaxLength = 30;
+            this.textBoxO.Name = "textBoxO";
+            this.textBoxO.Size = new System.Drawing.Size(212, 34);
+            this.textBoxO.TabIndex = 109;
+            this.textBoxO.TabStop = false;
+            // 
             // button2
             // 
             this.button2.BackColor = System.Drawing.Color.LimeGreen;
@@ -99,6 +121,40 @@ namespace kursovoy
             this.button2.Text = "Очистить все поля";
             this.button2.UseVisualStyleBackColor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // textBoxF
+            // 
+            this.textBoxF.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.textBoxF.Location = new System.Drawing.Point(129, 19);
+            this.textBoxF.MaxLength = 30;
+            this.textBoxF.Name = "textBoxF";
+            this.textBoxF.Size = new System.Drawing.Size(212, 34);
+            this.textBoxF.TabIndex = 108;
+            this.textBoxF.TabStop = false;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.BackColor = System.Drawing.Color.LightGreen;
+            this.label3.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label3.Location = new System.Drawing.Point(16, 62);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(50, 26);
+            this.label3.TabIndex = 110;
+            this.label3.Text = "Имя";
+            this.label3.Click += new System.EventHandler(this.label2_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.LightGreen;
+            this.label1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(16, 102);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(96, 26);
+            this.label1.TabIndex = 110;
+            this.label1.Text = "Отчество";
+            this.label1.Click += new System.EventHandler(this.label2_Click);
             // 
             // label2
             // 
@@ -225,60 +281,6 @@ namespace kursovoy
             this.dataGridView1.TabIndex = 31;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
-            // textBoxF
-            // 
-            this.textBoxF.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxF.Location = new System.Drawing.Point(129, 19);
-            this.textBoxF.MaxLength = 30;
-            this.textBoxF.Name = "textBoxF";
-            this.textBoxF.Size = new System.Drawing.Size(212, 34);
-            this.textBoxF.TabIndex = 108;
-            this.textBoxF.TabStop = false;
-            // 
-            // textBoxO
-            // 
-            this.textBoxO.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxO.Location = new System.Drawing.Point(129, 99);
-            this.textBoxO.MaxLength = 30;
-            this.textBoxO.Name = "textBoxO";
-            this.textBoxO.Size = new System.Drawing.Size(212, 34);
-            this.textBoxO.TabIndex = 109;
-            this.textBoxO.TabStop = false;
-            // 
-            // textBoxI
-            // 
-            this.textBoxI.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxI.Location = new System.Drawing.Point(129, 59);
-            this.textBoxI.MaxLength = 30;
-            this.textBoxI.Name = "textBoxI";
-            this.textBoxI.Size = new System.Drawing.Size(212, 34);
-            this.textBoxI.TabIndex = 110;
-            this.textBoxI.TabStop = false;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.LightGreen;
-            this.label1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label1.Location = new System.Drawing.Point(16, 102);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(96, 26);
-            this.label1.TabIndex = 110;
-            this.label1.Text = "Отчество";
-            this.label1.Click += new System.EventHandler(this.label2_Click);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.BackColor = System.Drawing.Color.LightGreen;
-            this.label3.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label3.Location = new System.Drawing.Point(16, 62);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(50, 26);
-            this.label3.TabIndex = 110;
-            this.label3.Text = "Имя";
-            this.label3.Click += new System.EventHandler(this.label2_Click);
-            // 
             // Staffs
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -296,6 +298,7 @@ namespace kursovoy
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Сотрудники";
             this.Load += new System.EventHandler(this.Staffs_Load);
+            this.Shown += new System.EventHandler(this.Staffs_Shown);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
@@ -322,5 +325,6 @@ namespace kursovoy
         private System.Windows.Forms.TextBox textBoxI;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Timer Timer;
     }
 }

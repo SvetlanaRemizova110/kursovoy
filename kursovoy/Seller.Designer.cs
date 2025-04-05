@@ -29,9 +29,11 @@ namespace kursovoy
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.button4 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.Timer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // button4
@@ -86,6 +88,8 @@ namespace kursovoy
             this.Name = "Seller";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Продавец";
+            this.Load += new System.EventHandler(this.Seller_Load);
+            this.Shown += new System.EventHandler(this.Seller_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -95,5 +99,6 @@ namespace kursovoy
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Timer Timer;
     }
 }

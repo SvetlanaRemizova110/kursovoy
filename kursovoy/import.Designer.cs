@@ -29,6 +29,7 @@ namespace kursovoy
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.btnRestoreDatabase = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -42,6 +43,7 @@ namespace kursovoy
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.Timer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // btnRestoreDatabase
@@ -202,11 +204,12 @@ namespace kursovoy
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnRestoreDatabase);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.MaximizeBox = false;
             this.Name = "import";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "import";
+            this.Load += new System.EventHandler(this.import_Load);
+            this.Shown += new System.EventHandler(this.import_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -227,5 +230,6 @@ namespace kursovoy
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Timer Timer;
     }
 }

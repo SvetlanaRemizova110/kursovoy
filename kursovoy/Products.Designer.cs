@@ -29,6 +29,7 @@ namespace kursovoy
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -50,6 +51,7 @@ namespace kursovoy
             this.buttonPag1 = new System.Windows.Forms.Button();
             this.labelVSE = new System.Windows.Forms.Label();
             this.labelCount = new System.Windows.Forms.Label();
+            this.Timer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -346,6 +348,7 @@ namespace kursovoy
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Товары";
             this.Load += new System.EventHandler(this.Products_Load);
+            this.Shown += new System.EventHandler(this.Products_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -372,5 +375,6 @@ namespace kursovoy
         private System.Windows.Forms.Button buttonPag1;
         private System.Windows.Forms.Label labelVSE;
         private System.Windows.Forms.Label labelCount;
+        private System.Windows.Forms.Timer Timer;
     }
 }

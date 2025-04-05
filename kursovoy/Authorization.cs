@@ -95,7 +95,7 @@ namespace kursovoy
                     //Если введены логин и пароль администратора, то открываем форму admin
                     import admin = new import();
                     this.Hide();
-                    admin.ShowDialog();
+                    admin.Show();
                 }
                 else if (authorizedUser != null)
                 {
