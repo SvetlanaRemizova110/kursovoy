@@ -53,7 +53,7 @@ namespace kursovoy
             this.button1.TabIndex = 2;
             this.button1.Text = "Пользователи";
             this.button1.UseVisualStyleBackColor = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.users_Click);
             // 
             // label1
             // 
@@ -79,7 +79,7 @@ namespace kursovoy
             this.button2.TabIndex = 1;
             this.button2.Text = "Товары";
             this.button2.UseVisualStyleBackColor = false;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.product_Click);
             // 
             // button3
             // 
@@ -93,7 +93,7 @@ namespace kursovoy
             this.button3.TabIndex = 3;
             this.button3.Text = "Сотрудники";
             this.button3.UseVisualStyleBackColor = false;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button3.Click += new System.EventHandler(this.employee_Click);
             // 
             // button4
             // 
@@ -107,7 +107,7 @@ namespace kursovoy
             this.button4.TabIndex = 5;
             this.button4.Text = "выход из учетной записи";
             this.button4.UseVisualStyleBackColor = false;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button4.Click += new System.EventHandler(this.back_Click);
             // 
             // button5
             // 
@@ -121,7 +121,7 @@ namespace kursovoy
             this.button5.TabIndex = 4;
             this.button5.Text = "Справочники";
             this.button5.UseVisualStyleBackColor = false;
-            this.button5.Click += new System.EventHandler(this.button5_Click_1);
+            this.button5.Click += new System.EventHandler(this.books_Click);
             // 
             // label2
             // 

@@ -18,48 +18,44 @@ namespace kursovoy
             InitializeComponent();
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void Admin_Load(object sender, EventArgs e)
         {
-            this.Close();
-            Authorization authorization = new Authorization();
-            authorization.Show();
+            label2.Text = Authorization.User2.FIO;
         }
-        private void button2_Click(object sender, EventArgs e)
+
+        private void product_Click(object sender, EventArgs e)
         {
             Products pr = new Products();
             pr.Show();
             this.Close();
         }
-        private void button1_Click(object sender, EventArgs e)
+
+        private void users_Click(object sender, EventArgs e)
         {
             Users us = new Users();
             us.Show();
             this.Close();
         }
-        private void button3_Click(object sender, EventArgs e)
+
+        private void employee_Click(object sender, EventArgs e)
         {
             Staffs st = new Staffs();
             st.Show();
             this.Close();
         }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            import i = new import();
-            i.Show();
-            this.Close();
-        }
-
-        private void button5_Click_1(object sender, EventArgs e)
+        private void books_Click(object sender, EventArgs e)
         {
             ReferenceBooks rb = new ReferenceBooks();
             rb.Show();
             this.Hide();
         }
 
-        private void Admin_Load(object sender, EventArgs e)
+        private void back_Click(object sender, EventArgs e)
         {
-            label2.Text = Authorization.User2.FIO;
+            this.Close();
+            Authorization authorization = new Authorization();
+            authorization.Show();
         }
     }
 }

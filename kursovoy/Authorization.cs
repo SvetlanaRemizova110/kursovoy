@@ -98,6 +98,9 @@ namespace kursovoy
             InitializeComponent();
             LoadCaptcha();
         }
+        /// <summary>
+        /// Функция загрузки капчи
+        /// </summary>
         private void LoadCaptcha()
         {
             captchaPictureBox.Image = CaptchaGenerator.GenerateCaptcha(out captchaText);
@@ -111,7 +114,7 @@ namespace kursovoy
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button1_Click(object sender, EventArgs e)
+        private void authorization_Click(object sender, EventArgs e)
         {
             //Получаем логин и пароль из текстовых полей на форме
             string login = textBoxLogin.Text;
@@ -213,7 +216,7 @@ namespace kursovoy
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button2_Click(object sender, EventArgs e)
+        private void exit_Click(object sender, EventArgs e)
         {
             DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите выйти из приложения?", "Подтверждение на выход", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.Yes)
@@ -361,6 +364,7 @@ MessageBox.Show("База данных не существует. Создайт
             }
            //this.Hide(); // Прячем форму авторизации
         }
+        
         private void BackupAllTables()
         {
             string[] tables = new string[]
@@ -434,7 +438,9 @@ MessageBox.Show("База данных не существует. Создайт
                 MessageBox.Show($"Произошла ошибка при резервном копировании таблицы '{tableName}': {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        /// Проверка на пустое поле для ввода пароля
+
+        /// <summary>
+        /// Проверка на пустое поле для ввода пароля при загрузке формы
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -445,12 +451,22 @@ MessageBox.Show("База данных не существует. Создайт
                 button1.Enabled = false;
             }
         }
+        /// <summary>
+        /// При любом изменении пароля кнопка для входа становится активной.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxPwd_TextChanged(object sender, EventArgs e)
         {
             button1.Enabled = true;
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Кнопка для обновления капчи.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void updateCaptcha_Click(object sender, EventArgs e)
         {
             LoadCaptcha();
             captchaPictureBox.Visible = true;
@@ -459,6 +475,11 @@ MessageBox.Show("База данных не существует. Создайт
             captchaTextBox.Visible = true;
         }
 
+        /// <summary>
+        /// Обработчик нажатия клавиш, ввод только русских букв.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxLogin_KeyPress(object sender, KeyPressEventArgs e)
         {
             if((e.KeyChar >= 'А' && e.KeyChar <= 'Я') || 

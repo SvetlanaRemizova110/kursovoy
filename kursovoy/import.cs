@@ -1,7 +1,4 @@
-﻿// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,6 +24,9 @@ namespace kursovoy
             ComboBoxTables();
         }
 
+        /// <summary>
+        /// Заполнение ComboBox
+        /// </summary>
         private void ComboBoxTables()
         {
             using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionStringNotDB))
@@ -56,13 +56,24 @@ namespace kursovoy
                 }
             }
         }
+       
+        /// <summary>
+        /// Кнопка для восстановления структуры БД
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnRestoreDatabase_Click(object sender, EventArgs e)
         {
             string dbName = $"db45";
             CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-            CreateTables(Authorization.Program.ConnectionString, dbName);
-            
+            CreateTables(Authorization.Program.ConnectionString);
         }
+
+        /// <summary>
+        /// Функция создания БД
+        /// </summary>
+        /// <param name="connentionString"></param>
+        /// <param name="dbName"></param>
         static void CreateDatabase(string connentionString, string dbName)
         {
             using (MySqlConnection connection = new MySqlConnection(connentionString))
@@ -74,7 +85,12 @@ namespace kursovoy
                 MessageBox.Show($"База данных {dbName} уже существует.");
             }
         }
-        private void CreateTables(string connectionString, string dbName)
+
+        /// <summary>
+        /// Функция создания необходимых таблиц БД
+        /// </summary>
+        /// <param name="connectionString"></param>
+        private void CreateTables(string connectionString)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -263,8 +279,13 @@ namespace kursovoy
                 }
             }
         }
-
-        // Метод для проверки существования таблицы
+ 
+        /// <summary>
+        /// Метод для проверки существования таблицы
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         private bool TableExists(MySqlConnection connection, string tableName)
         {
             string query = $"SHOW TABLES LIKE '{tableName}';";
@@ -273,6 +294,11 @@ namespace kursovoy
             return result != null;
         }
 
+        /// <summary>
+        /// Кнопка для выбора файла для импорта
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnSelectCsv_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -285,6 +311,11 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Кнопка для импорта данных в БД
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnImportData_Click(object sender, EventArgs e)
         {
             if (comboBox1.SelectedItem == null)
@@ -294,15 +325,15 @@ namespace kursovoy
             }
             string tableName = comboBox1.SelectedItem.ToString();
 
-            OpenFileAndImportData(tableName);
-        }
-
-        public void OpenFileAndImportData(string selectedTable)
-        {
             string filePath = textBox1.Text;
-            ImportData(filePath, selectedTable);
+            ImportData(filePath, tableName);
         }
 
+        /// <summary>
+        /// Импорт данных в БД
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="selectedTable"></param>
         private void ImportData(string filePath, string selectedTable)
         {
             string fullConnectionString = Authorization.Program.ConnectionString;
@@ -362,6 +393,13 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка подключения к базе данных: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Для генерации SQL-запроса для вставки данных в разные таблицы базы данных.
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
         private string GenerateInsertCommand(string tableName, string[] values)
         {
             if (tableName == "user" || tableName == "User")
@@ -407,11 +445,19 @@ namespace kursovoy
             return "ошибкаааааа";
         }
 
+        /// <summary>
+        /// Кнопка для резервного копирования БД 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
             AutomaticBackup();
         }
 
+        /// <summary>
+        /// Функция резервного копирования БД.
+        /// </summary>
         public static void AutomaticBackup()
         {
             try
@@ -444,6 +490,10 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Создание скрипта резервной копии
+        /// </summary>
+        /// <param name="filePath"></param>
         public static void BackupDatabaseToSql(string filePath)
         {
             using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
@@ -545,7 +595,11 @@ namespace kursovoy
             }
         }
 
-        // Внутри класса, но вне метода
+        /// <summary>
+        /// Функция для преобразования числа
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string FixNumberFormat(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -563,6 +617,11 @@ namespace kursovoy
             return corrected;
         }
 
+        /// <summary>
+        /// Функция для преобразования даты при создании резервной копии
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string TryParseAndFormatDate(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -582,7 +641,9 @@ namespace kursovoy
             return value;
         }
 
-
+        /// <summary>
+        /// Восстановление БД
+        /// </summary>
         public void RestoreDatabaseFromDump()
         {
             // Путь к папке с дампами
@@ -681,13 +742,22 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Кнопка выход из учетной записи.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button5_Click(object sender, EventArgs e)
         {
             Authorization ad = new Authorization();
             ad.Show();
             this.Close();
         }
-
+        /// <summary>
+        /// Кнопка для восстановления БД.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
             //string dbName = $"db45";

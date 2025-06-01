@@ -126,7 +126,7 @@ namespace kursovoy
             this.button2.TabIndex = 2;
             this.button2.Text = "выход из программы";
             this.button2.UseVisualStyleBackColor = false;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.exit_Click);
             // 
             // button1
             // 
@@ -140,7 +140,7 @@ namespace kursovoy
             this.button1.TabIndex = 1;
             this.button1.Text = "Войти";
             this.button1.UseVisualStyleBackColor = false;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.authorization_Click);
             // 
             // label4
             // 
@@ -193,7 +193,7 @@ namespace kursovoy
             this.button3.Size = new System.Drawing.Size(37, 32);
             this.button3.TabIndex = 1;
             this.button3.UseVisualStyleBackColor = false;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.button3.Click += new System.EventHandler(this.updateCaptcha_Click);
             // 
             // pictureBox2
             // 
