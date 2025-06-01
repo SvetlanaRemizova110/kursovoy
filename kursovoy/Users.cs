@@ -14,7 +14,10 @@ namespace kursovoy
 {
     public partial class Users : Form
     {
-        private int inactivityTimeout = 0;
+        private int inactivityTimeout = 0; // Время бездействия в миллисекундах.
+        private int initialInactivityTimeout = 0; // Сохраняем начальное значение таймаута.
+        private Timer Timer = new Timer(); //Обязательно инициализируйте Timer
+        private bool isTimerTickRunning = false; // Флаг для блокировки повторного входа
         public Users()
         {
             InitializeComponent();
@@ -50,28 +53,43 @@ namespace kursovoy
         }
         private void inactivityTimer_Tick(object sender, EventArgs e)
         {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
+            // Блокируем повторный вход
+            if (isTimerTickRunning)
             {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
+                return; // Если таймер уже работает, выходим
             }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
 
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
+            isTimerTickRunning = true; // Устанавливаем флаг, что таймер работает
+
+            try
+            {
+                if (inactivityTimeout > 0)
+                {
+                    inactivityTimeout -= Timer.Interval; // Уменьшаем тайм-аут на интервал таймера
+                }
+                else
+                {
+                    Timer.Stop();
+                    MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    import.AutomaticBackup();
+                    this.Close();
+                    Authorization authorization = new Authorization();
+                    authorization.Show();
+                }
+            }
+            finally
+            {
+                isTimerTickRunning = false; // Снимаем флаг в любом случае (даже если было исключение)
             }
         }
 
         //Кнопка НАЗАД
         private void button4_Click(object sender, EventArgs e)
         {
+            Timer.Stop();
             Admin ad = new Admin();
             ad.Show();
-            this.Hide();
+            this.Close();
         }
         
         /// <summary>
@@ -86,14 +104,6 @@ namespace kursovoy
             using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
                 connection.Open();
-                //MySqlCommand cmd1 = new MySqlCommand(query1, connection);
-                //using (MySqlDataReader reader1 = cmd1.ExecuteReader())
-                //{
-                //    while (reader1.Read())
-                //    {
-                //        comboBox2.Items.Add(reader1["EmployeeFIO"].ToString());
-                //    }
-                //}
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 using (MySqlDataReader reader1 = cmd.ExecuteReader())
                 {
@@ -128,30 +138,21 @@ namespace kursovoy
                 inactivityTimeout = 30000;
             }
 
+            initialInactivityTimeout = inactivityTimeout; // Сохраняем начальное значение
             ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
-            //FillDataGrid("SELECT UserID AS 'Идентификатор'," +
-            //    "employee.EmployeeFIO AS 'ФИО сотрудника'," +
-            //    "role.Role AS 'Роль'," +
-            //    "Login AS 'Логин'," +
-            //    "Password AS 'Пароль'" +
-            //    "FROM user " +
-            //    " INNER JOIN employee ON user.UserFIO = employee.EmployeeID" +
-            //    " INNER JOIN role ON user.RoleID = role.RoleID");
-            FillDataGrid("SELECT userr.UserID AS 'id',"+
-            "empF.EmployeeF AS 'Фамилия', "+
-            "empI.EmployeeI AS 'Имя', "+
-            "empO.EmployeeO AS 'Отчество', "+
-            "`role`.Role AS 'Роль', "+
-            "userr.Login AS 'Логин',"+
-            "userr.Password AS 'Пароль'"+
-            " FROM userr"+
-            " INNER JOIN employeeee AS empF ON userr.UserF = empF.EmployeeID"+
-            " INNER JOIN employeeee AS empI ON userr.UserI = empI.EmployeeID"+
-            " INNER JOIN employeeee AS empO ON userr.UserO = empO.EmployeeID"+
-            " INNER JOIN `role` ON userr.RoleID = `role`.RoleID;");
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
+            Timer.Start(); // Запуск таймера активностиs
+            FillDataGrid("SELECT UserID AS 'Идентификатор'," +
+                "employeeee.EmployeeF AS 'Ф сотрудника'," +
+                "employeeee.EmployeeI AS 'И сотрудника'," +
+                "employeeee.EmployeeO AS 'О сотрудника'," +
+                "role.Role AS 'Роль'," +
+                "Login AS 'Логин'," +
+                "Password AS 'Пароль'" +
+                "FROM user " +
+                " INNER JOIN employeeee ON user.UserFIO = employeeee.EmployeeID" +
+                " INNER JOIN role ON user.RoleID = role.RoleID");
+            label2.Text += " " + dataGridView1.Rows.Count;
+            role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
         }
 
         public void FillDataGrid(string strCmd)
@@ -168,22 +169,27 @@ namespace kursovoy
                 }
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
-                dataGridView1.AllowUserToResizeColumns = false;
                 dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+                //dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+                dataGridView1.AllowUserToDeleteRows = false;
+                //dataGridView1.AllowUserToOrderColumns = false;
+                dataGridView1.AllowUserToResizeColumns = false;
+                dataGridView1.AllowUserToResizeRows = false;
 
                 dataGridView1.AllowUserToAddRows = false;
                 dataGridView1.ReadOnly = true;
+
                 dataGridView1.Columns.Add("UserID", "Идентификатор");
                 dataGridView1.Columns["UserID"].Visible = false;
-                //dataGridView1.Columns.Add("UserFIO", "ФИО сотрудника");
-                dataGridView1.Columns.Add("UserF", "Фамилия");
-                dataGridView1.Columns.Add("UserI", "Имя");
-                dataGridView1.Columns.Add("UserO", "Отчетство");
+                dataGridView1.Columns.Add("UserFIO", "ФИО сотрудника");
+                dataGridView1.Columns["UserFIO"].Width = 270;
                 dataGridView1.Columns.Add("RoleID", "Роль");
+                dataGridView1.Columns["RoleID"].Width = 110;
                 dataGridView1.Columns.Add("Login", "Логин");
+                dataGridView1.Columns["Login"].Width = 100;
                 dataGridView1.Columns.Add("Password", "Пароль");
                 dataGridView1.Columns["Password"].Visible = false;
+                dataGridView1.Columns["UserFIO"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
 
                 DataGridViewButtonColumn buttonV = new DataGridViewButtonColumn();
                 buttonV.Name = "Выбрать";
@@ -191,6 +197,7 @@ namespace kursovoy
                 buttonV.Text = "Выбрать";
                 buttonV.UseColumnTextForButtonValue = true;
                 dataGridView1.Columns.Add(buttonV);
+                dataGridView1.Columns["Выбрать"].Width = 75;
 
                 DataGridViewButtonColumn buttonDel = new DataGridViewButtonColumn();
                 buttonDel.Name = "Удалить";
@@ -198,19 +205,14 @@ namespace kursovoy
                 buttonDel.Text = "Удалить";
                 buttonDel.UseColumnTextForButtonValue = true;
                 dataGridView1.Columns.Add(buttonDel);
+                dataGridView1.Columns["Удалить"].Width = 75;
 
                 while (rdr.Read())
                 {
                     int rowIndex = dataGridView1.Rows.Add();
                     DataGridViewRow row = dataGridView1.Rows[rowIndex];
                     row.Cells["UserID"].Value = rdr[0];
-                    //row.Cells["UserFIO"].Value = rdr[1];                    
-                    row.Cells["UserF"].Value = rdr[1];                    
-                    row.Cells["UserI"].Value = rdr[2];
-                    row.Cells["UserO"].Value = rdr[3];
-                    //row.Cells["RoleID"].Value = rdr[2];
-                    //row.Cells["Login"].Value = rdr[3];
-                    //row.Cells["Password"].Value = rdr[4];
+                    row.Cells["UserFIO"].Value = string.Format("{0} {1} {2}", rdr[1], rdr[2], rdr[3]);
                     row.Cells["RoleID"].Value = rdr[4];
                     row.Cells["Login"].Value = rdr[5];
                     row.Cells["Password"].Value = rdr[6];
@@ -233,39 +235,12 @@ namespace kursovoy
             }
         }
         // Функция для проверки существования пользователя по ФИО
-        //private bool UserFIOExists(int userFIO, MySqlConnection connection)
-        //{
-        //    string checkQuery = "SELECT COUNT(*) FROM User WHERE UserFIO = @userFIO";
-        //    using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-        //    {
-        //        checkCmd.Parameters.AddWithValue("@userFIO", userFIO);
-        //        return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-        //    }
-        //}  
-        private bool UserFExists(int UserF, MySqlConnection connection)
+        private bool UserFIOExists(int userFIO, MySqlConnection connection)
         {
-            string checkQuery = "SELECT COUNT(*) FROM User WHERE UserF = @UserF";
+            string checkQuery = "SELECT COUNT(*) FROM User WHERE UserFIO = @userFIO";
             using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
             {
-                checkCmd.Parameters.AddWithValue("@UserF", UserF);
-                return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-            }
-        }
-        private bool UserIExists(int UserF, MySqlConnection connection)
-        {
-            string checkQuery = "SELECT COUNT(*) FROM User WHERE UserI = @UserI";
-            using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-            {
-                checkCmd.Parameters.AddWithValue("@UserI", UserF);
-                return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-            }
-        }
-        private bool UserOExists(int UserF, MySqlConnection connection)
-        {
-            string checkQuery = "SELECT COUNT(*) FROM User WHERE UserO = @UserO";
-            using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-            {
-                checkCmd.Parameters.AddWithValue("@UserO", UserF);
+                checkCmd.Parameters.AddWithValue("@userFIO", userFIO);
                 return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
             }
         }
@@ -275,141 +250,124 @@ namespace kursovoy
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button3_Click(object sender, EventArgs e)
-        {
-            if (comboBox1.Text == "" || comboBox2.Text == "" || textBox1.Text == "" || textBox7.Text == "")
-            {
-                MessageBox.Show("Необходимо заполнить все поля!");
-            }
-            else
-            {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
-                    {
-                        try
-                        {
-                            connection.Open();
-                            int roleid;
-                            string roleidQuery = "SELECT RoleID FROM Role WHERE Role = @role";
-                            using (MySqlCommand roleCmd = new MySqlCommand(roleidQuery, connection))
-                            {
-                                roleCmd.Parameters.AddWithValue("@role", comboBox1.Text);
-                                object result = roleCmd.ExecuteScalar();
-                                roleid = result != null ? Convert.ToInt32(result) : 0;
-                                if (roleid == 0)
-                                {
-                                    MessageBox.Show("Роль не найдена.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                            }
-                            int userFIO;
-                            //string userFIOQuery = "SELECT EmployeeID FROM employee WHERE EmployeeFIO = @employeeFIO";
-                            //string userFIOQuery = "SELECT EmployeeID FROM employeeee WHERE EmployeeF = @employeeF + EmployeeI = @employeeI + EmployeeO = @employeeO;";
-                            string userFIOQuery = "SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @employeeF AND EmployeeI LIKE @employeeI AND EmployeeO LIKE @employeeO;";
-                            string[] fioParts = comboBox2.Text.Split(' ');
-                            if (fioParts.Length >= 3)
-                            {
-                                string employeeF = fioParts[0];
-                                string employeeI = fioParts[1];
-                                string employeeO = fioParts[2];
+        //private void button3_Click(object sender, EventArgs e)
+        //{
+        //    if (comboBox1.Text == "" || comboBox2.Text == "" || textBox1.Text == "" || textBox7.Text == "")
+        //    {
+        //        MessageBox.Show("Необходимо заполнить все поля!");
+        //    }
+        //    else
+        //    {
+        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        //        if (dialogResult == DialogResult.Yes)
+        //        {
+        //            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //            {
+        //                try
+        //                {
+        //                    connection.Open();
+        //                    int roleid;
+        //                    string roleidQuery = "SELECT RoleID FROM Role WHERE Role = @role";
+        //                    using (MySqlCommand roleCmd = new MySqlCommand(roleidQuery, connection))
+        //                    {
+        //                        roleCmd.Parameters.AddWithValue("@role", comboBox1.Text);
+        //                        object result = roleCmd.ExecuteScalar();
+        //                        roleid = result != null ? Convert.ToInt32(result) : 0;
+        //                        if (roleid == 0)
+        //                        {
+        //                            MessageBox.Show("Роль не найдена.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                            return;
+        //                        }
+        //                    }
+        //                    int userFIO;
+        //                    string userFIOQuery = "SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @employeeF AND EmployeeI LIKE @employeeI AND EmployeeO LIKE @employeeO;";
+        //                    string[] fioParts = comboBox2.Text.Split(' ');
+        //                    if (fioParts.Length >= 3)
+        //                    {
+        //                        string employeeF = fioParts[0];
+        //                        string employeeI = fioParts[1];
+        //                        string employeeO = fioParts[2];
 
-                                using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, connection))
-                                {
-                                    userFIOCmd.Parameters.AddWithValue("@employeeF", employeeF);
-                                    userFIOCmd.Parameters.AddWithValue("@employeeI", employeeI);
-                                    userFIOCmd.Parameters.AddWithValue("@employeeO", employeeO);
-                                    object result = userFIOCmd.ExecuteScalar();
-                                    userFIO = result != null ? Convert.ToInt32(result) : 0;
-                                    if (userFIO == 0)
-                                    {
-                                        MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                        return;
-                                    }
-                                }
-                                //if (UserFIOExists(userFIO, connection))
-                                //{
-                                //    MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                //    return;
-                                //}
-                                if (UserExists(textBox7.Text, connection))
-                                {
-                                    MessageBox.Show("Пользователь с таким Логином уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                                string query = "INSERT INTO userr (UserF,UserI,UserO, Login, Password, RoleID) VALUES (@value1,@value5,@value6,@value2,@value3,@value4)";
-                                using (MySqlCommand cmd = new MySqlCommand(query, connection))
-                                {
-                                    //UserID,cmd.Parameters.AddWithValue("@value0", textBox2.Text);
-                                    cmd.Parameters.AddWithValue("@value1", userFIO);
-                                    cmd.Parameters.AddWithValue("@value5", userFIO);
-                                    cmd.Parameters.AddWithValue("@value6", userFIO);
-                                    cmd.Parameters.AddWithValue("@value2", textBox7.Text);
-                                    if (textBox1.Text.Length < 10)
-                                    {
-                                        string hashedPassword = HashPassword(textBox1.Text);
-                                        cmd.Parameters.AddWithValue("@value3", hashedPassword);
-                                    }
-                                    else
-                                    {
-                                        string hashedPassword = textBox1.Text;
-                                        cmd.Parameters.AddWithValue("@value3", hashedPassword);
-                                    }
-                                    cmd.Parameters.AddWithValue("@value4", roleid);
-                                    cmd.ExecuteNonQuery();
-                                    MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    comboBox2.SelectedItem = null;
-                                    comboBox1.SelectedItem = null;
-                                    textBox7.Text = "";
-                                    textBox1.Text = "";
-                                    textBox2.Text = "";
-                                    //FillDataGrid("SELECT UserID AS 'Идентификатор'," +
-                                    //"employee.EmployeeFIO AS 'ФИО сотрудника'," +
-                                    //"role.Role AS 'Роль'," +
-                                    //"Login AS 'Логин'," +
-                                    //"Password AS 'Пароль'" +
-                                    //"FROM user " +
-                                    //" INNER JOIN employee ON user.UserFIO = employee.EmployeeID" +
-                                    //" INNER JOIN role ON user.RoleID = role.RoleID");
-                                    FillDataGrid("SELECT userr.UserID AS 'id'," +
-                                    "empF.EmployeeF AS 'Фамилия', " +
-                                    "empI.EmployeeI AS 'Имя', " +
-                                    "empO.EmployeeO AS 'Отчество', " +
-                                    "`role`.Role AS 'Роль', " +
-                                    "userr.Login AS 'Логин'," +
-                                    "userr.Password AS 'Пароль'" +
-                                    " FROM userr" +
-                                    " INNER JOIN employeeee AS empF ON userr.UserF = empF.EmployeeID" +
-                                    " INNER JOIN employeeee AS empI ON userr.UserI = empI.EmployeeID" +
-                                    " INNER JOIN employeeee AS empO ON userr.UserO = empO.EmployeeID" +
-                                    " INNER JOIN `role` ON userr.RoleID = `role`.RoleID;");
-
-                                }
-                                connection.Close();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Ошибка: " + ex);
-                        }
-                    }
-                }
-            }
-        }
+        //                        using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, connection))
+        //                        {
+        //                            userFIOCmd.Parameters.AddWithValue("@employeeF", employeeF);
+        //                            userFIOCmd.Parameters.AddWithValue("@employeeI", employeeI);
+        //                            userFIOCmd.Parameters.AddWithValue("@employeeO", employeeO);
+        //                            object result = userFIOCmd.ExecuteScalar();
+        //                            userFIO = result != null ? Convert.ToInt32(result) : 0;
+        //                            if (userFIO == 0)
+        //                            {
+        //                                MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                                return;
+        //                            }
+        //                        }
+        //                        if (UserFIOExists(userFIO, connection))
+        //                        {
+        //                            MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                            return;
+        //                        }
+        //                        if (UserExists(textBox7.Text, connection))
+        //                        {
+        //                            MessageBox.Show("Пользователь с таким Логином уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                            return;
+        //                        }
+        //                        string query = "INSERT INTO user (UserFIO, Login, Password, RoleID) VALUES (@value1,@value2,@value3,@value4)";
+        //                        using (MySqlCommand cmd = new MySqlCommand(query, connection))
+        //                        {
+        //                            //UserID,cmd.Parameters.AddWithValue("@value0", textBox2.Text);
+        //                            cmd.Parameters.AddWithValue("@value1", userFIO);
+        //                            cmd.Parameters.AddWithValue("@value2", textBox7.Text);
+        //                            if (textBox1.Text.Length < 10)
+        //                            {
+        //                                string hashedPassword = HashPassword(textBox1.Text);
+        //                                cmd.Parameters.AddWithValue("@value3", hashedPassword);
+        //                            }
+        //                            else
+        //                            {
+        //                                string hashedPassword = textBox1.Text;
+        //                                cmd.Parameters.AddWithValue("@value3", hashedPassword);
+        //                            }
+        //                            cmd.Parameters.AddWithValue("@value4", roleid);
+        //                            cmd.ExecuteNonQuery();
+        //                            MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                            comboBox2.SelectedItem = null;
+        //                            comboBox1.SelectedItem = null;
+        //                            textBox7.Text = "";
+        //                            textBox1.Text = "";
+        //                            textBox2.Text = "";
+        //                            FillDataGrid("SELECT UserID AS 'Идентификатор'," +
+        //                            "employeeee.EmployeeF AS 'Ф сотрудника'," +
+        //                            "employeeee.EmployeeI AS 'И сотрудника'," +
+        //                            "employeeee.EmployeeO AS 'О сотрудника'," +
+        //                            "role.Role AS 'Роль'," +
+        //                            "Login AS 'Логин'," +
+        //                            "Password AS 'Пароль'" +
+        //                            "FROM user " +
+        //                            " INNER JOIN employeeee ON user.UserFIO = employeeee.EmployeeID" +
+        //                            " INNER JOIN role ON user.RoleID = role.RoleID");
+        //                        }
+        //                        connection.Close();
+        //                    }
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    MessageBox.Show("Ошибка: " + ex);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
         //Работа кнопок с таблицы
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
             //При нажатии на кнопку "Выбрать"
             if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0) {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 textBox2.Text = row.Cells["UserID"].Value.ToString();
-                comboBox2.Text = row.Cells["UserF"].Value.ToString() + " " + row.Cells["UserI"].Value.ToString() + " " + row.Cells["UserO"].Value.ToString();
+                comboBox2.Text = row.Cells["UserFIO"].Value.ToString();
                 comboBox1.Text = row.Cells["RoleID"].Value.ToString();
                 textBox7.Text = row.Cells["Login"].Value.ToString();
                 textBox1.Text = row.Cells["Password"].Value.ToString();
-
             }
             // При нажатии кнопки "Удалить"
             if (e.ColumnIndex == dataGridView1.Columns["Удалить"].Index && e.RowIndex >= 0)
@@ -489,7 +447,7 @@ namespace kursovoy
         /// <param name="id"></param>
         private void DeleteRecord(int id)
         {
-            string query = "DELETE FROM userr WHERE UserID = @UserID";
+            string query = "DELETE FROM user WHERE UserID = @UserID";
             MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
             con.Open();
             MySqlCommand command = new MySqlCommand(query, con);
@@ -531,17 +489,18 @@ namespace kursovoy
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
-             (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
-             (e.KeyChar < 'a' || e.KeyChar > 'z') &&
-             (e.KeyChar < '0' || e.KeyChar > '9') &&
-             (e.KeyChar != ' '))
+    ((e.KeyChar >= 'А' && e.KeyChar <= 'Я') ||
+     (e.KeyChar >= 'а' && e.KeyChar <= 'я') ||
+     (e.KeyChar == 'Ё') || (e.KeyChar == 'ё')))
             {
                 e.Handled = true;
             }
+
+
         }
-       
+
         /// <summary>
-        /// Изменение товара
+        /// Добавление/Изменение товара
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -553,123 +512,204 @@ namespace kursovoy
             }
             else
             {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
+                if (textBox2.Text != "")
                 {
-                    int userID = Convert.ToInt32(textBox2.Text);
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
                     {
-                        con.Open();
-                        MySqlCommand cmd = new MySqlCommand(@"UPDATE userr 
+                        int userID = Convert.ToInt32(textBox2.Text);
+                        using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                        {
+                            con.Open();
+                            MySqlCommand cmd = new MySqlCommand(@"UPDATE user 
                         SET UserID = @userid,
-                            UserF = @userF,
-                            UserI = @userI,
-                            UserO = @userO,
+                            UserFIO = @userFIO,
                             RoleID = @roleID,
                             Login = @login,
                             Password = @password
                         WHERE UserID = @userid", con);
 
-                        int roleid;
-                        string roleidQuery = "SELECT RoleID FROM Role WHERE Role = @role";
-                        using (MySqlCommand roleCmd = new MySqlCommand(roleidQuery, con))
-                        {
-                            roleCmd.Parameters.AddWithValue("@role", comboBox1.Text);
-                            object result = roleCmd.ExecuteScalar();
-                            roleid = result != null ? Convert.ToInt32(result) : 0;
-                            if (roleid == 0)
+                            int roleid;
+                            string roleidQuery = "SELECT RoleID FROM Role WHERE Role = @role";
+                            using (MySqlCommand roleCmd = new MySqlCommand(roleidQuery, con))
                             {
-                                MessageBox.Show("Роль не найдена.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
-                            }
-                        }
-                        //int userFIO;
-                        //string userFIOQuery = "SELECT EmployeeID FROM employee WHERE EmployeeFIO = @employeeFIO";
-                        //using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, con))
-                        //{
-                        //    userFIOCmd.Parameters.AddWithValue("@employeeFIO", comboBox2.Text);
-                        //    object result = userFIOCmd.ExecuteScalar();
-                        //    userFIO = result != null ? Convert.ToInt32(result) : 0;
-                        //    if (userFIO == 0)
-                        //    {
-                        //        MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //        return;
-                        //    }
-                        //}
-                        int userFIO;
-                        string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @userF AND EmployeeI LIKE @userI AND EmployeeO LIKE @userO;";
-                        string[] fioParts = comboBox2.Text.Split(' ');
-                        if (fioParts.Length >= 3)
-                        {
-                            string employeeF = fioParts[0];
-                            string employeeI = fioParts[1];
-                            string employeeO = fioParts[2];
-
-                            using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, con))
-                            {
-                                userFIOCmd.Parameters.AddWithValue("@userF", employeeF);
-                                userFIOCmd.Parameters.AddWithValue("@userI", employeeI);
-                                userFIOCmd.Parameters.AddWithValue("@userO", employeeO);
-                                object result = userFIOCmd.ExecuteScalar();
-                                userFIO = result != null ? Convert.ToInt32(result) : 0;
-                                if (userFIO == 0)
+                                roleCmd.Parameters.AddWithValue("@role", comboBox1.Text);
+                                object result = roleCmd.ExecuteScalar();
+                                roleid = result != null ? Convert.ToInt32(result) : 0;
+                                if (roleid == 0)
                                 {
-                                    MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("Роль не найдена.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return;
                                 }
                             }
-
-                            cmd.Parameters.AddWithValue("@userid", userID);
-
-                            string selectedUSERFIO = comboBox2.Text.ToString();
-                            int userFio = GetEmployeeIDByName(selectedUSERFIO, con);
-                            cmd.Parameters.AddWithValue("@userF", userFIO);
-                            cmd.Parameters.AddWithValue("@userI", userFIO);
-                            cmd.Parameters.AddWithValue("@userO", userFIO);
-
-                            string selectedRoleid = comboBox1.Text.ToString();
-                            int role = GetRoleidByName(selectedRoleid, con);
-                            cmd.Parameters.AddWithValue("@roleID", role);
-                            cmd.Parameters.AddWithValue("@login", textBox7.Text);
-                            if (textBox1.Text.Length < 10)
+                            int userFIO;
+                            //string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @userF AND EmployeeI LIKE @userI AND EmployeeO LIKE @userO;";
+                            //string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE EmployeeF + EmployeeI + EmployeeO LIKE @userFIO;";
+                            string userFIOQuery = "  SELECT EmployeeID FROM employeeee WHERE CONCAT(EmployeeF, EmployeeI, EmployeeO) = @userFIO; ";
+                            string[] fioParts = comboBox2.Text.Split(' ');
+                            if (fioParts.Length >= 3)
                             {
-                                string hashedPassword = HashPassword(textBox1.Text);
-                                cmd.Parameters.AddWithValue("@password", hashedPassword);
+                                string employeeF = fioParts[0];
+                                string employeeI = fioParts[1];
+                                string employeeO = fioParts[2];
+
+                                using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, con))
+                                {
+                                    userFIOCmd.Parameters.AddWithValue("@userFIO", employeeF + employeeI + employeeO);
+                                    //userFIOCmd.Parameters.AddWithValue("@userI", employeeI);
+                                    //userFIOCmd.Parameters.AddWithValue("@userO", employeeO);
+                                    object result = userFIOCmd.ExecuteScalar();
+                                    userFIO = result != null ? Convert.ToInt32(result) : 0;
+                                    //if (userFIO == 0)
+                                    //{
+                                    //    MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    //    return;
+                                    //}
+                                }
+
+                                cmd.Parameters.AddWithValue("@userid", userID);
+
+                                string selectedUSERFIO = comboBox2.Text.ToString();
+                                int userFio = GetEmployeeIDByName(selectedUSERFIO, con);
+                                cmd.Parameters.AddWithValue("@userFIO", userFIO);
+                                //cmd.Parameters.AddWithValue("@userI", userFIO);
+                                //cmd.Parameters.AddWithValue("@userO", userFIO);
+
+                                string selectedRoleid = comboBox1.Text.ToString();
+                                int role = GetRoleidByName(selectedRoleid, con);
+                                cmd.Parameters.AddWithValue("@roleID", role);
+                                cmd.Parameters.AddWithValue("@login", textBox7.Text);
+                                if (textBox1.Text.Length < 10)
+                                {
+                                    string hashedPassword = HashPassword(textBox1.Text);
+                                    cmd.Parameters.AddWithValue("@password", hashedPassword);
+                                }
+                                else
+                                {
+                                    string hashedPassword = textBox1.Text;
+                                    cmd.Parameters.AddWithValue("@password", hashedPassword);
+                                }
+                                cmd.ExecuteNonQuery();
+                                MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                con.Close();
                             }
-                            else
-                            {
-                                string hashedPassword = textBox1.Text;
-                                cmd.Parameters.AddWithValue("@password", hashedPassword);
-                            }
-                            cmd.ExecuteNonQuery();
-                            MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            con.Close();
+                            comboBox2.SelectedItem = null;
+                            comboBox1.SelectedItem = null;
+                            textBox7.Text = "";
+                            textBox1.Text = "";
+                            textBox2.Text = "";
+                            FillDataGrid("SELECT UserID AS 'Идентификатор'," +
+                            "employeeee.EmployeeF AS 'Ф сотрудника'," +
+                            "employeeee.EmployeeI AS 'И сотрудника'," +
+                            "employeeee.EmployeeO AS 'О сотрудника'," +
+                            "role.Role AS 'Роль'," +
+                            "Login AS 'Логин'," +
+                            "Password AS 'Пароль'" +
+                            "FROM user " +
+                            " INNER JOIN employeeee ON user.UserFIO = employeeee.EmployeeID" +
+                            " INNER JOIN role ON user.RoleID = role.RoleID");
                         }
-                        comboBox2.SelectedItem = null;
-                        comboBox1.SelectedItem = null;
-                        textBox7.Text = "";
-                        textBox1.Text = "";
-                        textBox2.Text = "";
-                        //FillDataGrid("SELECT UserID AS 'Идентификатор'," +
-                        //"employee.EmployeeFIO AS 'ФИО сотрудника'," +
-                        //"role.Role AS 'Роль'," +
-                        //"Login AS 'Логин'," +
-                        //"Password AS 'Пароль'" +
-                        //"FROM user " +
-                        //" INNER JOIN employee ON user.UserFIO = employee.EmployeeID" +
-                        //" INNER JOIN role ON user.RoleID = role.RoleID");
-                        FillDataGrid("SELECT userr.UserID AS 'id'," +
-                        "empF.EmployeeF AS 'Фамилия', " +
-                        "empI.EmployeeI AS 'Имя', " +
-                        "empO.EmployeeO AS 'Отчество', " +
-                        "`role`.Role AS 'Роль', " +
-                        "userr.Login AS 'Логин'," +
-                        "userr.Password AS 'Пароль'" +
-                        " FROM userr" +
-                        " INNER JOIN employeeee AS empF ON userr.UserF = empF.EmployeeID" +
-                        " INNER JOIN employeeee AS empI ON userr.UserI = empI.EmployeeID" +
-                        " INNER JOIN employeeee AS empO ON userr.UserO = empO.EmployeeID" +
-                        " INNER JOIN `role` ON userr.RoleID = `role`.RoleID;");
+                    }
+                }
+                else
+                {
+                    textBox2.Text = "";
+                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                        {
+                            try
+                            {
+                                connection.Open();
+                                int roleid;
+                                string roleidQuery = "SELECT RoleID FROM Role WHERE Role = @role";
+                                using (MySqlCommand roleCmd = new MySqlCommand(roleidQuery, connection))
+                                {
+                                    roleCmd.Parameters.AddWithValue("@role", comboBox1.Text);
+                                    object result = roleCmd.ExecuteScalar();
+                                    roleid = result != null ? Convert.ToInt32(result) : 0;
+                                    if (roleid == 0)
+                                    {
+                                        MessageBox.Show("Роль не найдена.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+                                }
+                                int userFIO;
+                                string userFIOQuery = "SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @employeeF AND EmployeeI LIKE @employeeI AND EmployeeO LIKE @employeeO;";
+                                string[] fioParts = comboBox2.Text.Split(' ');
+                                if (fioParts.Length >= 3)
+                                {
+                                    string employeeF = fioParts[0];
+                                    string employeeI = fioParts[1];
+                                    string employeeO = fioParts[2];
+
+                                    using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, connection))
+                                    {
+                                        userFIOCmd.Parameters.AddWithValue("@employeeF", employeeF);
+                                        userFIOCmd.Parameters.AddWithValue("@employeeI", employeeI);
+                                        userFIOCmd.Parameters.AddWithValue("@employeeO", employeeO);
+                                        object result = userFIOCmd.ExecuteScalar();
+                                        userFIO = result != null ? Convert.ToInt32(result) : 0;
+                                        if (userFIO == 0)
+                                        {
+                                            MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            return;
+                                        }
+                                    }
+                                    if (UserFIOExists(userFIO, connection))
+                                    {
+                                        MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+                                    if (UserExists(textBox7.Text, connection))
+                                    {
+                                        MessageBox.Show("Пользователь с таким Логином уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+                                    string query = "INSERT INTO user (UserFIO, Login, Password, RoleID) VALUES (@value1,@value2,@value3,@value4)";
+                                    using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                                    {
+                                        //UserID,cmd.Parameters.AddWithValue("@value0", textBox2.Text);
+                                        cmd.Parameters.AddWithValue("@value1", userFIO);
+                                        cmd.Parameters.AddWithValue("@value2", textBox7.Text);
+                                        if (textBox1.Text.Length < 10)
+                                        {
+                                            string hashedPassword = HashPassword(textBox1.Text);
+                                            cmd.Parameters.AddWithValue("@value3", hashedPassword);
+                                        }
+                                        else
+                                        {
+                                            string hashedPassword = textBox1.Text;
+                                            cmd.Parameters.AddWithValue("@value3", hashedPassword);
+                                        }
+                                        cmd.Parameters.AddWithValue("@value4", roleid);
+                                        cmd.ExecuteNonQuery();
+                                        MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        comboBox2.SelectedItem = null;
+                                        comboBox1.SelectedItem = null;
+                                        textBox7.Text = "";
+                                        textBox1.Text = "";
+                                        textBox2.Text = "";
+                                        FillDataGrid("SELECT UserID AS 'Идентификатор'," +
+                                        "employeeee.EmployeeF AS 'Ф сотрудника'," +
+                                        "employeeee.EmployeeI AS 'И сотрудника'," +
+                                        "employeeee.EmployeeO AS 'О сотрудника'," +
+                                        "role.Role AS 'Роль'," +
+                                        "Login AS 'Логин'," +
+                                        "Password AS 'Пароль'" +
+                                        "FROM user " +
+                                        " INNER JOIN employeeee ON user.UserFIO = employeeee.EmployeeID" +
+                                        " INNER JOIN role ON user.RoleID = role.RoleID");
+                                    }
+                                    connection.Close();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Ошибка: " + ex);
+                            }
+                        }
                     }
                 }
             }
@@ -684,12 +724,7 @@ namespace kursovoy
         /// </summary>
         private void ResetInactivityTimer()
         {
-            // Перезапускаем таймер
-            if (Timer != null)
-            {
-                Timer.Stop();
-                Timer.Start();
-            }
+            inactivityTimeout = initialInactivityTimeout; //сбрасываем значение тайм-аута!
         }
 
         /// <summary>

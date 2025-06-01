@@ -73,6 +73,26 @@ namespace kursovoy.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _222 {
+            get {
+                object obj = ResourceManager.GetObject("222", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _2473504 {
+            get {
+                object obj = ResourceManager.GetObject("2473504", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _3aef7174ebd411efb39922ac96e53444_1 {
             get {
                 object obj = ResourceManager.GetObject("3aef7174ebd411efb39922ac96e53444_1", resourceCulture);
@@ -86,6 +106,16 @@ namespace kursovoy.Properties {
         internal static System.Drawing.Bitmap picture {
             get {
                 object obj = ResourceManager.GetObject("picture", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Лого__1_ {
+            get {
+                object obj = ResourceManager.GetObject("Лого (1)", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 using System.IO;
+using System.Drawing.Drawing2D;
 using System.Threading;
 namespace kursovoy
 {
@@ -19,32 +20,72 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
+
             //public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
             //public static string ConnectionStringNotDB { get; } = "host=localhost;uid=root;pwd=;";
-            public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
-            public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
-
-
+            public static string ConnectionString { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};database={ConfigurationManager.AppSettings["db"]};";
+            public static string ConnectionStringNotDB { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};";
+            //public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
+            //public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
         }
         public class CaptchaGenerator
         {
             private static Random random = new Random();
+
             public static Bitmap GenerateCaptcha(out string captchaText)
             {
-                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 captchaText = new string(Enumerable.Range(0, 4).Select(x => chars[random.Next(chars.Length)]).ToArray());
-                Bitmap bmp = new Bitmap(100, 50);
+                int width = 199;
+                int height = 69;
+                Bitmap bmp = new Bitmap(width, height);
+
+                // Определяем область для символов (оставляем отступы)
+                Rectangle symbolArea = new Rectangle(10, 10, width - 20, height - 20);
+
                 using (Graphics g = Graphics.FromImage(bmp))
                 {
                     g.Clear(Color.White);
-                    using (Font font = new Font("Arial", 20, FontStyle.Bold))
+                    Font font = new Font("Arial", 22, FontStyle.Bold);
+
+                    // stringFormat для выравнивания ВСЕЙ строки в области (не отдельных символов!)
+                    StringFormat stringFormat = new StringFormat();
+                    stringFormat.Alignment = StringAlignment.Center;
+                    stringFormat.LineAlignment = StringAlignment.Center;
+
+                    // Рисуем каждый символ, ограничивая его областью
+                    for (int i = 0; i < captchaText.Length; i++)
                     {
-                        g.DrawString(captchaText, font, Brushes.Black, new PointF(10, 10));
+                        // Вычисляем ширину ячейки для символа
+                        int cellWidth = symbolArea.Width / captchaText.Length;
+
+                        // Генерируем случайные координаты внутри ячейки
+                        int x = symbolArea.X + i * cellWidth + random.Next(cellWidth / 4);
+                        int y = symbolArea.Y + random.Next(0, symbolArea.Height / 2); //Поднимаем символы повыше
+
+                        // Генерируем случайный угол поворота
+                        int rotationAngle = random.Next(-15, 15); // Уменьшил диапазон вращения
+
+                        // Создаем матрицу преобразования
+                        Matrix matrix = new Matrix();
+                        matrix.RotateAt(rotationAngle, new PointF(x + (float)cellWidth / 2, y + (float)symbolArea.Height / 2));
+                        g.Transform = matrix;
+
+                        // Рисуем символ
+                        g.DrawString(captchaText[i].ToString(), font, Brushes.Black, new PointF(x, y));
+
+                        // Сбрасываем преобразование
+                        g.ResetTransform();
                     }
-                    // Добавление графического шума
-                    for (int i = 0; i < 100; i++)
+
+                    // Рисуем линии искажения
+                    for (int i = 0; i < 4; i++)
                     {
-                        bmp.SetPixel(random.Next(bmp.Width), random.Next(bmp.Height), Color.FromArgb(random.Next(256), random.Next(256), random.Next(256)));
+                        int startX = random.Next(0, width / 4);
+                        int startY = random.Next(0, height); // Расширил диапазон
+                        int endX = random.Next(width / 4 * 3, width);
+                        int endY = random.Next(0, height); // Расширил диапазон
+                        g.DrawLine(new Pen(Color.Black, 2), startX, startY, endX, endY);
                     }
                 }
                 return bmp;
@@ -102,8 +143,6 @@ namespace kursovoy
                     //Если найден пользователь, то устанавливаем свойства его роли и переключаем
                     SwitchRole(authorizedUser.Role);
                 }
-
-
                 else
                 {
                     //Если пользователь с указанным логином и паролем не найден выводим сообщение об ошибке
@@ -118,20 +157,31 @@ namespace kursovoy
                         button3.Visible = true;
                         label4.Visible = true;
                         captchaTextBox.Visible = true;
-                        //Блокируем кнопку для входа 
-                        button1.Enabled = false;
-                        MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        Thread.Sleep(10000);
-                        button1.Enabled = true;
-                        MessageBox.Show("Система разблокирована!", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        if (failedLoginAttempts >= 2)
+                        {
+                            //Блокируем кнопку для входа 
+                            button1.Enabled = false;
+                            MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            Thread.Sleep(10000);
+                            button1.Enabled = true;
+                            MessageBox.Show("Система разблокирована!", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                 }
             }
             else
             {
                 MessageBox.Show("Неверная CAPTCHA!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (failedLoginAttempts >= 1)
+                {
+                    //Блокируем кнопку для входа 
+                    button1.Enabled = false;
+                    MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Thread.Sleep(10000);
+                    button1.Enabled = true;
+                    MessageBox.Show("Система разблокирована!", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-
         }
         //
         /// <summary>
@@ -143,6 +193,7 @@ namespace kursovoy
             public int UserID { get; set; }
             public int EmployeeID { get; set; }
             public string FIO { get; set; }
+            public string RoleName { get; set; }
         }
 
         /// <summary>
@@ -154,6 +205,7 @@ namespace kursovoy
             public static int UserID { get; set; }
             public static int EmployeeID { get; set; }
             public static string FIO { get; set; }
+            public static string RoleName { get; set; }
         }
 
         /// <summary>
@@ -166,6 +218,7 @@ namespace kursovoy
             DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите выйти из приложения?", "Подтверждение на выход", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.Yes)
             {
+                import.AutomaticBackup();
                 Application.Exit();
             }
         }
@@ -183,35 +236,50 @@ namespace kursovoy
             {
                 // Хешируем введённый пароль
                 string hashedPassword = HashPassword(password);
-
                 using (MySqlConnection con = new MySqlConnection(Program.ConnectionString))
                 {
                     con.Open();
-                    MySqlCommand cmd = new MySqlCommand($"SELECT * FROM user INNER JOIN Employee e ON User.UserFIO = e.EmployeeID WHERE Login='{login}' and Password='{hashedPassword}'", con);
+                    MySqlCommand cmd = new MySqlCommand($"SELECT u.*, e.EmployeeF, e.EmployeeI, e.EmployeeO, r.Role"+
+                    " FROM user u "+
+                    " INNER JOIN employeeee e ON u.UserFIO = e.EmployeeID "+
+                    " INNER JOIN role r ON u.RoleID = r.RoleID "+
+                    $" WHERE u.Login = '{login}' AND u.Password = '{hashedPassword}';", con); 
                     MySqlDataAdapter ad = new MySqlDataAdapter(cmd);
                     DataTable tb = new DataTable();
                     ad.Fill(tb);
-
                     // Получаем данные о пользователе
                     if (tb.Rows.Count == 1)
                     {
                         DataRow row = tb.Rows[0];
                         user = new User
                         {
-                            Role = Convert.ToInt32(row["RoleID"]),// Используем имя столбца
-                            UserID = Convert.ToInt32(row["UserID"]),// Используем имя столбца
-                            EmployeeID = Convert.ToInt32(row["UserFIO"]),// Используем имя столбца
-                            FIO = row["EmployeeFIO"].ToString() // Получаем ФИО
+                            Role = Convert.ToInt32(row["RoleID"]),// Получаем Роль, используем имя столбца
+                            UserID = Convert.ToInt32(row["UserID"]),
+                            EmployeeID = Convert.ToInt32(row["UserFIO"]), // Используем внешний ключ UserFIO
+                            RoleName = row["Role"].ToString(),
+                            FIO = row["EmployeeF"].ToString() + " " +
+                                  row["EmployeeI"].ToString() + " " + row["EmployeeO"].ToString()
                         };
                     }
+                    con.Close();
                 }
             }
             catch (MySqlException ex)
             {
                 if (ex.Number == 1049) // Error 1049 - Unknown database
                 {
-                    MessageBox.Show("База данных не существует.  Создайте базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    user = new User { };
+                    string defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
+                    string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
+                    if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
+                    {
+                        
+                        user = new User { };
+                    }
+                    else
+                    {
+MessageBox.Show("База данных не существует. Создайте базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        user = new User { };
+                    }
                 }
                 else
                 {
@@ -221,10 +289,15 @@ namespace kursovoy
             }
             catch (Exception ex)
             {
-                // TODO: Залогируйте ошибку (в файл, базу данных, систему мониторинга)
-                Console.WriteLine("Ошибка при авторизации: " + ex.Message);
                 MessageBox.Show("Ошибка при авторизации: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 user = null; // Возвращаем null, если произошла ошибка
+            }
+            if (user != null)
+            {
+                User2.EmployeeID = user.EmployeeID;
+                User2.FIO = user.FIO;
+                User2.Role = user.Role;
+                User2.RoleName = user.RoleName;
             }
             return user;
         }
@@ -254,8 +327,6 @@ namespace kursovoy
         /// Метод для входа в учетную запись в зависимости от роли
         /// </summary>
         /// <param name="user"></param>
-
-
         private void SwitchRole(int role)
         {
             // Определите форму для отображения в зависимости от роли
@@ -263,27 +334,105 @@ namespace kursovoy
             {
                 case 1:
                     User2.Role = 1;
+                   //BackupAllTables();
+
                     Admin ad = new Admin();
                     ad.Show();
                     this.Hide();
                     break;
                 case 2:
                     User2.Role = 2;
+                    //BackupAllTables();
+
                     СommoditySpecialist CS = new СommoditySpecialist();
                     CS.Show();
                     this.Hide();
                     break;
                 case 3:
                     User2.Role = 3;
+                    //BackupAllTables();
                     Seller sl = new Seller();
                     sl.Show();
                     this.Hide();
                     break;
                 default:
-                    MessageBox.Show("Ваша роль в системе не определена. Обратитесь к администратору.");
+                    //MessageBox.Show("Ваша роль в системе не определена. Обратитесь к администратору.");
                     break;
             }
-            this.Hide(); // Прячем форму авторизации
+           //this.Hide(); // Прячем форму авторизации
+        }
+        private void BackupAllTables()
+        {
+            string[] tables = new string[]
+            {
+           "category",
+            "companyinfo",
+            "employeeee",
+            "`order`",
+            "product",
+            "productmanufactur",
+            "productorder",
+            "role",
+            "supplier",
+            "user"
+            };
+
+            foreach (var table in tables)
+            {
+                BackupTable(table);
+            }
+            MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        private void BackupTable(string tableName)
+        {
+           try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Program.ConnectionString))
+                {
+                    connection.Open();
+                    string query = $"SELECT * FROM {tableName}";
+                    MySqlCommand command = new MySqlCommand(query, connection);
+                    MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+                    DataTable dataTable = new DataTable();
+
+                    adapter.Fill(dataTable);
+
+                    string backupFilePath = Path.Combine("./ReservCopy/", $"{tableName}_backup_{DateTime.Now:yyyyMMddHHmmss}.csv");
+
+                    using (StreamWriter writer = new StreamWriter(backupFilePath))
+                    {
+                        // Записываем заголовки столбцов
+                        for (int i = 0; i < dataTable.Columns.Count; i++)
+                        {
+                            writer.Write(dataTable.Columns[i]);
+                            if (i < dataTable.Columns.Count - 1)
+                            {
+                                writer.Write(";");
+                            }
+                        }
+                        writer.WriteLine();
+
+                        // Записываем строки данных
+                        foreach (DataRow row in dataTable.Rows)
+                        {
+                            for (int i = 0; i < dataTable.Columns.Count; i++)
+                            {
+                                writer.Write(row[i]);
+                                if (i < dataTable.Columns.Count - 1)
+                                {
+                                    writer.Write(";");
+                                }
+                            }
+                            writer.WriteLine();
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Произошла ошибка при резервном копировании таблицы '{tableName}': {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         /// Проверка на пустое поле для ввода пароля
         /// </summary>
@@ -310,9 +459,17 @@ namespace kursovoy
             captchaTextBox.Visible = true;
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void textBoxLogin_KeyPress(object sender, KeyPressEventArgs e)
         {
-
+            if((e.KeyChar >= 'А' && e.KeyChar <= 'Я') || 
+                (e.KeyChar >= 'а' && e.KeyChar <= 'я'))
+            {
+                e.Handled = true;
+            }
+            else
+            {
+                e.Handled = false;
+            }
         }
     }
 }

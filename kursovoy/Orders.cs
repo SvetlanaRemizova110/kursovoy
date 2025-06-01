@@ -11,59 +11,28 @@ using MySql.Data.MySqlClient;
 using Microsoft.Office.Interop.Excel;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Configuration;
+
 namespace kursovoy
 {
     public partial class Orders : Form
     {
-        private int inactivityTimeout = 0;
+        /// <summary>
+        /// 
+        /// </summary>
+        private FormWindowState _previousWindowState; // Сохраняем предыдущее состояние окна
+        private FormBorderStyle _previousBorderStyle; // Сохраняем стиль границы
+
+        private int currentPage1 = 0;
+        private int rowsPerPage1 = 20;
+        private int totalRows1 = 0;
+        private int totalRecords;//кол-во строк всего
+        private List<DataGridViewRow> allRows1 = new List<DataGridViewRow>();
+
         public Orders()
         {
             InitializeComponent();
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList; // Запрет на ввод в comboBox
-            Timer.Tick += inactivityTimer_Tick;
-            Timer.Interval = 1000; // Проверка каждые 1 секунду
-        }
-        /// <summary>
-        /// Назначение обработчиков событий клавиатуры и мыши для отслеживания активности.
-        /// </summary>
-        private void Users_ActivateTracking()
-        {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
-
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
-            {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
-            }
-        }
-        /// <summary>
-        /// Обработчик любых событий, связанных с активностью пользователя (например, движение мыши или нажатие клавиш).
-        /// Отслеживает действия пользователя и сбрасывает таймер бездействия.
-        /// </summary>
-        private void Users_ActivityDetected(object sender, EventArgs e)
-        {
-            ResetInactivityTimer();
-        }
-        private void inactivityTimer_Tick(object sender, EventArgs e)
-        {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
-            {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
-            }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
-
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
-            }
+            dateTimePickerStart.Value = DateTime.Now;
+            dateTimePickerEnd.Value = DateTime.Now;
         }
 
         /// <summary>
@@ -73,6 +42,7 @@ namespace kursovoy
         {
             public int OrderID { get; set; }
             public string OrderStatus { get; set; }
+            public DateTime OrderDate { get; set; } // Добавлено хранение даты заказа
 
             // Хранение количества товаров в заказе
             public Dictionary<string, int> OrderItems { get; set; } = new Dictionary<string, int>();
@@ -95,40 +65,64 @@ namespace kursovoy
                         {
                             dataGridView1.Rows[i].Visible = true;
                         }
+                        allRows1.Clear();
                         dataGridView1.Rows.Clear();
                         dataGridView1.Columns.Clear();
                         orderDataList.Clear();
-                        dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                        dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+                        dataGridView1.AllowUserToDeleteRows = false;
+                        dataGridView1.AllowUserToOrderColumns = false;
                         dataGridView1.AllowUserToResizeColumns = false;
+                        dataGridView1.AllowUserToResizeRows = false;
+
                         dataGridView1.ReadOnly = false;
                         dataGridView1.AllowUserToAddRows = false;
 
                         dataGridView1.Columns.Add("OrderID", "Номер заказа");
                         dataGridView1.Columns.Add("OrderDate", "Дата заказа");
                         dataGridView1.Columns.Add("OrderUser", "Сотрудник");
-                        dataGridView1.Columns.Add("OrderPrice", "Цена заказа");
-
-                        // Создаем ComboBoxColumn для статуса заказа
-                        DataGridViewComboBoxColumn statusColumn = new DataGridViewComboBoxColumn();
-                        statusColumn.Name = "OrderStatus";
-                        statusColumn.HeaderText = "Статус заказа";
-                        statusColumn.Items.AddRange(new string[] { "Завершен", "Отменён" });
-                        dataGridView1.Columns.Add(statusColumn);
+                        dataGridView1.Columns.Add("OrderPrice", "Сумма заказа");
+                        dataGridView1.Columns["OrderUser"].Width = 250;
+                        dataGridView1.Columns["OrderDate"].Width = 150;
+                        dataGridView1.Columns["OrderID"].Width = 80;
+                        dataGridView1.Columns["OrderUser"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
 
                         dataGridView1.Columns["OrderID"].ReadOnly = true;
                         dataGridView1.Columns["OrderDate"].ReadOnly = true;
                         dataGridView1.Columns["OrderUser"].ReadOnly = true;
                         dataGridView1.Columns["OrderPrice"].ReadOnly = true;
 
+                        if (Authorization.User2.Role == 2)
+                        {
+                            // Создаем ComboBoxColumn для статуса заказа
+                            DataGridViewComboBoxColumn statusColumn = new DataGridViewComboBoxColumn();
+                            statusColumn.Name = "OrderStatus";
+                            statusColumn.HeaderText = "Статус заказа";
+                            statusColumn.Items.AddRange(new string[] { "Завершен", "Отменён" });
+                            dataGridView1.Columns.Add(statusColumn);
+                        }
+                        if (Authorization.User2.Role == 3)
+                        {
+                            dataGridView1.Columns.Add("OrderStatus", "Статус заказа");
+                            dataGridView1.Columns["OrderStatus"].ReadOnly = true;
+                            dateTimePickerEnd.Visible = false;
+                            dateTimePickerStart.Visible = false;
+                            button2.Visible = false;
+                            label1.Visible = false;
+                            panel1.Visible = false;
+                        }
+
                         while (rdr.Read())
                         {
                             int orderID = Convert.ToInt32(rdr["Номер заказа"]);
+                            DateTime orderDate = Convert.ToDateTime(rdr["Дата заказа"]);
+
                             // Создаем объект OrderData и заполняем его данными
                             OrderData orderData = new OrderData
                             {
                                 OrderID = orderID,
-                                OrderStatus = rdr["Статус заказа"].ToString()
+                                OrderStatus = rdr["Статус заказа"].ToString(),
+                                OrderDate = orderDate  // Сохраняем дату заказа
                             };
                             // Загружаем информацию о товарах в заказе
                             LoadOrderItems(orderID, orderData);
@@ -137,15 +131,16 @@ namespace kursovoy
                             DataGridViewRow row = dataGridView1.Rows[rowIndex];
                             row.Cells["OrderID"].Value = rdr[0];
                             row.Cells["OrderDate"].Value = rdr[1];
-                            row.Cells["OrderUser"].Value = rdr[3];
-                            row.Cells["OrderPrice"].Value = rdr[4];
+                            row.Cells["OrderUser"].Value = string.Format("{0} {1} {2}", rdr[3], rdr[4], rdr[5]);
+                            row.Cells["OrderPrice"].Value = rdr[6];
                             // Устанавливаем выбранное значение в ComboBoxColumn
                             row.Cells["OrderStatus"].Value = rdr[2];
-
+                            allRows1.Add(row);
                             orderDataList.Add(orderData);
                         }
+                        totalRows1 = allRows1.Count;
+                        con.Close();
                     }
-                    con.Close();
                 }
             }
             catch (Exception ex)
@@ -175,7 +170,7 @@ namespace kursovoy
                         {
                             string productArticleNumber = reader["ProductID"].ToString();
                             int quantity = Convert.ToInt32(reader["ProductCount"]);
-                            orderData.OrderItems.Add(productArticleNumber, quantity); 
+                            orderData.OrderItems.Add(productArticleNumber, quantity);
                         }
                     }
                     con.Close();
@@ -194,44 +189,163 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            СommoditySpecialist CS = new СommoditySpecialist();
-            CS.Show();
-            this.Hide();
+            if (Authorization.User2.Role == 2)
+            {
+                СommoditySpecialist CS = new СommoditySpecialist();
+                CS.Show();
+                this.Close();
+            }
+            else if (Authorization.User2.Role == 3)
+            {
+                Seller sl = new Seller();
+                sl.Show();
+                this.Close();
+            }
         }
 
         private void Orders_Load(object sender, EventArgs e)
         {
-            // Загрузить интервал времени бездействия из App.config
-            if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
+            if (Authorization.User2.Role == 3)
             {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
+                this.Size = new Size(905, 608);
+                buttonPag1.Location = new System.Drawing.Point(75, 524);
+                buttonPag2.Location = new System.Drawing.Point(106, 524);
+                labelCount.Location = new System.Drawing.Point(75, 491);
+                labelVSE.Location = new System.Drawing.Point(301, 491);
+                label4.Location = new System.Drawing.Point(628, 492);
+                button5.Location = new System.Drawing.Point(768, 495);
+                dataGridView1.Size = new Size(740, 375);
             }
-            else
+            UpdateDataGrid();
+            UpdatePag();
+            FillCount();
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            labelVSE.Visible = false;
+            label7.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
+            //FillDataGrid("SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
+            //    " OrderStatus AS 'Статус заказа', e.EmployeeF AS 'Фамилия', e.EmployeeI AS 'Имя', e.EmployeeO AS 'Отчетво', OrderPrice AS 'Сумма заказа'" +
+            //    " FROM `order`" +
+            //    " INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID");
+            //////////////
+        }
+        /// <summary>
+        /// //////////
+        /// </summary>
+        /// выбор страницы пагинации
+        /// те строки которые нам не нужны на выбраной странице - скрываем
+        private void LinkLabel_Click(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
+            dataGridView1.CurrentCell = null;
+
+            // узнаём какая страница выбрана
+            LinkLabel l = sender as LinkLabel;
+            if (l != null)
             {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
+                currentPage1 = Convert.ToInt32(l.Text) - 1;
+                UpdatePag(); //Перерисовываем интерфейс
+                FillCount();
+            }
+        }
+        //Пагинация
+        private void UpdatePag()
+        {
+            // Очищаем только строки, не трогая столбцы
+            dataGridView1.Rows.Clear();
+
+            int startIndex = currentPage1 * rowsPerPage1;
+            int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
+
+            // Добавляем строки для текущей страницы
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
             }
 
-            ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
-            FillDataGrid("SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
-                "OrderStatus AS 'Статус заказа',e.EmployeeFIO AS 'Продавец', OrderPrice AS 'Сумма заказа'" +
-                " FROM `order`" +
-                "INNER JOIN `Employee` e ON `order`.OrderUser = e.EmployeeID");
+            // Удаляем старые LinkLabel страниц
+            foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
+            {
+                this.Controls.Remove(control);
+            }
+
+            // Рассчитываем общее количество страниц
+            int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
+            int step = 15;
+
+            int x = labelCount.Location.X + 68;
+            int y = labelCount.Location.Y + 38;
+
+            // Создаем новые LinkLabel для страниц
+            for (int i = 0; i < totalPages; i++)
+            {
+                var linkLabel = new LinkLabel();
+                linkLabel.Text = (i + 1).ToString();
+                linkLabel.Name = "page" + i;
+                // Устанавливаем цвет ссылок
+                linkLabel.LinkColor = Color.Black;      // Цвет ссылки до посещения
+                linkLabel.VisitedLinkColor = Color.Black; // Цвет ссылки после посещения
+                linkLabel.ActiveLinkColor = Color.Black;  // Цвет ссылки при нажатии
+                linkLabel.Font = new System.Drawing.Font(linkLabel.Font.FontFamily, 14);
+                linkLabel.AutoSize = true;
+                linkLabel.Location = new System.Drawing.Point(x, y);
+                linkLabel.Click += LinkLabel_Click;
+                linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;// Убираем подчеркивание
+
+                // Добавляем фон только у текущей страницы
+                if (i == currentPage1)
+                {
+                    linkLabel.BackColor = Color.LightGreen;
+                }
+                else
+                {
+                    linkLabel.BackColor = Color.Honeydew; //Устанавливаем дефолтный цвет для не выбранных
+                }
+                this.Controls.Add(linkLabel);
+                x += step;
+            }
+
+            // Обновляем состояние кнопок
+            buttonPag1.Enabled = currentPage1 > 0;
+            buttonPag2.Enabled = currentPage1 < totalPages - 1;
+
+            // Обновляем счетчик записей
+            //labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}";
+            //labelVSE.Text = $"/ {totalRows1}";
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
+        /// <summary>
+        /// Количество строк всего
+        /// </summary>
+        public void FillCount()
+        {
+            string connectionString = Authorization.Program.ConnectionString;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM `order`", connection))
+                {
+                    totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
+                }
+
+                labelVSE.Text = $"/{totalRecords}";
+            }
+        }
+        ////////////////////////
         /// <summary>
         /// Поиск, сортировка, фильтр
         /// </summary>
-        private void UpdateDataGrid() 
+        private void UpdateDataGrid()
         {
             string searchStr = SearchText.Text;
             string sortOrder = comboBox1.SelectedItem?.ToString();
-            string orderDirection = (sortOrder == "от нового к старому") ? "DESC" : "ASC";
+            string orderDirection = (sortOrder == "сначало новые") ? "DESC" : "ASC";
 
             string strCmd = "SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
-                "OrderStatus AS 'Статус заказа',e.EmployeeFIO AS 'Продавец', OrderPrice AS 'Сумма заказа'" +
+                " OrderStatus AS 'Статус заказа', e.EmployeeF AS 'Фамилия', e.EmployeeI AS 'Имя', e.EmployeeO AS 'Отчеcтво', OrderPrice AS 'Сумма заказа'" +
                 " FROM `order`" +
-                "INNER JOIN `Employee` e ON `order`.OrderUser = e.EmployeeID WHERE 1=1";
+                "INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID WHERE 1=1";
 
             if (!string.IsNullOrWhiteSpace(searchStr))
             {
@@ -239,15 +353,28 @@ namespace kursovoy
             }
             strCmd += $" ORDER BY `OrderDate` {orderDirection}";
             FillDataGrid(strCmd);
+
+            currentPage1 = 0; // Сбрасываем на первую страницу
+            UpdatePag(); // Обновляем пагинацию
         }
 
         private void SearchText_TextChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
+            UpdatePag();
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += " " + dataGridView1.Rows.Count;
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            FillCount();
         }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
+            UpdatePag();
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += " " + dataGridView1.Rows.Count;
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            FillCount();
         }
 
         /// <summary>
@@ -257,101 +384,150 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
-            DateTime startDate = dateTimePickerStart.Value;
-            DateTime endDate = dateTimePickerEnd.Value;
+                DateTime startDate = dateTimePickerStart.Value;
+                DateTime endDate = dateTimePickerEnd.Value;
 
-            string startDate2 = dateTimePickerStart.Value.ToString("yyyy-MM-dd");
-            string endDate2 = dateTimePickerEnd.Value.ToString("yyyy-MM-dd");
-            // Проверка дат
-            if (startDate > endDate)
-            {
-                MessageBox.Show("Дата начала периода не может быть больше даты окончания периода.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            try
-            {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                string startDate2 = dateTimePickerStart.Value.ToString("yyyy-MM-dd");
+                string endDate2 = dateTimePickerEnd.Value.ToString("yyyy-MM-dd");
+
+                // Проверка дат
+                if (startDate > endDate)
                 {
-                    // Сохранение файла
-                    SaveFileDialog saveFileDialog = new SaveFileDialog();
-                    saveFileDialog.FileName = $"Отчет по заказам{"_" + startDate2 + "_" + endDate2 + "_"}.xlsx";
-                    saveFileDialog.DefaultExt = "xlsx";
-                    saveFileDialog.Filter = "Excel Files|*.xlsx";
+                    MessageBox.Show("Дата начала периода не может быть больше даты окончания периода.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                try
+                {
+                    using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
                     {
-                        connection.Open();
+                        // Сохранение файла
+                        SaveFileDialog saveFileDialog = new SaveFileDialog();
+                        saveFileDialog.FileName = $"Отчет по заказам_{startDate2}_{endDate2}.xlsx";
+                        saveFileDialog.DefaultExt = "xlsx";
+                        saveFileDialog.Filter = "Excel Files|*.xlsx";
 
-                        // Запрос для получения данных о заказах за указанный период
-                        string query = @"SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
-                        "OrderStatus AS 'Статус заказа',e.EmployeeFIO AS 'Продавец', OrderPrice AS 'Сумма заказа'" +
-                        " FROM `order`" +
-                        "INNER JOIN `Employee` e ON `order`.OrderUser = e.EmployeeID WHERE OrderDate BETWEEN @startDate AND @endDate AND OrderStatus = 'Завершен'";
-
-                        MySqlCommand command = new MySqlCommand(query, connection);
-                        command.Parameters.AddWithValue("@startDate", startDate);
-                        command.Parameters.AddWithValue("@endDate", endDate);
-
-                        MySqlDataAdapter adapter = new MySqlDataAdapter(command);
-                        System.Data.DataTable dataTable = new System.Data.DataTable();
-                        adapter.Fill(dataTable);
-
-                        // Подсчет общего дохода
-                        int totalRevenue = dataTable.AsEnumerable().Sum(row => row.Field<int>("Сумма заказа"));
-
-                        // Создание Excel-приложения и книги
-                        Excel.Application excelApp = new Excel.Application();
-                        Excel.Workbook workbook = excelApp.Workbooks.Add();
-                        Excel.Worksheet worksheet = workbook.Sheets[1];
-
-                        // Заголовки столбцов
-                        for (int i = 0; i < dataTable.Columns.Count; i++)
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
                         {
-                            worksheet.Cells[1, i + 1] = dataTable.Columns[i].ColumnName;
-                        }
+                            connection.Open();
 
-                        // Данные
-                        for (int i = 0; i < dataTable.Rows.Count; i++)
-                        {
-                            for (int j = 0; j < dataTable.Columns.Count; j++)
+                            // Запрос для получения данных о заказах за указанный период
+                            string query = @"SELECT
+                                        OrderID AS 'Номер заказа',
+                                        OrderDate AS 'Дата заказа',
+                                        OrderStatus AS 'Статус заказа',
+                                        e.EmployeeF AS 'Фамилия',
+                                        e.EmployeeI AS 'Имя',
+                                        e.EmployeeO AS 'Отчество',
+                                        OrderPrice AS 'Сумма заказа'
+                                    FROM `order`
+                                    INNER JOIN employeeee e ON `order`.OrderUser = e.EmployeeID
+                                    WHERE OrderDate BETWEEN @startDate AND @endDate AND OrderStatus = 'Завершен'";
+
+                            using (MySqlCommand command = new MySqlCommand(query, connection))
                             {
-                                worksheet.Cells[i + 2, j + 1] = dataTable.Rows[i][j].ToString();
+                                command.Parameters.AddWithValue("@startDate", startDate);
+                                command.Parameters.AddWithValue("@endDate", endDate);
+
+                                using (MySqlDataAdapter adapter = new MySqlDataAdapter(command))
+                                {
+                                    System.Data.DataTable dataTable = new System.Data.DataTable();
+                                    adapter.Fill(dataTable);
+
+                                    // Подсчет общего дохода
+                                    decimal totalRevenue = dataTable.AsEnumerable().Sum(row => Convert.ToDecimal(row["Сумма заказа"]));
+                                    int totalOrders = dataTable.Rows.Count;
+                                    double averagePrice = totalOrders > 0 ? (double)totalRevenue / totalOrders : 0;
+
+                                    // Создание Excel-приложения и книги
+                                    Excel.Application excelApp = new Excel.Application();
+                                    Excel.Workbook workbook = excelApp.Workbooks.Add();
+                                    Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1]; // Explicit cast
+
+                                    // **Добавляем вывод текущей даты в первую строку**
+                                // Заголовок на весь лист
+                                var periodHeader = $"Отчет за период: {startDate.ToShortDateString()} - {endDate.ToShortDateString()}";
+                                worksheet.Range["A1:G1"].Merge(); // Объединяем ячейки для заголовка
+                                worksheet.Cells[1, 1] = periodHeader;
+                                worksheet.Cells[1, 1].Font.Bold = true;
+                                worksheet.Cells[1, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter; // Центрируем заголовок
+                                worksheet.Cells[1, 1].Font.Size = 14; // Увеличиваем размер шрифта
+
+                                                                      // Сдвигаем заголовки столбцов на строку вниз
+                                for (int i = 0; i < dataTable.Columns.Count; i++)
+                                    {
+                                        worksheet.Cells[2, i + 1] = dataTable.Columns[i].ColumnName;
+                                    }
+
+                                    // Данные
+                                    for (int i = 0; i < dataTable.Rows.Count; i++)
+                                    {
+                                        for (int j = 0; j < dataTable.Columns.Count; j++)
+                                        {
+                                            worksheet.Cells[i + 3, j + 1] = dataTable.Rows[i][j].ToString();
+                                        }
+                                    }
+
+                                    // Итоговая информация
+                                    int lastRow = dataTable.Rows.Count + 3;
+                                    worksheet.Cells[lastRow, 1] = "Общий доход:";
+                                    worksheet.Cells[lastRow, 2] = totalRevenue.ToString("F2");
+                                    worksheet.Cells[lastRow + 1, 1] = "Количество заказов:";
+                                    worksheet.Cells[lastRow + 1, 2] = totalOrders.ToString();
+
+                                    // Распределение по сотрудникам
+                                    var employeeDistribution = dataTable.AsEnumerable()
+                                        .GroupBy(row => $"{row.Field<string>("Фамилия")} {row.Field<string>("Имя")} {row.Field<string>("Отчество")}")
+                                        .Select(g => new
+                                        {
+                                            Employee = g.Key,
+                                            Count = g.Count(),
+                                            TotalPrice = g.Sum(row => Convert.ToDecimal(row["Сумма заказа"]))
+                                        });
+
+                                    //worksheet.Cells[lastRow + 4, 1] = "Распределение по сотрудникам:";
+                                    worksheet.Cells[lastRow + 3, 1] = "Сотрудник";
+                                    worksheet.Cells[lastRow + 3, 2] = "Количество заказов";
+                                    worksheet.Cells[lastRow + 3, 3] = "Сумма заказов";
+
+                                    int currentRow = lastRow + 4;
+                                    foreach (var employee in employeeDistribution)
+                                    {
+                                        worksheet.Cells[currentRow, 1] = employee.Employee;
+                                        worksheet.Cells[currentRow, 2] = employee.Count.ToString();
+                                        worksheet.Cells[currentRow, 3] = employee.TotalPrice.ToString("F2");
+                                        currentRow++;
+                                    }
+
+                                    // Авторазмер столбцов
+                                    worksheet.Columns.AutoFit();
+
+                                    workbook.SaveAs(saveFileDialog.FileName);
+                                    MessageBox.Show("Отчет успешно сформирован и сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                    // Закрытие Excel
+                                    workbook.Close();
+                                    excelApp.Quit();
+
+                                    // Очистка COM-объектов
+                                    System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+                                    System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
+                                    System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
+                                    excelApp = null;
+                                    workbook = null;
+                                    worksheet = null;
+                                    GC.Collect();
+                                    connection.Close();
+                                }
                             }
                         }
-
-                        // Итоговая сумма
-                        int lastRow = dataTable.Rows.Count + 2;
-                        worksheet.Cells[lastRow, 1] = "Общий доход:";
-                        worksheet.Cells[lastRow, 2] = totalRevenue.ToString("F2");
-
-                        // Авторазмер столбцов
-                        worksheet.Columns.AutoFit();
-
-                        workbook.SaveAs(saveFileDialog.FileName);
-                        MessageBox.Show("Отчет успешно сформирован и сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        // Закрытие Excel
-                        workbook.Close();
-                        excelApp.Quit();
-
-                        // Очистка COM-объектов
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
-                        excelApp = null;
-                        workbook = null;
-                        worksheet = null;
-                        GC.Collect();
-                        connection.Close();
-
                     }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при формировании отчета: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при формировании отчета: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
 
         private void dateTimePickerStart_ValueChanged(object sender, EventArgs e)
         {
@@ -370,44 +546,44 @@ namespace kursovoy
                 int orderID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["OrderID"].Value);
                 string newStatus = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
 
-                // Получаем старый статус заказа из списка данных
-                string oldStatus = orderDataList.FirstOrDefault(o => o.OrderID == orderID)?.OrderStatus;
+                // Находим данные заказа в списке
+                OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
 
-                // Проверяем, что статус изменился
-                if (oldStatus != newStatus)
+                if (orderData != null)
                 {
-                    // Проверяем, достаточно ли товара на складе, если меняем статус с "Отменён" на "Выполнен"
+                    // Получаем старый статус заказа из списка данных
+                    string oldStatus = orderData.OrderStatus;
+
+                    // **Добавляем проверку на изменение статуса с "Отменён" на "Завершен"**
                     if (oldStatus == "Отменён" && newStatus == "Завершен")
                     {
-                        if (!CheckStockAvailability(orderID))
+                        MessageBox.Show("Изменение статуса заказа с 'Отменён' на 'Завершен' запрещено.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus; // Возвращаем старый статус
+                        return; // Прекращаем выполнение метода
+                    }
+
+                    // Проверяем, прошло ли больше 14 дней с даты заказа
+                    if (DateTime.Now > orderData.OrderDate.AddDays(14) && newStatus == "Отменён")
+                    {
+                        MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = orderData.OrderStatus; // Возвращаем старый статус
+                        return; // Прекращаем выполнение метода
+                    }
+                    // Проверяем, что статус изменился
+                    if (oldStatus != newStatus)
+                    {
+                        // Обновляем статус заказа в базе данных
+                        UpdateOrderStatus(orderID, newStatus);
+
+                        // Если статус изменился с "Выполнен" на "Отменён", возвращаем товар на склад
+                        if (oldStatus == "Завершен" && newStatus == "Отменён")
                         {
-                            MessageBox.Show("Недостаточно товара на складе для выполнения заказа.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus; // Возвращаем старый статус
-                            return; // Прекращаем выполнение метода
+                            ReturnProductsToStock(orderID);
                         }
-                    }
 
-                    // Обновляем статус заказа в базе данных
-                    UpdateOrderStatus(orderID, newStatus);
-
-                    // Если статус изменился с "Выполнен" на "Отменён", возвращаем товар на склад
-                    if (oldStatus == "Завершен" && newStatus == "Отменён")
-                    {
-                        ReturnProductsToStock(orderID);
-                    }
-                    // Если статус изменился с "Отменён" на "Выполнен", списываем товар со склада
-                    else if (oldStatus == "Отменён" && newStatus == "Завершен")
-                    {
-                        DeductProductsFromStock(orderID);
-                    }
-
-                    // Обновляем статус заказа в списке данных
-                    OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
-                    if (orderData != null)
-                    {
+                        // Обновляем статус заказа в списке данных
                         orderData.OrderStatus = newStatus;
                     }
-
                 }
             }
         }
@@ -449,7 +625,6 @@ namespace kursovoy
                                 return false; // Недостаточно товара на складе
                             }
                         }
-
                         else
                         {
                             MessageBox.Show($"Товар с артикулом {productArticleNumber} не найден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -492,7 +667,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при обновлении статуса заказа: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Возврат товара на склад
         /// </summary>
@@ -510,12 +684,12 @@ namespace kursovoy
                         // Перебираем товары в заказе и возвращаем их на склад
                         foreach (var item in orderData.OrderItems)
                         {
-                            string productArticleNumber = item.Key; 
+                            string productArticleNumber = item.Key;
                             int quantity = item.Value;
                             // Увеличиваем количество товара на складе
                             string query = "UPDATE Product SET ProductQuantityInStock = ProductQuantityInStock + @Quantity WHERE ProductArticul = @ProductArticul"; // Используем ProductArticleNumber
                             MySqlCommand command = new MySqlCommand(query, con);
-                            command.Parameters.AddWithValue("@ProductArticul", productArticleNumber); 
+                            command.Parameters.AddWithValue("@ProductArticul", productArticleNumber);
                             command.Parameters.AddWithValue("@Quantity", quantity);
                             command.ExecuteNonQuery();
                         }
@@ -527,7 +701,7 @@ namespace kursovoy
             {
                 MessageBox.Show($"Ошибка при возврате товара на склад: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        } 
+        }
 
         /// <summary>
         /// Списание товара со склада (при изменении статуса с "Отменён" на "Выполнен")
@@ -573,25 +747,116 @@ namespace kursovoy
                 e.Handled = true; // Отменить ввод, если символ не является цифрой
             }
         }
-        /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
-        /// </summary>
-        private void ResetInactivityTimer()
+
+        private void buttonPag1_Click(object sender, EventArgs e)
         {
-            // Перезапускаем таймер
-            if (Timer != null)
+            if (currentPage1 > 0)
             {
-                Timer.Stop();
-                Timer.Start();
+                currentPage1--;
+                UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
+                FillCount();
             }
         }
 
-        /// <summary>
-        /// Запускает отслеживание активности при загрузке окна.
-        /// </summary>
-        private void Orders_Shown(object sender, EventArgs e)
+        private void buttonPag2_Click(object sender, EventArgs e)
         {
-            Users_ActivateTracking();
+            int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
+            if (currentPage1 < totalPages - 1)
+            {
+                currentPage1++;
+                UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
+                FillCount();
+            }
+        }
+
+        private void Orders_SizeChanged(object sender, EventArgs e)
+        {
+            UpdatePag();
+        }
+
+
+        private void viewOrder_Click(object sender, EventArgs e)
+        {
+            //  Получаем OrderID из свойства Tag MenuItem
+            int orderID = (int)contextMenuStrip1.Tag; // Cast object to int
+
+            ViewOrder vo = new ViewOrder(orderID);
+            vo.ShowDialog();
+
+            UpdateDataGrid();
+            UpdatePag();
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += " " + dataGridView1.Rows.Count;
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            //FillCount();
+            //int ed = dataGridView1.CurrentCell.RowIndex;
+            //int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
+            //ViewOrder vo = new ViewOrder(id);
+            //this.Close();
+            //vo.ShowDialog();
+        }
+
+        private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex == dataGridView1.Columns["OrderStatus"].Index && e.Value != null)
+            {
+                string OrderStatus = Convert.ToString(e.Value);
+
+                if (OrderStatus == "Отменён")
+                {
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightCoral;
+                }
+                else if (OrderStatus == "Завершен")
+                {
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
+                }
+            }
+        }
+        private void dataGridView1_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                // 1. Проверяем, что кликнули на строку (а не, например, на заголовок)
+                if (e.RowIndex >= 0 && e.RowIndex < dataGridView1.Rows.Count)
+                {
+                    // 2. Выделяем строку, если она еще не выделена.  Важно!
+                    if (!dataGridView1.Rows[e.RowIndex].Selected)
+                    {
+                        dataGridView1.ClearSelection();
+                        dataGridView1.Rows[e.RowIndex].Selected = true;
+                    }
+
+                    // 3. Получаем OrderID для строки *в dataGridView1*
+                    int rowIndex = e.RowIndex;
+                    int orderID = Convert.ToInt32(dataGridView1.Rows[rowIndex].Cells["OrderID"].Value);
+
+                    //  (Необязательно) Передаем OrderID в контекстное меню.
+                    contextMenuStrip1.Tag = orderID; // Сохраняем ID заказа в свойстве Tag MenuItem
+
+                    // 4. Отображаем контекстное меню
+                    contextMenuStrip1.Show(dataGridView1, e.Location);
+                }
+            }
+        }
+
+        private void toggleFullscreenButton_Click(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                // Восстанавливаем предыдущее состояние (нормальное)
+                this.WindowState = _previousWindowState;
+               // this.FormBorderStyle = _previousBorderStyle; // Восстанавливаем стиль границы
+              //  toggleFullscreenButton.Text = "На весь экран";
+            }
+            else
+            {
+                // Переходим в полноэкранный режим
+                _previousWindowState = this.WindowState;  // Сохраняем текущее состояние
+                _previousBorderStyle = this.FormBorderStyle; // Сохраняем стиль границы
+                this.WindowState = FormWindowState.Maximized;
+             //   this.FormBorderStyle = FormBorderStyle.None;  // Убираем границу для истинного полноэкранного режима
+               // toggleFullscreenButton.Text = "Окно";
+            }
         }
     }
 }

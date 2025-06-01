@@ -29,7 +29,7 @@ namespace kursovoy
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProductsAdd));
             this.label12 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
@@ -53,16 +53,16 @@ namespace kursovoy
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.Timer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // label12
             // 
+            this.label12.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.label12.AutoSize = true;
             this.label12.BackColor = System.Drawing.Color.LightGreen;
             this.label12.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label12.Location = new System.Drawing.Point(665, 175);
+            this.label12.Location = new System.Drawing.Point(859, 216);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(107, 26);
             this.label12.TabIndex = 81;
@@ -70,50 +70,58 @@ namespace kursovoy
             // 
             // button3
             // 
+            this.button3.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.button3.BackColor = System.Drawing.Color.LimeGreen;
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button3.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button3.Location = new System.Drawing.Point(662, 204);
+            this.button3.Location = new System.Drawing.Point(817, 174);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(163, 38);
-            this.button3.TabIndex = 80;
-            this.button3.TabStop = false;
+            this.button3.Size = new System.Drawing.Size(149, 38);
+            this.button3.TabIndex = 10;
             this.button3.Text = "Выбрать фото";
             this.button3.UseVisualStyleBackColor = false;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // comboBox3
             // 
+            this.comboBox3.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox3.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(467, 300);
+            this.comboBox3.Location = new System.Drawing.Point(516, 300);
             this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(173, 34);
+            this.comboBox3.Size = new System.Drawing.Size(281, 34);
             this.comboBox3.TabIndex = 9;
             // 
             // comboBox2
             // 
+            this.comboBox2.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(467, 257);
+            this.comboBox2.Location = new System.Drawing.Point(516, 258);
             this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(173, 34);
+            this.comboBox2.Size = new System.Drawing.Size(281, 34);
             this.comboBox2.TabIndex = 8;
             // 
             // comboBox1
             // 
+            this.comboBox1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(467, 215);
+            this.comboBox1.Location = new System.Drawing.Point(516, 217);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(173, 34);
+            this.comboBox1.Size = new System.Drawing.Size(281, 34);
             this.comboBox1.TabIndex = 7;
             // 
             // label6
             // 
+            this.label6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label6.AutoSize = true;
             this.label6.BackColor = System.Drawing.Color.LightGreen;
             this.label6.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label6.Location = new System.Drawing.Point(19, 185);
+            this.label6.Location = new System.Drawing.Point(19, 189);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(104, 26);
             this.label6.TabIndex = 75;
@@ -121,6 +129,7 @@ namespace kursovoy
             // 
             // label4
             // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label4.AutoSize = true;
             this.label4.BackColor = System.Drawing.Color.LightGreen;
             this.label4.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -132,6 +141,7 @@ namespace kursovoy
             // 
             // label3
             // 
+            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.LightGreen;
             this.label3.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -143,6 +153,7 @@ namespace kursovoy
             // 
             // label1
             // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.LightGreen;
             this.label1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -154,10 +165,11 @@ namespace kursovoy
             // 
             // label9
             // 
+            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label9.AutoSize = true;
             this.label9.BackColor = System.Drawing.Color.LightGreen;
             this.label9.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label9.Location = new System.Drawing.Point(306, 304);
+            this.label9.Location = new System.Drawing.Point(356, 303);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(154, 26);
             this.label9.TabIndex = 68;
@@ -165,10 +177,11 @@ namespace kursovoy
             // 
             // label8
             // 
+            this.label8.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label8.AutoSize = true;
             this.label8.BackColor = System.Drawing.Color.LightGreen;
             this.label8.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label8.Location = new System.Drawing.Point(345, 261);
+            this.label8.Location = new System.Drawing.Point(395, 261);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(115, 26);
             this.label8.TabIndex = 76;
@@ -176,10 +189,11 @@ namespace kursovoy
             // 
             // label7
             // 
+            this.label7.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label7.AutoSize = true;
             this.label7.BackColor = System.Drawing.Color.LightGreen;
             this.label7.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label7.Location = new System.Drawing.Point(355, 218);
+            this.label7.Location = new System.Drawing.Point(405, 220);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(105, 26);
             this.label7.TabIndex = 67;
@@ -187,6 +201,7 @@ namespace kursovoy
             // 
             // label2
             // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.LightGreen;
             this.label2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -198,90 +213,94 @@ namespace kursovoy
             // 
             // textBox5
             // 
+            this.textBox5.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox5.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox5.Location = new System.Drawing.Point(17, 214);
-            this.textBox5.MaxLength = 250;
+            this.textBox5.Location = new System.Drawing.Point(17, 218);
+            this.textBox5.MaxLength = 205;
             this.textBox5.Multiline = true;
             this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(264, 119);
+            this.textBox5.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox5.Size = new System.Drawing.Size(313, 116);
             this.textBox5.TabIndex = 6;
-            this.textBox5.TabStop = false;
-            this.textBox5.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox5_KeyPress);
             // 
             // textBox7
             // 
+            this.textBox7.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox7.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox7.Location = new System.Drawing.Point(17, 134);
             this.textBox7.MaxLength = 5;
             this.textBox7.Name = "textBox7";
             this.textBox7.Size = new System.Drawing.Size(164, 34);
             this.textBox7.TabIndex = 3;
-            this.textBox7.TabStop = false;
             this.textBox7.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // textBox6
             // 
+            this.textBox6.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox6.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox6.Location = new System.Drawing.Point(17, 53);
             this.textBox6.MaxLength = 9;
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(164, 34);
             this.textBox6.TabIndex = 1;
-            this.textBox6.TabStop = false;
             this.textBox6.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // textBox1
             // 
+            this.textBox1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox1.Location = new System.Drawing.Point(227, 134);
             this.textBox1.MaxLength = 3;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(173, 34);
             this.textBox1.TabIndex = 4;
-            this.textBox1.TabStop = false;
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // textBoxName
             // 
+            this.textBoxName.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBoxName.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBoxName.Location = new System.Drawing.Point(208, 53);
+            this.textBoxName.Location = new System.Drawing.Point(210, 53);
             this.textBoxName.MaxLength = 45;
             this.textBoxName.Name = "textBoxName";
-            this.textBoxName.Size = new System.Drawing.Size(431, 34);
+            this.textBoxName.Size = new System.Drawing.Size(558, 34);
             this.textBoxName.TabIndex = 2;
-            this.textBoxName.TabStop = false;
-            this.textBoxName.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxName_KeyPress);
             // 
             // button2
             // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button2.BackColor = System.Drawing.Color.ForestGreen;
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button2.Location = new System.Drawing.Point(17, 362);
+            this.button2.Location = new System.Drawing.Point(17, 363);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(107, 36);
-            this.button2.TabIndex = 56;
-            this.button2.TabStop = false;
-            this.button2.Text = "НАЗАД";
+            this.button2.Size = new System.Drawing.Size(166, 36);
+            this.button2.TabIndex = 12;
+            this.button2.Text = "Отмена";
             this.button2.UseVisualStyleBackColor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.BackColor = System.Drawing.Color.LimeGreen;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button1.Location = new System.Drawing.Point(696, 362);
+            this.button1.Location = new System.Drawing.Point(802, 362);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(129, 37);
-            this.button1.TabIndex = 55;
-            this.button1.TabStop = false;
-            this.button1.Text = "ДОБАВИТЬ";
+            this.button1.Size = new System.Drawing.Size(166, 37);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "Добавить";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // pictureBox1
             // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = global::kursovoy.Properties.Resources.picture;
-            this.pictureBox1.Location = new System.Drawing.Point(659, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(800, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(167, 156);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -290,17 +309,18 @@ namespace kursovoy
             // 
             // textBox2
             // 
+            this.textBox2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBox2.Location = new System.Drawing.Point(442, 134);
             this.textBox2.MaxLength = 20;
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(197, 34);
             this.textBox2.TabIndex = 5;
-            this.textBox2.TabStop = false;
             this.textBox2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox2_KeyPress);
             // 
             // label5
             // 
+            this.label5.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label5.AutoSize = true;
             this.label5.BackColor = System.Drawing.Color.LightGreen;
             this.label5.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -315,7 +335,7 @@ namespace kursovoy
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Honeydew;
-            this.ClientSize = new System.Drawing.Size(838, 412);
+            this.ClientSize = new System.Drawing.Size(984, 412);
             this.ControlBox = false;
             this.Controls.Add(this.label12);
             this.Controls.Add(this.button3);
@@ -341,11 +361,11 @@ namespace kursovoy
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ProductsAdd";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Добавление товара";
             this.Load += new System.EventHandler(this.ProductsAdd_Load);
-            this.Shown += new System.EventHandler(this.ProductsAdd_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -377,6 +397,5 @@ namespace kursovoy
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Timer Timer;
     }
 }

@@ -9,93 +9,52 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using System.Configuration;
+using System.Globalization;
+
 namespace kursovoy
 {
 
     public partial class ReferenceBooks : Form
     {
-        private int inactivityTimeout = 0;
         public ReferenceBooks()
         {
             InitializeComponent();
-            Timer.Tick += inactivityTimer_Tick;
-            Timer.Interval = 1000; // Проверка каждые 1 секунду
             textBox4.Visible = false;
             textBox5.Visible = false;
             textBox6.Visible = false;
-        }
-        /// <summary>
-        /// Назначение обработчиков событий клавиатуры и мыши для отслеживания активности.
-        /// </summary>
-        private void Users_ActivateTracking()
-        {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
-
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
-            {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
-            }
-        }
-        /// <summary>
-        /// Обработчик любых событий, связанных с активностью пользователя (например, движение мыши или нажатие клавиш).
-        /// Отслеживает действия пользователя и сбрасывает таймер бездействия.
-        /// </summary>
-        private void Users_ActivityDetected(object sender, EventArgs e)
-        {
-            ResetInactivityTimer();
-        }
-        private void inactivityTimer_Tick(object sender, EventArgs e)
-        {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
-            {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
-            }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
-
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
-            }
         }
 
         //Кнопка НАЗАД
         private void button2_Click(object sender, EventArgs e)
         {
-            СommoditySpecialist ad = new СommoditySpecialist();
-            ad.Show();
-            this.Hide();
+            if (Authorization.User2.Role == 1)
+            {
+                Admin ad = new Admin();
+                ad.Show();
+                this.Close();
+            }
+            else if (Authorization.User2.Role == 2)
+            {
+                СommoditySpecialist CS = new СommoditySpecialist();
+                CS.Show();
+                this.Close();
+            }
         }
 
         //При загрузке формы
         private void ReferenceBooks_Load(object sender, EventArgs e)
         {
-            // Загрузить интервал времени бездействия из App.config
-            if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
-            {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
-            }
-            else
-            {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
-            }
+            role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
+            //empl.Text = "Сотрудник: " + ;
 
-            ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
             FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
             FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM `Supplier`");
             FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM `ProductManufactur`");
+            label3.Text += " " + dataGridView1.Rows.Count;
+            label4.Text += " " + dataGridView2.Rows.Count;
+            label6.Text += " " + dataGridView3.Rows.Count;
         }
-        
+
         /// <summary>
         /// Для вывода категории
         /// </summary>
@@ -117,6 +76,11 @@ namespace kursovoy
                 dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dataGridView1.ReadOnly = true;
                 dataGridView1.AllowUserToAddRows = false;
+
+                dataGridView1.AllowUserToDeleteRows = false;
+                dataGridView1.AllowUserToOrderColumns = false;
+                dataGridView1.AllowUserToResizeColumns = false;
+                dataGridView1.AllowUserToResizeRows = false;
 
                 dataGridView1.Columns.Add("CategoryID", "Идентификатор");
                 dataGridView1.Columns["CategoryID"].Visible = false;
@@ -163,9 +127,14 @@ namespace kursovoy
                 }
                 dataGridView2.Rows.Clear();
                 dataGridView2.Columns.Clear();
-               dataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+                dataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dataGridView2.ReadOnly = true;
                 dataGridView2.AllowUserToAddRows = false;
+
+                dataGridView2.AllowUserToDeleteRows = false;
+                dataGridView2.AllowUserToOrderColumns = false;
+                dataGridView2.AllowUserToResizeColumns = false;
+                dataGridView2.AllowUserToResizeRows = false;
 
                 dataGridView2.Columns.Add("SupplierID", "Идентификатор");
                 dataGridView2.Columns["SupplierID"].Visible = false;
@@ -193,7 +162,7 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
-        
+
         /// <summary>
         /// Для вывода производителя
         /// </summary>
@@ -215,6 +184,11 @@ namespace kursovoy
                 dataGridView3.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dataGridView3.ReadOnly = true;
                 dataGridView3.AllowUserToAddRows = false;
+
+                dataGridView3.AllowUserToDeleteRows = false;
+                dataGridView3.AllowUserToOrderColumns = false;
+                dataGridView3.AllowUserToResizeColumns = false;
+                dataGridView3.AllowUserToResizeRows = false;
 
                 dataGridView3.Columns.Add("ProductManufacturID", "Идентификатор");
                 dataGridView3.Columns["ProductManufacturID"].Visible = false;
@@ -272,7 +246,7 @@ namespace kursovoy
                                 if (count > 0)
                                 {
                                     MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    
+
                                     return;
                                 }
                             }
@@ -282,7 +256,7 @@ namespace kursovoy
                                 cmd.Parameters.AddWithValue("@value0", categoryName);
                                 cmd.ExecuteNonQuery();
                                 MessageBox.Show("Запись добавлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                textBox4.Text = ""; 
+                                textBox4.Text = "";
                                 textBox1.Text = "";
                                 FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
                             }
@@ -360,7 +334,7 @@ namespace kursovoy
                 }
             }
         }
-        
+
         /// <summary>
         /// Добавление производителя
         /// </summary>
@@ -418,17 +392,17 @@ namespace kursovoy
                 }
             }
         }
-        
+
         //Проверка ввода для категории
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(!char.IsControl(e.KeyChar) &&
-                (e.KeyChar < 'а' || e.KeyChar > 'я') && 
+            if (!char.IsControl(e.KeyChar) &&
+                (e.KeyChar < 'а' || e.KeyChar > 'я') &&
                 (e.KeyChar < 'А' || e.KeyChar > 'Я'))
             {
                 e.Handled = true;
             }
-            if(e.KeyChar == ' ')
+            if (e.KeyChar == ' ')
             {
                 e.Handled = false;
             }
@@ -467,7 +441,7 @@ namespace kursovoy
                 DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение измения", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dialogResult == DialogResult.Yes)
                 {
-                    
+
                     if (textBox4.Text == "")
                     {
                         MessageBox.Show("Данной записи не существует! Выберите заново.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -500,7 +474,7 @@ namespace kursovoy
                             cmd.ExecuteNonQuery();
                             con.Close();
                         }
-                        textBox4.Text = ""; 
+                        textBox4.Text = "";
                         textBox1.Text = "";
                         FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
                     }
@@ -535,7 +509,7 @@ namespace kursovoy
                 textBox3.Text = row.Cells["ProductManufacturName"].Value.ToString(); //сategoryName
             }
         }
-        
+
         /// <summary>
         /// Изменение поставщика
         /// </summary>
@@ -590,7 +564,7 @@ namespace kursovoy
                 }
             }
         }
-        
+
         /// <summary>
         /// Изменение производителя
         /// </summary>
@@ -645,27 +619,71 @@ namespace kursovoy
                 }
             }
         }
-        /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
-        /// </summary>
-        private void ResetInactivityTimer()
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            // Перезапускаем таймер
-            if (Timer != null)
+            // Сохраняем текущее положение курсора
+            int selectionStart = textBox1.SelectionStart;
+            int selectionLength = textBox1.SelectionLength;
+
+            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+            string[] words = textBox1.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
             {
-                Timer.Stop();
-                Timer.Start();
+                if (words[i].Length > 0) // Проверка длины слова
+                {
+                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                }
             }
+            textBox1.Text = string.Join(" ", words);
+
+            // Восстанавливаем положение курсора
+            textBox1.SelectionStart = Math.Min(selectionStart, textBox1.Text.Length);
+            textBox1.SelectionLength = selectionLength;
         }
 
-        /// <summary>
-        /// Запускает отслеживание активности при загрузке окна.
-        /// </summary>
-        private void ReferenceBooks_Shown(object sender, EventArgs e)
+        private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            Users_ActivateTracking();
+            // Сохраняем текущее положение курсора
+            int selectionStart = textBox2.SelectionStart;
+            int selectionLength = textBox2.SelectionLength;
+
+            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+            string[] words = textBox2.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0) // Проверка длины слова
+                {
+                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                }
+            }
+            textBox2.Text = string.Join(" ", words);
+
+            // Восстанавливаем положение курсора
+            textBox2.SelectionStart = Math.Min(selectionStart, textBox2.Text.Length);
+            textBox2.SelectionLength = selectionLength;
         }
 
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            // Сохраняем текущее положение курсора
+            int selectionStart = textBox3.SelectionStart;
+            int selectionLength = textBox3.SelectionLength;
 
+            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+            string[] words = textBox3.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0) // Проверка длины слова
+                {
+                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                }
+            }
+            textBox3.Text = string.Join(" ", words);
+
+            // Восстанавливаем положение курсора
+            textBox3.SelectionStart = Math.Min(selectionStart, textBox3.Text.Length);
+            textBox3.SelectionLength = selectionLength;
+        }
     }
 }

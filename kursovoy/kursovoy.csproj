@@ -142,6 +142,12 @@
     <Compile Include="Users.Designer.cs">
       <DependentUpon>Users.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewOrder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ViewOrder.Designer.cs">
+      <DependentUpon>ViewOrder.cs</DependentUpon>
+    </Compile>
     <Compile Include="СommoditySpecialist.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -188,6 +194,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Users.resx">
       <DependentUpon>Users.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewOrder.resx">
+      <DependentUpon>ViewOrder.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="СommoditySpecialist.resx">
       <DependentUpon>СommoditySpecialist.cs</DependentUpon>
@@ -266,12 +275,11 @@
     <None Include="Resources\picture.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="photo\105232371.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="photo\144365326.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="Resources\222.png" />
+    <None Include="Resources\2473504.png" />
+    <None Include="Resources\Лого %281%29.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="photo\147596897.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -293,9 +301,6 @@
     <Content Include="photo\158074124.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="photo\159874927.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="photo\169881547.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -312,9 +317,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="photo\180021567.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="photo\180190918.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="photo\188433865.png">

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,66 +14,19 @@ using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using System.Configuration;
 using System.IO;
+using System.Diagnostics;
+using System.Globalization;
+
 namespace kursovoy
 {
     public partial class import : Form
     {
-        private int inactivityTimeout = 0;
         public import()
         {
             InitializeComponent();
             ComboBoxTables();
-            Timer.Tick += inactivityTimer_Tick;
-            Timer.Interval = 1000; // Проверка каждые 1 секунду
         }
-        /// <summary>
-        /// Назначение обработчиков событий клавиатуры и мыши для отслеживания активности.
-        /// </summary>
-        private void Users_ActivateTracking()
-        {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
 
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
-            {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
-            }
-        }
-        /// <summary>
-        /// Обработчик любых событий, связанных с активностью пользователя (например, движение мыши или нажатие клавиш).
-        /// Отслеживает действия пользователя и сбрасывает таймер бездействия.
-        /// </summary>
-        private void Users_ActivityDetected(object sender, EventArgs e)
-        {
-            ResetInactivityTimer();
-        }
-        private void inactivityTimer_Tick(object sender, EventArgs e)
-        {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
-            {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
-            }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
-
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
-            }
-        }
-        private void button1_Click(object sender, EventArgs e)
-        {
-            Authorization a = new Authorization();
-            this.Hide();
-            a.Show();
-        }
         private void ComboBoxTables()
         {
             using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionStringNotDB))
@@ -104,40 +61,69 @@ namespace kursovoy
             string dbName = $"db45";
             CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
             CreateTables(Authorization.Program.ConnectionString, dbName);
-            ComboBoxTables();
+            
         }
         static void CreateDatabase(string connentionString, string dbName)
         {
-
             using (MySqlConnection connection = new MySqlConnection(connentionString))
             {
                 connection.Open();
                 string createDbQuery = $"CREATE DATABASE IF NOT EXISTS {dbName};";
                 MySqlCommand command = new MySqlCommand(createDbQuery, connection);
                 command.ExecuteNonQuery();
-                Console.WriteLine($"Database {dbName} created or already exists.");
+                MessageBox.Show($"База данных {dbName} уже существует.");
             }
         }
-        static void CreateTables(string connectionString, string dbName)
+        private void CreateTables(string connectionString, string dbName)
         {
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
-                    string createCategoryTable = @"
-                    CREATE TABLE IF NOT EXISTS `Category` (
-                      `CategoryID` int NOT NULL AUTO_INCREMENT,
-                      `CategoryName` varchar(30) NOT NULL,
-                         PRIMARY KEY (`CategoryID`));";
-                    string createEmployeeTable = @"
-                    CREATE TABLE  IF NOT EXISTS `Employee` (
-                      `EmployeeID` int NOT NULL AUTO_INCREMENT,
-                      `EmployeeFIO` varchar(45) NOT NULL,
-                      `telephone` varchar(20) NOT NULL,
-                      `pasport` bigint NOT NULL,
-                        PRIMARY KEY (`EmployeeID`));";
-                    string createOrderTable = @"
+                    if (TableExists(connection, "Category"))
+                    {
+                        MessageBox.Show("Таблица Category уже существует.");
+                    }
+                    else
+                    {
+                        string createCategoryTable = @"
+                    CREATE TABLE Category (
+                      CategoryID int NOT NULL AUTO_INCREMENT,
+                      CategoryName varchar(30) NOT NULL,
+                      PRIMARY KEY (CategoryID));";
+                        MySqlCommand cmd = new MySqlCommand(createCategoryTable, connection);
+                        cmd.ExecuteNonQuery();
+                        MessageBox.Show("Таблица Category успешно создана.");
+                    }
+
+                    if (TableExists(connection, "Employeeee"))
+                    {
+                        MessageBox.Show("Таблица Employeeee уже существует.");
+                    }
+                    else
+                    {
+                        string createEmployeeTable = @"
+                    CREATE TABLE Employeeee (
+                      EmployeeID int NOT NULL AUTO_INCREMENT,
+                      EmployeeF varchar(45) NOT NULL,
+                      EmployeeI varchar(45) NOT NULL,
+                      EmployeeO varchar(45) NOT NULL,
+                      telephone varchar(20) NOT NULL,
+                      status varchar(10) NOT NULL,
+                      PRIMARY KEY (EmployeeID));";
+                        MySqlCommand cmd = new MySqlCommand(createEmployeeTable, connection);
+                        cmd.ExecuteNonQuery();
+                        MessageBox.Show("Таблица Employeeee успешно создана.");
+                    }
+
+                    if (TableExists(connection, "`Order`"))
+                    {
+                        MessageBox.Show("Таблица Order уже существует.");
+                    }
+                    else
+                    {
+                        string createOrderTable = @"
                     CREATE TABLE IF NOT EXISTS `Order` (
                       `OrderID` int NOT NULL AUTO_INCREMENT,
                       `OrderDate` datetime NOT NULL,
@@ -145,8 +131,18 @@ namespace kursovoy
                       `OrderUser` int NOT NULL,
                       `OrderPrice` int NOT NULL,
                       PRIMARY KEY (`OrderID`),
-                      FOREIGN KEY (`OrderUser`) REFERENCES `Employee` (`EmployeeID`));";
-                    string createProductTable = @"
+                      FOREIGN KEY (`OrderUser`) REFERENCES `employeeee` (`EmployeeID`));";
+                        MySqlCommand orderCommand = new MySqlCommand(createOrderTable, connection);
+                        orderCommand.ExecuteNonQuery();
+                    }
+
+                    if (TableExists(connection, "Product"))
+                    {
+                        MessageBox.Show("Таблица Product уже существует.");
+                    }
+                    else
+                    {
+                        string createProductTable = @"
                     CREATE TABLE `Product` (
                       `ProductArticul` int NOT NULL,
                       `Name` varchar(45) NOT NULL,
@@ -162,12 +158,33 @@ namespace kursovoy
                       FOREIGN KEY (`ProductCategory`) REFERENCES `Category` (`CategoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
                       FOREIGN KEY (`ProductManufactur`) REFERENCES `ProductManufactur` (`ProductManufacturID`) ON DELETE CASCADE ON UPDATE CASCADE,
                       FOREIGN KEY (`ProductSupplier`) REFERENCES `Supplier` (`SupplierID`) ON DELETE CASCADE ON UPDATE CASCADE);";
-                    string createManufacturerTable = @"
+                        MySqlCommand prodCommand = new MySqlCommand(createProductTable, connection);
+                        prodCommand.ExecuteNonQuery();
+                    }
+
+                    if (TableExists(connection, "ProductManufactur"))
+                    {
+                        MessageBox.Show("Таблица ProductManufactur уже существует.");
+                    }
+                    else
+                    {
+                        string createManufacturerTable = @"
                     CREATE TABLE `ProductManufactur` (
                       `ProductManufacturID` int NOT NULL AUTO_INCREMENT,
                       `ProductManufacturName` varchar(45) NOT NULL,
                       PRIMARY KEY (`ProductManufacturID`));";
-                    string createOrderProductTable = @"
+                        MySqlCommand manufCommand = new MySqlCommand(createManufacturerTable, connection);
+                        manufCommand.ExecuteNonQuery();
+                    }
+
+
+                    if (TableExists(connection, "ProductOrder"))
+                    {
+                        MessageBox.Show("Таблица ProductOrder уже существует.");
+                    }
+                    else
+                    {
+                        string createOrderProductTable = @"
                     CREATE TABLE `ProductOrder` (
                       `ProductID` int NOT NULL,
                       `ProductCount` int NOT NULL,
@@ -175,17 +192,32 @@ namespace kursovoy
                       PRIMARY KEY (`ProductID`,`OrderID`),
                       FOREIGN KEY (`OrderID`) REFERENCES `Order` (`OrderID`) ON DELETE CASCADE ON UPDATE CASCADE,
                       FOREIGN KEY (`ProductID`) REFERENCES `Product` (`ProductArticul`) ON DELETE CASCADE ON UPDATE CASCADE);";
-                    string createRoleTable = @"
+                        MySqlCommand orderproductCommand = new MySqlCommand(createOrderProductTable, connection);
+                        orderproductCommand.ExecuteNonQuery();
+                    }
+
+                    if (TableExists(connection, "Role"))
+                    {
+                        MessageBox.Show("Таблица Role уже существует.");
+                    }
+                    else
+                    {
+                        string createRoleTable = @"
                     CREATE TABLE `Role` (
                       `RoleID` int NOT NULL AUTO_INCREMENT,
                       `Role` varchar(45) NOT NULL,
                       PRIMARY KEY (`RoleID`));";
-                    string createSupplierTable = @"
-                    CREATE TABLE `Supplier` (
-                      `SupplierID` int NOT NULL AUTO_INCREMENT,
-                      `SupplierName` varchar(25) NOT NULL,
-                      PRIMARY KEY (`SupplierID`));";
-                    string createUserTable = @"
+                        MySqlCommand roleCommand = new MySqlCommand(createRoleTable, connection);
+                        roleCommand.ExecuteNonQuery();
+                    }
+
+                    if (TableExists(connection, "User"))
+                    {
+                        MessageBox.Show("Таблица User уже существует.");
+                    }
+                    else
+                    {
+                        string createUserTable = @"
                     CREATE TABLE `User` (
                       `UserID` int NOT NULL AUTO_INCREMENT,
                       `UserFIO` int NOT NULL,
@@ -194,28 +226,35 @@ namespace kursovoy
                       `Password` varchar(100) NOT NULL,
                       PRIMARY KEY (`UserID`),
                       FOREIGN KEY (`RoleID`) REFERENCES `Role` (`RoleID`) ON DELETE CASCADE ON UPDATE CASCADE,
-                      FOREIGN KEY (`UserFIO`) REFERENCES `Employee` (`EmployeeID`) ON DELETE CASCADE ON UPDATE CASCADE);";
+                      FOREIGN KEY (`UserFIO`) REFERENCES `employeeee` (`EmployeeID`) ON DELETE CASCADE ON UPDATE CASCADE);";
+                        MySqlCommand userCommand = new MySqlCommand(createUserTable, connection);
+                        userCommand.ExecuteNonQuery();
+                    }
 
-                    MySqlCommand roleCommand = new MySqlCommand(createRoleTable, connection);
-                    MySqlCommand employeeCommand = new MySqlCommand(createEmployeeTable, connection);
-                    MySqlCommand userCommand = new MySqlCommand(createUserTable, connection);
-                    MySqlCommand manufCommand = new MySqlCommand(createManufacturerTable, connection);
-                    MySqlCommand supCommand = new MySqlCommand(createSupplierTable, connection);
-                    MySqlCommand catCommand = new MySqlCommand(createCategoryTable, connection);
-                    MySqlCommand prodCommand = new MySqlCommand(createProductTable, connection);
-                    MySqlCommand orderCommand = new MySqlCommand(createOrderTable, connection);
-                    MySqlCommand orderproductCommand = new MySqlCommand(createOrderProductTable, connection);
+                    if (TableExists(connection, "User"))
+                    {
+                        MessageBox.Show("Таблица User уже существует.");
+                    }
+                    else
+                    {
+                        string createCompanyTable = @"CREATE TABLE Companyinfo (
+                      idcompanyinfo int NOT NULL AUTO_INCREMENT,
+                      company_name varchar(45) NOT NULL,
+                      company_adress varchar(45) NOT NULL,
+                      company_phone varchar(45) NOT NULL,
+                      company_inn varchar(45) NOT NULL,
+                      company_ogrn varchar(45) NOT NULL,
+                      company_bick varchar(45) NOT NULL,
+                      company_ip varchar(45) NOT NULL,
+                      PRIMARY KEY (idcompanyinfo)
+                    )";
+                        MySqlCommand companyCommand = new MySqlCommand(createCompanyTable, connection);
+                        companyCommand.ExecuteNonQuery();
+                    }
 
-                    roleCommand.ExecuteNonQuery();
-                    employeeCommand.ExecuteNonQuery();
-                    userCommand.ExecuteNonQuery();
-                    manufCommand.ExecuteNonQuery();
-                    supCommand.ExecuteNonQuery();
-                    catCommand.ExecuteNonQuery();
-                    prodCommand.ExecuteNonQuery();
-                    orderCommand.ExecuteNonQuery();
-                    orderproductCommand.ExecuteNonQuery();
                     MessageBox.Show("База данных восстановлена.");
+
+                    ComboBoxTables();
                     connection.Close();
                 }
                 catch (Exception ex)
@@ -223,6 +262,15 @@ namespace kursovoy
                     MessageBox.Show("Ошибка восстановления БД " + ex.Message + Environment.NewLine);
                 }
             }
+        }
+
+        // Метод для проверки существования таблицы
+        private bool TableExists(MySqlConnection connection, string tableName)
+        {
+            string query = $"SHOW TABLES LIKE '{tableName}';";
+            MySqlCommand cmd = new MySqlCommand(query, connection);
+            var result = cmd.ExecuteScalar();
+            return result != null;
         }
 
         private void btnSelectCsv_Click(object sender, EventArgs e)
@@ -248,11 +296,13 @@ namespace kursovoy
 
             OpenFileAndImportData(tableName);
         }
+
         public void OpenFileAndImportData(string selectedTable)
         {
             string filePath = textBox1.Text;
             ImportData(filePath, selectedTable);
         }
+
         private void ImportData(string filePath, string selectedTable)
         {
             string fullConnectionString = Authorization.Program.ConnectionString;
@@ -324,7 +374,7 @@ namespace kursovoy
             }
             if (tableName == "order" || tableName == "Order")
             {
-                return $"INSERT INTO `Order` (OrderID, OrderDate, OrderStatus, OrderUser, OrderPrice) VALUES (@param0, @param1, @param2, @param3, @param4)";
+                return $"INSERT INTO `order` (OrderID, OrderDate, OrderStatus, OrderUser, OrderPrice) VALUES (@param0, @param1, @param2, @param3, @param4)";
             }
             if (tableName == "productorder" || tableName == "ProductOrder")
             {
@@ -332,11 +382,11 @@ namespace kursovoy
             }
             if (tableName == "product" || tableName == "Product")
             {
-                return $"INSERT INTO Product (ProductArticul, Name, Description, Cost, Unit, ProductQuantityInStock, ProductCategory, ProductManufactur, ProductSupplier, ProductPhoto) VALUES (@param0, @param1, @param2, @param3, @param4, @param5, @param6, @param7, @param8, @param9)";
+                return $"INSERT INTO product (ProductArticul, Name, Description, Cost, Unit, ProductQuantityInStock, ProductCategory, ProductManufactur, ProductSupplier, ProductPhoto) VALUES (@param0, @param1, @param2, @param3, @param4, @param5, @param6, @param7, @param8, @param9)";
             }
-            else if (tableName == "employee" || tableName == "Employee")
+            else if (tableName == "employeeee" || tableName == "Employeeee")
             {
-                return $"INSERT INTO employee (EmployeeID, EmployeeFIO, telephone, pasport) VALUES (@param0, @param1,@param2, @param3)";
+                return $"INSERT INTO employeeee (EmployeeID, EmployeeF, EmployeeI, EmployeeO, telephone, status) VALUES (@param0, @param1,@param2, @param3, @param4, @param5)";
             }
             else if (tableName == "productmanufactur" || tableName == "ProductManufactur")
             {
@@ -344,51 +394,311 @@ namespace kursovoy
             }
             else if (tableName == "supplier" || tableName == "Supplier")
             {
-                return $"INSERT INTO Supplier (SupplierID, SupplierName) VALUES (@param0, @param1)";
+                return $"INSERT INTO supplier (SupplierID, SupplierName) VALUES (@param0, @param1)";
             }
             else if (tableName == "category" || tableName == "Category")
             {
-                return $"INSERT INTO Category (CategoryID, CategoryName) VALUES (@param0, @param1)";
+                return $"INSERT INTO category (CategoryID, CategoryName) VALUES (@param0, @param1)";
             }
-            return "ошмбкаааааааа123";
+            else if (tableName == "companyinfo" || tableName == "Companyinfo")
+            {
+                return $"INSERT INTO companyinfo (idcompanyinfo, company_name, company_adress, company_phone, company_inn, company_ogrn, company_bick, company_ip) VALUES (@param0, @param1, @param2, @param3, @param4, @param5, @param6, @param7)";
+            }
+            return "ошибкаааааа";
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            AutomaticBackup();
+        }
+
+        public static void AutomaticBackup()
+        {
+            try
+            {
+                string appDir = AppDomain.CurrentDomain.BaseDirectory;
+                string backupsDir = Path.Combine(appDir, "ReservCopy"); // папка ReservCopy
+
+                if (!Directory.Exists(backupsDir))
+                {
+                    Directory.CreateDirectory(backupsDir);
+                }
+
+                string backupFileName = $"PetsShop_backup_{DateTime.Now:yyyyMMdd_HHmmss}.sql";
+                string backupFilePath = Path.Combine(backupsDir, backupFileName);
+
+                try
+                {
+                    BackupDatabaseToSql(backupFilePath);
+                    MessageBox.Show("Создана резервная копия!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при создании резервной копии: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка автоматического резервного копирования: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+        }
+
+        public static void BackupDatabaseToSql(string filePath)
+        {
+            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            {
+                connection.Open();
+
+                using (StreamWriter writer = new StreamWriter(filePath, false, new UTF8Encoding(false)))
+                {
+                    writer.WriteLine("-- Резервная копия базы данных db45");
+                    writer.WriteLine($"-- Создана: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                    writer.WriteLine();
+                    writer.WriteLine("SET FOREIGN_KEY_CHECKS = 0;");
+                    writer.WriteLine();
+
+                    List<string> tables = new List<string>();
+                    using (MySqlCommand cmd = new MySqlCommand("SHOW TABLES", connection))
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            tables.Add(reader.GetString(0));
+                        }
+                    }
+
+                    writer.WriteLine($"CREATE DATABASE IF NOT EXISTS db45 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+                    writer.WriteLine($"USE db45;");
+                    writer.WriteLine();
+
+                    foreach (string table in tables)
+                    {
+                        // Записываем структуру таблицы
+                        writer.WriteLine($"-- Структура таблицы {table}");
+                        writer.WriteLine($"DROP TABLE IF EXISTS `{table}`;");
+                        using (MySqlCommand cmd = new MySqlCommand($"SHOW CREATE TABLE `{table}`", connection))
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                writer.WriteLine(reader.GetString("Create Table") + ";");
+                            }
+                        }
+                        writer.WriteLine();
+
+                        // Выполняем блокировку таблицы
+                        using (MySqlCommand lockCmd = new MySqlCommand($"LOCK TABLES `{table}` WRITE;", connection))
+                        {
+                            lockCmd.ExecuteNonQuery();
+                        }
+
+                        // Записываем дамп данных таблицы
+                        writer.WriteLine($"-- Дамп данных таблицы {table}");
+                        writer.WriteLine($"/*!40000 ALTER TABLE `{table}` DISABLE KEYS */;");
+
+                        using (MySqlCommand cmd = new MySqlCommand($"SELECT * FROM `{table}`", connection))
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+
+                                StringBuilder insertQuery = new StringBuilder($"INSERT INTO `{table}` VALUES (");
+                                for (int i = 0; i < reader.FieldCount; i++)
+                                {
+                                    if (i > 0) insertQuery.Append(", ");
+
+                                    string rawValue = reader.IsDBNull(i) ? null : reader.GetValue(i).ToString();
+
+                                    // Обработка дат
+                                    string formattedValue = TryParseAndFormatDate(rawValue);
+
+                                    // Обработка чисел
+                                    if (formattedValue != null)
+                                    {
+                                        formattedValue = FixNumberFormat(formattedValue);
+                                    }
+
+                                    if (rawValue == null)
+                                    {
+                                        insertQuery.Append("NULL");
+                                    }
+                                    else
+                                    {
+                                        insertQuery.Append($"'{formattedValue.Replace("'", "''")}'");
+                                    }
+                                }
+                                insertQuery.Append(");");
+                                writer.WriteLine(insertQuery.ToString());
+                            }
+                        }
+
+                        // Разблокируем таблицу
+                        using (MySqlCommand unlockCmd = new MySqlCommand($"UNLOCK TABLES;", connection))
+                        {
+                            unlockCmd.ExecuteNonQuery();
+                        }
+
+                        writer.WriteLine(); // разделитель между таблицами
+                    }
+                }
+            }
+        }
+
+        // Внутри класса, но вне метода
+        public static string FixNumberFormat(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            // Заменяем запятые на точки
+            string corrected = value.Replace(',', '.');
+
+            // Проверяем, что это число
+            double temp;
+            if (double.TryParse(corrected, NumberStyles.Any, CultureInfo.InvariantCulture, out temp))
+            {
+                return temp.ToString(CultureInfo.InvariantCulture);
+            }
+            return corrected;
+        }
+
+        public static string TryParseAndFormatDate(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            DateTime dt;
+
+            // Попытка парсинга с форматом 'dd.MM.yyyy H:mm:ss' (один или два символа для часа)
+            string[] formats = { "dd.MM.yyyy H:mm:ss", "dd.MM.yyyy HH:mm:ss" };
+
+            if (DateTime.TryParseExact(value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+            {
+                return dt.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+
+            // Можно добавить дополнительные форматы, если есть
+            return value;
+        }
+
+
+        public void RestoreDatabaseFromDump()
+        {
+            // Путь к папке с дампами
+            string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ReservCopy");
+
+            // Открываем диалог выбора файла
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = folderPath,
+                Filter = "SQL файлы (*.sql)|*.sql",
+                Title = "Выберите дамп для восстановления"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                string dumpFilePath = openFileDialog.FileName;
+
+                try
+                {
+                    // Читаем содержимое файла
+                    string sqlScript = File.ReadAllText(dumpFilePath);
+
+                    using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                    {
+                        connection.Open();
+
+                        // Создаем объект MySqlScript для выполнения скрипта
+                        MySqlScript script = new MySqlScript(connection, sqlScript);
+                        script.Execute();
+
+                        MessageBox.Show("Восстановление завершено успешно!", "Успех");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при восстановлении: {ex.Message}", "Ошибка");
+                }
+            }
+        }
+
+        //Метод проверки существования таблиц
+        private bool AreAllTablesPresent(string[] tableNames)
+        {
+            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    foreach (string tableName in tableNames)
+                    {
+                        string query = $"SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = '{tableName}'";
+                        MySqlCommand command = new MySqlCommand(query, connection);
+                        object result = command.ExecuteScalar();
+
+                        if (result == null) // Таблица не найдена
+                        {
+                            return false;
+                        }
+                    }
+                    return true; // Все таблицы найдены
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка при проверке существования таблиц: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false; // Предполагаем, что таблица не существует в случае ошибки
+                }
+            }
+        }
+
+        //Метод проверки заполненности таблиц
+        private bool AreAllTablesPopulated(string[] tableNames)
+        {
+            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    foreach (string tableName in tableNames)
+                    {
+                        string query = $"SELECT COUNT(*) FROM `{tableName}`"; // Обратите внимание на обратные кавычки
+                        MySqlCommand command = new MySqlCommand(query, connection);
+                        long count = (long)command.ExecuteScalar();
+
+                        if (count == 0) // Таблица пуста
+                        {
+                            return false;
+                        }
+                    }
+                    return true; // Все таблицы не пусты
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка при проверке заполненности таблиц: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false; // Предполагаем, что таблица пуста в случае ошибки
+                }
+            }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            Authorization ad = new Authorization();
+            ad.Show();
+            this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //string dbName = $"db45";
+            //CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+            //CreateTables(Authorization.Program.ConnectionString, dbName);
+            RestoreDatabaseFromDump();
         }
 
         private void import_Load(object sender, EventArgs e)
         {
-            // Загрузить интервал времени бездействия из App.config
-            if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
-            {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
-            }
-            else
-            {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
-            }
 
-            ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
         }
-        /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
-        /// </summary>
-        private void ResetInactivityTimer()
-        {
-            // Перезапускаем таймер
-            if (Timer != null)
-            {
-                Timer.Stop();
-                Timer.Start();
-            }
-        }
-        /// <summary>
-        /// Запускает отслеживание активности при загрузке окна.
-        /// </summary>
-        private void import_Shown(object sender, EventArgs e)
-        {
-            Users_ActivateTracking();
-        }
-
-        
     }
 }

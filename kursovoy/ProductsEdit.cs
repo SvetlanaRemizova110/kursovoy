@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,79 +16,19 @@ namespace kursovoy
 {
     public partial class ProductsEdit : Form
     {
-        private int inactivityTimeout = 0;
-        private int productId_;
+        private int productArticul_;
         private string imageDirectory = @"./photo/";
-        public ProductsEdit(int productId)
+        public ProductsEdit(int productArticul)
         {
             InitializeComponent();
-            Timer.Tick += inactivityTimer_Tick;
-            Timer.Interval = 1000; // Проверка каждые 1 секунду
-            this.productId_ = productId;
+            this.productArticul_ = productArticul;
+            label10.Visible = false;
         }
         private void ProductsEdit_Load(object sender, EventArgs e)
         {
-            // Загрузить интервал времени бездействия из App.config
-            if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
-            {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
-            }
-            else
-            {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
-            }
-
-            ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox3.DropDownStyle = ComboBoxStyle.DropDownList;
             LoadDataIntoComboBox();// Для загрузки данных в comboBox
             LoadProductData(); // Загрузка данных в поля по артикулу
             LoadImage(); // Загрузка фото товара из Базы данных
-        }
-        /// <summary>
-        /// Назначение обработчиков событий клавиатуры и мыши для отслеживания активности.
-        /// </summary>
-        private void Users_ActivateTracking()
-        {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
-
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
-            {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
-            }
-        }
-        /// <summary>
-        /// Обработчик любых событий, связанных с активностью пользователя (например, движение мыши или нажатие клавиш).
-        /// Отслеживает действия пользователя и сбрасывает таймер бездействия.
-        /// </summary>
-        private void Users_ActivityDetected(object sender, EventArgs e)
-        {
-            ResetInactivityTimer();
-        }
-        private void inactivityTimer_Tick(object sender, EventArgs e)
-        {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
-            {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
-            }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
-
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
-            }
         }
 
         /// <summary>
@@ -102,8 +43,8 @@ namespace kursovoy
             {
                 try
                 {
-                    pictureBox1.Image = Image.FromFile(fullPath);  
-                    pictureBox1.SizeMode = PictureBoxSizeMode.Zoom; 
+                    pictureBox1.Image = Image.FromFile(fullPath);
+                    pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
                 }
                 catch (Exception ex)
                 {
@@ -128,18 +69,18 @@ namespace kursovoy
                 try
                 {
                     pictureBox1.Image = Image.FromFile(defaultImagePath);
-                    pictureBox1.SizeMode = PictureBoxSizeMode.Zoom; 
+                    pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Ошибка загрузки изображения по умолчанию: {ex.Message}");
-                    pictureBox1.Image = null; 
+                    pictureBox1.Image = null;
                 }
             }
             else
             {
                 MessageBox.Show("Изображение по умолчанию не найдено: picture.png");
-                pictureBox1.Image = null; 
+                pictureBox1.Image = null;
             }
         }
 
@@ -191,13 +132,13 @@ namespace kursovoy
             {
                 con.Open();
                 MySqlCommand cmd = new MySqlCommand(@"SELECT ProductArticul,Name,Description,
-             Cost,Unit,ProductQuantityInStock,ProductManufactur.ProductManufacturName,
-             Supplier.SupplierName,Category.CategoryName,ProductPhoto
-             FROM Product 
-             INNER JOIN ProductManufactur ON ProductManufactur = ProductManufacturID
-             INNER JOIN Supplier ON ProductSupplier = SupplierID
-             INNER JOIN Category ON ProductCategory = CategoryID WHERE ProductArticul = " + productId_, con);
-                cmd.Parameters.AddWithValue("ProductArticul", productId_);
+                 Cost,Unit,ProductQuantityInStock,ProductManufactur.ProductManufacturName,
+                 Supplier.SupplierName,Category.CategoryName,ProductPhoto
+                 FROM Product 
+                 INNER JOIN ProductManufactur ON ProductManufactur = ProductManufacturID
+                 INNER JOIN Supplier ON ProductSupplier = SupplierID
+                 INNER JOIN Category ON ProductCategory = CategoryID WHERE ProductArticul = @ProductArticul", con);
+                cmd.Parameters.AddWithValue("@ProductArticul", productArticul_); // Используем productArticul_
                 using (MySqlDataReader rdr = cmd.ExecuteReader())
                 {
                     if (rdr.Read())
@@ -217,7 +158,21 @@ namespace kursovoy
                 con.Close();
             }
         }
-
+        /// <summary>
+        /// Проверка на уникальность артикула
+        /// </summary>
+        /// <param name="articul">Артикул для проверки</param>
+        /// <param name="con">Открытое соединение с базой данных</param>
+        /// <returns>True, если артикул уникален, False - иначе</returns>
+        private bool IsArticulUnique(int articul, MySqlConnection con)
+        {
+            using (MySqlCommand cmd = new MySqlCommand("SELECT COUNT(*) FROM Product WHERE ProductArticul = @ProductArticul", con))
+            {
+                cmd.Parameters.AddWithValue("@ProductArticul", articul);
+                int count = Convert.ToInt32(cmd.ExecuteScalar());
+                return count == 0; // Артикул уникален, если количество совпадений равно 0
+            }
+        }
         private void button2_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -233,52 +188,77 @@ namespace kursovoy
             if (textBox6.Text == "" || textBoxName.Text == "" || textBox5.Text == "" || textBox7.Text == "" || textBox2.Text == "" || textBox1.Text == "" || comboBox1.Text == "" || comboBox2.Text == "" || comboBox3.Text == "")
             {
                 MessageBox.Show("Необходимо заполнить все поля!");
+                return;
             }
-            else
-            {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите отредактировать этот товар?", "Подтверждение редактирования!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
-                    {
-                        con.Open();
-                        
-                            MySqlCommand cmd = new MySqlCommand(@"UPDATE Product 
-                            SET Name = @name,
-                            Description = @description,
-                            Cost = @cost,
-                            Unit = @unit,
-                            ProductCategory=@ProductCategory,
-                            ProductManufactur=@ProductManufactur,
-                            ProductSupplier = @ProductSupplier,
-                            ProductQuantityInStock = @ProductQuantityInStock,
-                            ProductPhoto = @ProductPhoto
-                            WHERE ProductArticul = @productArticul", con);
 
-                            cmd.Parameters.AddWithValue("@name", textBoxName.Text);
-                            cmd.Parameters.AddWithValue("@description", textBox5.Text);
-                            cmd.Parameters.AddWithValue("@cost", int.Parse(textBox7.Text));
-                            cmd.Parameters.AddWithValue("@unit", textBox2.Text);
-                            cmd.Parameters.AddWithValue("@ProductQuantityInStock", int.Parse(textBox1.Text));
-                            string selectedCategory = comboBox1.Text.ToString();
-                            int categoryid = GetCategoryIdByName(selectedCategory, con);
-                            cmd.Parameters.AddWithValue("@ProductCategory", categoryid);
-                            string selectedManufactur = comboBox3.Text.ToString();
-                            int Manufacturid = GetManufacturIdByName(selectedManufactur, con);
-                            cmd.Parameters.AddWithValue("@ProductManufactur", Manufacturid);
-                            string selectedSupplier = comboBox2.Text.ToString();
-                            int Supplierid = GetSupplierIdByName(selectedSupplier, con);
-                            cmd.Parameters.AddWithValue("@ProductSupplier", Supplierid);
-                            cmd.Parameters.AddWithValue("@ProductPhoto", label10.Text);
-                            cmd.Parameters.AddWithValue("@productArticul", productId_);
-                            cmd.ExecuteNonQuery();
-                            MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        con.Close();
+            DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите отредактировать этот товар?", "Подтверждение редактирования!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dialogResult == DialogResult.Yes)
+            {
+                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                {
+                    con.Open();
+
+                    int newArticul = Convert.ToInt32(textBox6.Text);
+
+                    //Проверяем изменился ли артикль
+                    if (newArticul != productArticul_)
+                    {
+                        //Проверяем, не занят ли новый артикль
+                        if (!IsArticulUnique(newArticul, con))
+                        {
+                            MessageBox.Show("Артикул уже существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return; // Прерываем выполнение, если артикул не уникален
+                        }
+
+                        // Обновляем артикль в отдельном запросе
+                        MySqlCommand cmdUpdateArticul = new MySqlCommand("UPDATE Product SET ProductArticul = @newArticul WHERE ProductArticul = @oldArticul", con);
+                        cmdUpdateArticul.Parameters.AddWithValue("@newArticul", newArticul);
+                        cmdUpdateArticul.Parameters.AddWithValue("@oldArticul", productArticul_); // Используем старый артикль для WHERE
+                        cmdUpdateArticul.ExecuteNonQuery();
+
+                        // Обновляем переменную productArticul_
+                        productArticul_ = newArticul;
                     }
-                    this.Close();
+
+                    // Обновляем остальные данные
+                    MySqlCommand cmd = new MySqlCommand(@"UPDATE Product 
+                    SET Name = @name,
+                    Description = @description,
+                    Cost = @cost,
+                    Unit = @unit,
+                    ProductCategory=@ProductCategory,
+                    ProductManufactur=@ProductManufactur,
+                    ProductSupplier = @ProductSupplier,
+                    ProductQuantityInStock = @ProductQuantityInStock,
+                    ProductPhoto = @ProductPhoto
+                    WHERE ProductArticul = @productArticul", con); // Используем productArticul_ для WHERE
+
+                    cmd.Parameters.AddWithValue("@name", textBoxName.Text);
+                    cmd.Parameters.AddWithValue("@description", textBox5.Text);
+                    cmd.Parameters.AddWithValue("@cost", int.Parse(textBox7.Text));
+                    cmd.Parameters.AddWithValue("@unit", textBox2.Text);
+                    cmd.Parameters.AddWithValue("@ProductQuantityInStock", int.Parse(textBox1.Text));
+                    string selectedCategory = comboBox1.Text.ToString();
+                    int categoryid = GetCategoryIdByName(selectedCategory, con);
+                    cmd.Parameters.AddWithValue("@ProductCategory", categoryid);
+                    string selectedManufactur = comboBox3.Text.ToString();
+                    int Manufacturid = GetManufacturIdByName(selectedManufactur, con);
+                    cmd.Parameters.AddWithValue("@ProductManufactur", Manufacturid);
+                    string selectedSupplier = comboBox2.Text.ToString();
+                    int Supplierid = GetSupplierIdByName(selectedSupplier, con);
+                    cmd.Parameters.AddWithValue("@ProductSupplier", Supplierid);
+                    cmd.Parameters.AddWithValue("@ProductPhoto", label10.Text);
+                    cmd.Parameters.AddWithValue("@productArticul", productArticul_); // Используем productArticul_
+                    cmd.ExecuteNonQuery();
+
+                    MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    con.Close();
                 }
+                this.Close();
             }
         }
+
+
 
         /// <summary>
         /// Для получения ID категории
@@ -286,9 +266,9 @@ namespace kursovoy
         /// <param name="categoryName"></param>
         /// <param name="con"></param>
         /// <returns></returns>
-        private int GetCategoryIdByName(string categoryName,MySqlConnection con)
+        private int GetCategoryIdByName(string categoryName, MySqlConnection con)
         {
-            int categoryId = -1; 
+            int categoryId = -1;
             string query = "SELECT CategoryID FROM Category WHERE CategoryName = @categoryName";
             using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
@@ -309,14 +289,14 @@ namespace kursovoy
         }
 
         /// <summary>
-        /// Для получения ID прлизводителя
+        /// Для получения ID производителя
         /// </summary>
         /// <param name="categoryName"></param>
         /// <param name="con"></param>
         /// <returns></returns>
         private int GetManufacturIdByName(string manufacturName, MySqlConnection con)
         {
-            int Manufacturid = -1; 
+            int Manufacturid = -1;
             string query = "SELECT ProductManufacturID FROM productmanufactur WHERE ProductManufacturName = @productManufacturName";
             using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
@@ -344,7 +324,7 @@ namespace kursovoy
         /// <returns></returns>
         private int GetSupplierIdByName(string SupplierName, MySqlConnection con)
         {
-            int Supplierid = -1; 
+            int Supplierid = -1;
             string query = "SELECT SupplierID FROM Supplier WHERE SupplierName = @SupplierName";
             using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
@@ -363,7 +343,7 @@ namespace kursovoy
             }
             return Supplierid;
         }
-        
+
         /// <summary>
         /// Изменение фото товара
         /// </summary>
@@ -371,7 +351,7 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
-            label10.Visible = true;
+            //label10.Visible = true;
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png";
             openFileDialog.Title = "Выберите фотографию";
@@ -382,12 +362,12 @@ namespace kursovoy
                 FileInfo fileInfo = new FileInfo(selectedFilePath);
                 if (fileInfo.Extension.ToLower() != ".jpg" && fileInfo.Extension.ToLower() != ".png")
                 {
-                    MessageBox.Show("Ошибка: Выберите файл с расширением .jpg или .png.", "Ошибка выбора файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Выберите файл с расширением .jpg или .png.", "Ошибка выбора файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (fileInfo.Length > 2 * 1024 * 1024)
+                if (fileInfo.Length > 3 * 1024 * 1024)
                 {
-                    MessageBox.Show("Ошибка: Размер файла должен быть не более 2 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Размер файла должен быть не более 3 Мб!", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 string folderPath = @"./photo/";
@@ -400,42 +380,12 @@ namespace kursovoy
                 File.Copy(selectedFilePath, Path.Combine(folderPath, Path.GetFileName(selectedFilePath)), true);
 
                 pictureBox1.ImageLocation = Path.Combine(folderPath, Path.GetFileName(selectedFilePath));
-                
+
                 string fileName = Path.GetFileName(selectedFilePath);
                 label10.Text = fileName;
             }
         }
 
-        //Description
-        private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsControl(e.KeyChar) &&
-                    !char.IsLetter(e.KeyChar))
-            {
-                e.Handled = true; // Отменяем ввод
-            }
-            if (e.KeyChar == ' ')
-            {
-                e.Handled = false;
-            }
-        }
-
-        //Name
-        private void textBoxName_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsControl(e.KeyChar) &&
-            (e.KeyChar < 'а' || e.KeyChar > 'я') &&
-            (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
-            (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
-             (e.KeyChar < 'a' || e.KeyChar > 'z'))
-            {
-                e.Handled = true; // Отменяем ввод
-            }
-            if (e.KeyChar == ' ')
-            {
-                e.Handled = false;
-            }
-        }
         //Cost, count, Art
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -461,28 +411,5 @@ namespace kursovoy
                 e.Handled = false;
             }
         }
-        /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
-        /// </summary>
-        private void ResetInactivityTimer()
-        {
-            // Перезапускаем таймер
-            if (Timer != null)
-            {
-                Timer.Stop();
-                Timer.Start();
-            }
-        }
-        /// <summary>
-        /// Запускает отслеживание активности при загрузке окна.
-        /// </summary>
-        private void ProductsEdit_Shown(object sender, EventArgs e)
-        {
-            Users_ActivateTracking();
-        }
-
-        
-
     }
 }
-

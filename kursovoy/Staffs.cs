@@ -14,7 +14,10 @@ namespace kursovoy
 {
     public partial class Staffs : Form
     {
-        private int inactivityTimeout = 0;
+        private int inactivityTimeout = 0; // Время бездействия в миллисекундах.
+        private int initialInactivityTimeout = 0; // Сохраняем начальное значение таймаута.
+        private Timer Timer = new Timer(); //Обязательно инициализируйте Timer
+        private bool isTimerTickRunning = false; // Флаг для блокировки повторного входа
         private List<DataGridViewRow> allRows1 = new List<DataGridViewRow>();
         public Staffs()
         {
@@ -50,26 +53,41 @@ namespace kursovoy
         }
         private void inactivityTimer_Tick(object sender, EventArgs e)
         {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
+            // Блокируем повторный вход
+            if (isTimerTickRunning)
             {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
+                return; // Если таймер уже работает, выходим
             }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
 
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
+            isTimerTickRunning = true; // Устанавливаем флаг, что таймер работает
+
+            try
+            {
+                if (inactivityTimeout > 0)
+                {
+                    inactivityTimeout -= Timer.Interval; // Уменьшаем тайм-аут на интервал таймера
+                }
+                else
+                {
+                    Timer.Stop();
+                    MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы", MessageBoxButtons.OK,MessageBoxIcon.Stop);
+                    import.AutomaticBackup();
+                    this.Close();
+                    Authorization authorization = new Authorization();
+                    authorization.Show();
+                }
+            }
+            finally
+            {
+                isTimerTickRunning = false; // Снимаем флаг в любом случае (даже если было исключение)
             }
         }
         private void button4_Click(object sender, EventArgs e)
         {
+            Timer.Stop();
             Admin ad = new Admin();
             ad.Show();
-            this.Hide();
+            this.Close();
         }
 
         private void Staffs_Load(object sender, EventArgs e)
@@ -85,25 +103,23 @@ namespace kursovoy
                 inactivityTimeout = 30000;
             }
 
+            initialInactivityTimeout = inactivityTimeout; // Сохраняем начальное значение
             ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
-            //FillDataGrid("SELECT EmployeeID AS 'id', EmployeeFIO AS 'ФИО сотрудника'," +
-            //    " telephone AS 'Номер телефона', " +
-            //    "pasport AS 'Паспорт' " +
-            //    "FROM  employee;");
-            //FillDataGrid("SELECT EmployeeID AS 'id', EmployeeF AS 'Фамилия',EmployeeI AS 'Имя',EmployeeO AS 'Отчетство'," +
-            //            "telephone AS 'Номер телефона'," +
-            //            "pasport AS 'Паспорт'" +
-            //            "FROM  employeeee; ");
+            Timer.Start(); // Запуск таймера активностиs
+
             FillDataGrid("SELECT EmployeeID AS 'id', " +
                "EmployeeF AS 'Фамилия'," +
-               "left(EmployeeI, 1) AS 'Имя'," +
-               "left(EmployeeO, 1) AS 'Отчетство'," +
-               "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
-               "concat(left(pasport, 5), ' * ***') AS 'Паспорт'" +
+               "EmployeeI AS 'Имя'," +
+               "EmployeeO AS 'Отчетство'," +
+               "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона',"+
+               "status AS 'Статус'"+
                " FROM  employeeee; ");
-
+            label2.Text += " " + dataGridView1.Rows.Count;
             maskedTextBox1.Mask = "+7(000)000-00-00";
+
+            role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
+
+            comboBoxStatus.Text = "работает";
         }
         public void FillDataGrid(string strCmd)
         {
@@ -121,19 +137,28 @@ namespace kursovoy
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
 
-                dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+                //dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+                //dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
                 dataGridView1.AllowUserToAddRows = false;
                 dataGridView1.ReadOnly = true;
+                // Отключение возможности перемещения строк
+                dataGridView1.AllowUserToDeleteRows = false;
+                dataGridView1.AllowUserToOrderColumns = false;
+                dataGridView1.AllowUserToResizeColumns = false;
+                dataGridView1.AllowUserToResizeRows = false;
 
                 dataGridView1.Columns.Add("EmployeeID", "id");
                 dataGridView1.Columns["EmployeeID"].Visible = false;
-                //dataGridView1.Columns.Add("EmployeeFIO", "ФИО сотрудника");
                 dataGridView1.Columns.Add("EmployeeF", "Фамилия");
+                dataGridView1.Columns["EmployeeF"].Width = 180;
                 dataGridView1.Columns.Add("EmployeeI", "Имя");
+                dataGridView1.Columns["EmployeeI"].Width = 180;
                 dataGridView1.Columns.Add("EmployeeO", "Отчетство");
+                dataGridView1.Columns["EmployeeO"].Width = 100;
                 dataGridView1.Columns.Add("telephone", "Номер телефона");
-                dataGridView1.Columns.Add("pasport", "Паспорт");
+                dataGridView1.Columns["telephone"].Width = 130;
+                dataGridView1.Columns.Add("status", "Статус");
+                dataGridView1.Columns["status"].Width = 80;
 
                 DataGridViewButtonColumn buttonEdit = new DataGridViewButtonColumn();
                 buttonEdit.Name = "Выбрать";
@@ -141,7 +166,7 @@ namespace kursovoy
                 buttonEdit.Text = "Выбрать";
                 buttonEdit.UseColumnTextForButtonValue = true;
                 dataGridView1.Columns.Add(buttonEdit);
-
+                dataGridView1.Columns["Выбрать"].Width = 80;
                 while (rdr.Read())
                 {
                     int rowIndex = dataGridView1.Rows.Add();
@@ -152,9 +177,8 @@ namespace kursovoy
                     row.Cells["EmployeeI"].Value = rdr[2];
                     row.Cells["EmployeeO"].Value = rdr[3];
                     //row.Cells["telephone"].Value = rdr[2];
-                    //row.Cells["pasport"].Value = rdr[3];
                     row.Cells["telephone"].Value = rdr[4];
-                    row.Cells["pasport"].Value = rdr[5];
+                    row.Cells["status"].Value = rdr[5];
 
                     allRows1.Add(row);
                 }
@@ -169,15 +193,15 @@ namespace kursovoy
         //Для кнопки "Выбрать"
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            FillDataGrid("SELECT EmployeeID AS 'id', " +
+            if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
+            {
+                FillDataGrid("SELECT EmployeeID AS 'id', " +
                "EmployeeF AS 'Фамилия'," +
                "EmployeeI AS 'Имя'," +
                "EmployeeO AS 'Отчетство'," +
                "telephone AS 'Номер телефона'," +
-               "pasport AS 'Паспорт'" +
+               "status AS 'Статус'" +
                "FROM employeeee; ");
-            if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
-            {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 textBox2.Text = row.Cells["EmployeeID"].Value.ToString(); //id
                 //textBox4.Text = row.Cells["EmployeeFIO"].Value.ToString(); //FIO
@@ -187,63 +211,102 @@ namespace kursovoy
                 string cleanNumber = new string(maskedTextBox1.Text.Where(char.IsDigit).ToArray());
                 Console.WriteLine(cleanNumber);
                 maskedTextBox1.Text = row.Cells["telephone"].Value.ToString(); //telephone
-                textBox3.Text = row.Cells["pasport"].Value.ToString();//pasport
-               // FillDataGrid("SELECT EmployeeID AS 'id', " +
-               //"EmployeeF AS 'Фамилия'," +
-               //"left(EmployeeI, 1) AS 'Имя'," +
-               //"left(EmployeeO, 1) AS 'Отчетство'," +
-               //"telephone AS 'Номер телефона'," +
-               //"pasport AS 'Паспорт'" +
-               //"FROM employeeee; ");
-                FillDataGrid("SELECT EmployeeID AS 'id', " +
-                "EmployeeF AS 'Фамилия',"+
-                "left(EmployeeI, 1) AS 'Имя'," +
-                "left(EmployeeO, 1) AS 'Отчетство'," +
-                "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
-                "concat(left(pasport, 5), ' * ***') AS 'Паспорт'"+
-                " FROM  employeeee; ");
-//                SELECT EmployeeID AS 'id', 
-//EmployeeF AS 'Фамилия',
-//left(EmployeeI, 1) AS 'Имя',
-//left(EmployeeO, 1) AS 'Отчетство',
-//concat(left(telephone, 7), "***", right(telephone, 5)) AS 'Номер телефона',
-//concat(left(pasport, 5), "****") AS 'Паспорт'
-//FROM employeeee;
+                comboBoxStatus.Text = row.Cells["status"].Value.ToString(); //status \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
             }
+            FillDataGrid("SELECT EmployeeID AS 'id', " +
+               "EmployeeF AS 'Фамилия'," +
+               "EmployeeI AS 'Имя'," +
+               "EmployeeO AS 'Отчетство'," +
+               "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона',"+
+               "status AS 'Статус'"+
+               " FROM  employeeee; ");
         }
         //Для ввода ФИО, Автоматически первая буква слова заглавная
-        private void textBox4_TextChanged(object sender, EventArgs e)
+        private void textBoxF_TextChanged(object sender, EventArgs e)
         {
-            //// Сохраняем текущее положение курсора
-            //int selectionStart = textBox4.SelectionStart;
-            //int selectionLength = textBox4.SelectionLength; 
+            // Сохраняем текущее положение курсора
+            int selectionStart = textBoxF.SelectionStart;
+            int selectionLength = textBoxF.SelectionLength;
 
-            //// Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-            //string[] words = textBox4.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            //for (int i = 0; i < words.Length; i++)
-            //{
-            //    if (words[i].Length > 0) // Проверка длины слова
-            //    {
-            //        words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-            //    }
-            //}
-            //textBox4.Text = string.Join(" ", words);
+            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+            string[] words = textBoxF.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0) // Проверка длины слова
+                {
+                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                }
+            }
+            textBoxF.Text = string.Join(" ", words);
 
-            //// Восстанавливаем положение курсора
-            //textBox4.SelectionStart = Math.Min(selectionStart, textBox4.Text.Length);  
-            //textBox4.SelectionLength = selectionLength; 
+            // Восстанавливаем положение курсора
+            textBoxF.SelectionStart = Math.Min(selectionStart, textBoxF.Text.Length);
+            textBoxF.SelectionLength = selectionLength;
+        }
+        //Для ввода ФИО, Автоматически первая буква слова заглавная
+        private void textBoxI_TextChanged(object sender, EventArgs e)
+        {
+            // Сохраняем текущее положение курсора
+            int selectionStart = textBoxI.SelectionStart;
+            int selectionLength = textBoxI.SelectionLength;
+
+            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+            string[] words = textBoxI.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0) // Проверка длины слова
+                {
+                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                }
+            }
+            textBoxI.Text = string.Join(" ", words);
+
+            // Восстанавливаем положение курсора
+            textBoxI.SelectionStart = Math.Min(selectionStart, textBoxI.Text.Length);
+            textBoxI.SelectionLength = selectionLength;
+        }
+        //Для ввода ФИО, Автоматически первая буква слова заглавная
+        private void textBoxO_TextChanged(object sender, EventArgs e)
+        {
+            // Сохраняем текущее положение курсора
+            int selectionStart = textBoxO.SelectionStart;
+            int selectionLength = textBoxO.SelectionLength;
+
+            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+            string[] words = textBoxO.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0) // Проверка длины слова
+                {
+                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                }
+            }
+            textBoxO.Text = string.Join(" ", words);
+
+            // Восстанавливаем положение курсора
+            textBoxO.SelectionStart = Math.Min(selectionStart, textBoxO.Text.Length);
+            textBoxO.SelectionLength = selectionLength;
         }
         //Для ввода ФИО
-        private void textBox4_KeyPress(object sender, KeyPressEventArgs e)
+        private void textBoxF_KeyPress(object sender, KeyPressEventArgs e)
         {
-            //// Разрешаем ввод пробела и кириллицы
-            //if (!char.IsControl(e.KeyChar) &&
-            //    (e.KeyChar < 'а' || e.KeyChar > 'я') &&
-            //    (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
-            //    e.KeyChar != ' ')
-            //{
-            //    e.Handled = true; // Отменяем ввод
-            //}
+            if (!char.IsControl(e.KeyChar) &&
+                (e.KeyChar < 'а' || e.KeyChar > 'я') &&
+                (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
+                e.KeyChar != '-')
+            {
+                e.Handled = true; // Отменяем ввод
+            }
+        }
+        //Для ввода ФИО
+        private void textBoxO_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) &&
+                (e.KeyChar < 'а' || e.KeyChar > 'я') &&
+                (e.KeyChar < 'А' || e.KeyChar > 'Я'))
+            {
+                e.Handled = true; // Отменяем ввод
+            }
         }
         //Для ввода Паспорта
         private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
@@ -256,166 +319,205 @@ namespace kursovoy
         }
         
         /// <summary>
-        /// Изменение сотрудника
+        /// Добавление/Изменение сотрудника
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
-            if (maskedTextBox1.Text == "" || textBoxF.Text == "" ||textBoxI.Text == "" ||textBoxO.Text == "" || textBox3.Text == "")
+            if (maskedTextBox1.Text == "" || textBoxF.Text == "" ||textBoxI.Text == "" ||textBoxO.Text == "" || comboBoxStatus.Text == "")
             {
                 MessageBox.Show("Необходимо заполнить все поля!");
             }
             else
             {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
+                if (textBox2.Text != "")
                 {
-                    int employeeID = Convert.ToInt32(textBox2.Text);
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
                     {
-                        con.Open();
-                        MySqlCommand cmd = new MySqlCommand(@"UPDATE employeeee 
+                        int employeeID = Convert.ToInt32(textBox2.Text);
+                        using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                        {
+                            con.Open();
+                            MySqlCommand cmd = new MySqlCommand(@"UPDATE employeeee 
                         SET EmployeeID = @employeeID,
                             EmployeeF = @employeeF,
                             EmployeeI = @employeeI,
                             EmployeeO = @employeeO,
                             telephone = @telephone,
-                            pasport = @pasport
+                            status = @status
                         WHERE EmployeeID = @employeeID", con);
 
-                        cmd.Parameters.AddWithValue("@employeeID", employeeID);
-                        //cmd.Parameters.AddWithValue("@employeeFIO", textBox4.Text);
-                        cmd.Parameters.AddWithValue("@employeeF", textBoxF.Text);
-                        cmd.Parameters.AddWithValue("@employeeI", textBoxI.Text);
-                        cmd.Parameters.AddWithValue("@employeeO", textBoxO.Text);
-                        cmd.Parameters.AddWithValue("@pasport", textBox3.Text);
-                        cmd.Parameters.AddWithValue("@telephone", maskedTextBox1.Text);
-                        cmd.ExecuteNonQuery();
-                        MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        con.Close();
-                    }
-                    maskedTextBox1.Text = ""; //telephone
-                    textBoxF.Text = ""; //FIO
-                    textBoxI.Text = ""; //FIO
-                    textBoxO.Text = ""; //FIO
-                    textBox3.Text = "";//pasport
-                    textBox2.Text = ""; //id
-                    //FillDataGrid("SELECT EmployeeID AS 'id', EmployeeFIO AS 'ФИО сотрудника'," +
-                    //" telephone AS 'Номер телефона', " +
-                    //"pasport AS 'Паспорт' " +
-                    //"FROM  employee;");
-                    FillDataGrid("SELECT EmployeeID AS 'id', EmployeeF AS 'Фамилия',EmployeeI AS 'Имя',EmployeeO AS 'Отчетство'," +
-                        "telephone AS 'Номер телефона'," +
-                        "pasport AS 'Паспорт'" +
-                        "FROM  employeeee; ");
-                }
+                            cmd.Parameters.AddWithValue("@employeeID", employeeID);
+                            cmd.Parameters.AddWithValue("@employeeF", textBoxF.Text);
+                            cmd.Parameters.AddWithValue("@employeeI", textBoxI.Text);
+                            cmd.Parameters.AddWithValue("@employeeO", textBoxO.Text);
+                            cmd.Parameters.AddWithValue("@telephone", maskedTextBox1.Text);
+                            cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);///////////////////////
+                            cmd.ExecuteNonQuery();
+                            MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            con.Close();
+                        }
+                        maskedTextBox1.Text = ""; //telephone
+                        textBoxF.Text = ""; //FIO
+                        textBoxI.Text = ""; //FIO
+                        textBoxO.Text = ""; //FIO
+                        textBox2.Text = ""; //id
+                        comboBoxStatus.SelectedItem = null; //
 
+                        FillDataGrid("SELECT EmployeeID AS 'id', " +
+                           "EmployeeF AS 'Фамилия'," +
+                           "EmployeeI AS 'Имя'," +
+                           "EmployeeO AS 'Отчетство'," +
+                           "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
+                           "status AS 'Статус'" +
+                           " FROM  employeeee; ");
+                    }
+                }
+                else
+                {
+                    textBox2.Text = "";
+                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                        {
+                            try
+                            {
+                                connection.Open();
+
+                                //string query = "INSERT INTO Employee (EmployeeFIO, telephone, pasport) VALUES (@value1,@value2,@value3)";
+                                string query = "INSERT INTO employeeee (EmployeeF, EmployeeI, EmployeeO, telephone, status) VALUES (@value1,@value4,@value5,@value2, @status)";
+                                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+                                {
+                                    //if (UserFIOExists(textBox4.Text, connection))
+                                    //{
+                                    //    MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    //    return;
+                                    //}
+                                    if (UserTelephoneExists(maskedTextBox1.Text, connection))
+                                    {
+                                        MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        return;
+                                    }
+                                    cmd.Parameters.AddWithValue("@value1", textBoxF.Text);
+                                    cmd.Parameters.AddWithValue("@value4", textBoxI.Text);
+                                    cmd.Parameters.AddWithValue("@value5", textBoxO.Text);
+                                    cmd.Parameters.AddWithValue("@value2", maskedTextBox1.Text);
+                                    cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);//////////////////////
+
+                                    cmd.ExecuteNonQuery();
+                                    MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                    maskedTextBox1.Text = ""; //telephone
+                                    textBoxF.Text = ""; //FIO
+                                    textBoxI.Text = ""; //FIO
+                                    textBoxO.Text = ""; //FIO
+                                    textBox2.Text = ""; //id
+                                    comboBoxStatus.SelectedItem = null; //
+
+                                    FillDataGrid("SELECT EmployeeID AS 'id', " +
+                                       "EmployeeF AS 'Фамилия'," +
+                                       "EmployeeI AS 'Имя'," +
+                                       "EmployeeO AS 'Отчетство'," +
+                                       "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
+                                       "status AS 'Статус'" +
+                                       " FROM  employeeee; ");
+                                }
+                                connection.Close();
+                            }
+
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Ошибка: " + ex);
+                            }
+                        }
+                    }
+                }
             }
         }
         // Функция для проверки существования пользователя по телефону
         private bool UserTelephoneExists(string telephone, MySqlConnection connection)
         {
-            string checkQuery = "SELECT COUNT(*) FROM Employee WHERE telephone = @telephone";
+            string checkQuery = "SELECT COUNT(*) FROM employeeee WHERE telephone = @telephone";
             using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
             {
                 checkCmd.Parameters.AddWithValue("@telephone", telephone);
                 return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
             }
         }
-        // Функция для проверки существования пользователя по ФИО
-        //private bool UserFIOExists(string employeeFIO, MySqlConnection connection)
-        //{
-        //    //string checkQuery = "SELECT COUNT(*) FROM Employee WHERE EmployeeFIO = @employeeFIO";
-        //    //using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-        //    //{
-        //    //    checkCmd.Parameters.AddWithValue("@employeeFIO", employeeFIO);
-        //    //    return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-        //    //}
-        //}
-        // Функция для проверки существования пользователя по Паспорту
-        private bool UserPasportExists(string employeeFIO, MySqlConnection connection)
-        {
-            string checkQuery = "SELECT COUNT(*) FROM Employee WHERE pasport = @pasport";
-            using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-            {
-                checkCmd.Parameters.AddWithValue("@pasport", employeeFIO);
-                return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-            }
-        }
-
         /// <summary>
         /// Добавление сотрудника
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button6_Click(object sender, EventArgs e)
-        {
-            if (maskedTextBox1.Text == "" || textBoxF.Text == "" ||textBoxI.Text == "" ||textBoxO.Text == "" || textBox3.Text == "")
-            {
-                MessageBox.Show("Необходимо заполнить все поля!");
-            }
-            else
-            {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
-                    {
-                        try
-                        {
-                            connection.Open();
+        //private void button6_Click(object sender, EventArgs e)
+        //{
+        //    if (maskedTextBox1.Text == "" || textBoxF.Text == "" ||textBoxI.Text == "" ||textBoxO.Text == ""|| comboBoxStatus.Text == "")
+        //    {
+        //        MessageBox.Show("Необходимо заполнить все поля!");
+        //    }
+        //    else
+        //    {
+        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        //        if (dialogResult == DialogResult.Yes)
+        //        {
+        //            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //            {
+        //                try
+        //                {
+        //                    connection.Open();
 
-                            //string query = "INSERT INTO Employee (EmployeeFIO, telephone, pasport) VALUES (@value1,@value2,@value3)";
-                            string query = "INSERT INTO employeeee (EmployeeF, EmployeeI, EmployeeO, telephone, pasport) VALUES (@value1,@value4,@value5,@value2,@value3)";
-                            using (MySqlCommand cmd = new MySqlCommand(query, connection))
-                            {
+        //                    //string query = "INSERT INTO Employee (EmployeeFIO, telephone, pasport) VALUES (@value1,@value2,@value3)";
+        //                    string query = "INSERT INTO employeeee (EmployeeF, EmployeeI, EmployeeO, telephone, status) VALUES (@value1,@value4,@value5,@value2, @status)";
+        //                    using (MySqlCommand cmd = new MySqlCommand(query, connection))
+        //                    {
+        //                        //if (UserFIOExists(textBox4.Text, connection))
+        //                        //{
+        //                        //    MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                        //    return;
+        //                        //}
+        //                        if (UserTelephoneExists(maskedTextBox1.Text, connection))
+        //                        {
+        //                            MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                            return;
+        //                        }
+        //                        cmd.Parameters.AddWithValue("@value1", textBoxF.Text);
+        //                        cmd.Parameters.AddWithValue("@value4", textBoxI.Text);
+        //                        cmd.Parameters.AddWithValue("@value5", textBoxO.Text);
+        //                        cmd.Parameters.AddWithValue("@value2", maskedTextBox1.Text);
+        //                        cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);//////////////////////
 
-                                //if (UserFIOExists(textBox4.Text, connection))
-                                //{
-                                //    MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                //    return;
-                                //}
-                                if (UserTelephoneExists(maskedTextBox1.Text, connection))
-                                {
-                                    MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                                if (UserPasportExists(textBox3.Text, connection))
-                                {
-                                    MessageBox.Show("Пользователь с таким паспортом уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                                cmd.Parameters.AddWithValue("@value1", textBoxF.Text);
-                                cmd.Parameters.AddWithValue("@value4", textBoxI.Text);
-                                cmd.Parameters.AddWithValue("@value5", textBoxO.Text);
-                                cmd.Parameters.AddWithValue("@value2", maskedTextBox1.Text);
-                                cmd.Parameters.AddWithValue("@value3", textBox3.Text);
-                                cmd.ExecuteNonQuery();
-                                MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                        cmd.ExecuteNonQuery();
+        //                        MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                                maskedTextBox1.Text = ""; //telephone
-                                textBoxF.Text = ""; //FIO
-                                textBoxI.Text = ""; //FIO
-                                textBoxO.Text = ""; //FIO
-                                textBox3.Text = "";//pasport
-                                textBox2.Text = ""; //id
-                                FillDataGrid("SELECT EmployeeID AS 'id', EmployeeF AS 'Фамилия',EmployeeI AS 'Имя',EmployeeO AS 'Отчетство'," +
-                                "telephone AS 'Номер телефона'," +
-                                "pasport AS 'Паспорт'" +
-                                "FROM  employeeee; ");
-                            }
-                            connection.Close();
+        //                        maskedTextBox1.Text = ""; //telephone
+        //                        textBoxF.Text = ""; //FIO
+        //                        textBoxI.Text = ""; //FIO
+        //                        textBoxO.Text = ""; //FIO
+        //                        textBox2.Text = ""; //id
+        //                        comboBoxStatus.SelectedItem = null; //
+        //                        FillDataGrid("SELECT EmployeeID AS 'id', " +
+        //                           "EmployeeF AS 'Фамилия'," +
+        //                           "left(EmployeeI, 1) AS 'Имя'," +
+        //                           "left(EmployeeO, 1) AS 'Отчетство'," +
+        //                           "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
+        //                           "status AS 'Статус'" +
+        //                           " FROM  employeeee; ");
+        //                    }
+        //                    connection.Close();
+        //                }
 
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Ошибка: " + ex);
-                        }
-                    }
-                }
-            }
-        }
+        //                catch (Exception ex)
+        //                {
+        //                    MessageBox.Show("Ошибка: " + ex);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+        
         //Очистка всех полей
         private void button2_Click(object sender, EventArgs e)
         {
@@ -423,8 +525,8 @@ namespace kursovoy
             textBoxF.Text = ""; //FIO
             textBoxI.Text = ""; //FIO
             textBoxO.Text = ""; //FIO
-            textBox3.Text = "";//pasport
             textBox2.Text = ""; //id
+            comboBoxStatus.SelectedItem = null; //
         }
 
         /// <summary>
@@ -432,21 +534,11 @@ namespace kursovoy
         /// </summary>
         private void ResetInactivityTimer()
         {
-            // Перезапускаем таймер
-            if (Timer != null)
-            {
-                Timer.Stop();
-                Timer.Start();
-            }
+            inactivityTimeout = initialInactivityTimeout; //сбрасываем значение тайм-аута!
         }
         /// <summary>
         /// Запускает отслеживание активности при загрузке окна.
         /// </summary>
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void Staffs_Shown(object sender, EventArgs e)
         {
             Users_ActivateTracking();

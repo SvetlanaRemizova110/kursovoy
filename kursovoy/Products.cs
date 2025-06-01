@@ -13,24 +13,23 @@ namespace kursovoy
 {
     public partial class Products : Form
     {
-        private int inactivityTimeout = 0;
-        // Для заказа
+        private FormWindowState _previousWindowState; // Сохраняем предыдущее состояние окна
+        private FormBorderStyle _previousBorderStyle; // Сохраняем стиль границы
+
         private int currentPage1 = 0;
         private int rowsPerPage1 = 20;
         private int totalRows1 = 0;
         private int totalRecords;//кол-во строк всего
         private List<DataGridViewRow> allRows1 = new List<DataGridViewRow>();
-        private Dictionary<string, int> currentOrder = new Dictionary<string, int>();
+        public static Dictionary<string, int> currentOrder = new Dictionary<string, int>();
         public static class Value
         {
             public static bool clearOrder;
         }
-
+      
         public Products()
         {
             InitializeComponent();
-            Timer.Tick += inactivityTimer_Tick;
-            Timer.Interval = 1000; // Проверка каждые 1 секунду
             GetCategoryIdByName("");
             if (Value.clearOrder == true)
             {
@@ -38,88 +37,35 @@ namespace kursovoy
                 Value.clearOrder = false;
             }
         }
-        /// <summary>
-        /// Назначение обработчиков событий клавиатуры и мыши для отслеживания активности.
-        /// </summary>
-        private void Users_ActivateTracking()
+        private void toggleFullscreenButton_Click(object sender, EventArgs e)
         {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
-
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
+            if (this.WindowState == FormWindowState.Maximized)
             {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
-            }
-        }
-        /// <summary>
-        /// Обработчик любых событий, связанных с активностью пользователя (например, движение мыши или нажатие клавиш).
-        /// Отслеживает действия пользователя и сбрасывает таймер бездействия.
-        /// </summary>
-        private void Users_ActivityDetected(object sender, EventArgs e)
-        {
-            ResetInactivityTimer();
-        }
-        private void inactivityTimer_Tick(object sender, EventArgs e)
-        {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
-            {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
+                // Восстанавливаем предыдущее состояние (нормальное)
+                this.WindowState = _previousWindowState;
+                //this.FormBorderStyle = _previousBorderStyle; // Восстанавливаем стиль границы
+               // toggleFullscreenButton.Text = "На весь экран";
             }
             else
             {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
-
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
+                // Переходим в полноэкранный режим
+                _previousWindowState = this.WindowState;  // Сохраняем текущее состояние
+                _previousBorderStyle = this.FormBorderStyle; // Сохраняем стиль границы
+                this.WindowState = FormWindowState.Maximized;
+                //this.FormBorderStyle = FormBorderStyle.None;  // Убираем границу для истинного полноэкранного режима
+               // toggleFullscreenButton.Text = "Окно";
             }
         }
-
         private void Products_Load(object sender, EventArgs e)
         {
-            // Загрузить интервал времени бездействия из App.config
-            if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
-            {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
-            }
-            else
-            {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
-            }
-
-            ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
-            FillDataGrid("SELECT " +
-            "ProductArticul AS 'Артикул'," +
-            "Name AS 'Наименование товара'," +
-            "Description AS 'Описание'," +
-            "Cost AS 'Стоимость'," +
-            "Unit AS 'Единица измерения'," +
-            "ProductQuantityInStock AS 'Количество на складе'," +
-            "ProductManufactur.ProductManufacturName AS 'Производитель'," +
-            "Supplier.SupplierName AS 'Поставщик'," +
-            "Category.CategoryName AS 'Категория'," +
-            "ProductPhoto " +
-            "FROM Product " +
-            "INNER JOIN ProductManufactur ON Product.ProductManufactur = ProductManufactur.ProductManufacturID " +
-            "INNER JOIN Supplier ON Product.ProductSupplier = Supplier.SupplierID " +
-            "INNER JOIN Category ON Product.ProductCategory = Category.CategoryID", 1);
-            // Для запрета изменять ComboBox
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
-
             UpdateDataGrid();
             UpdatePag();
-            labelCount.Text = "Количество записей: ";
-            labelCount.Text += dataGridView1.Rows.Count;
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += dataGridView1.Rows.Count;
             FillCount();
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            labelVSE.Visible = false;
+            label7.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
         }
 
         /// <summary>
@@ -148,49 +94,64 @@ namespace kursovoy
                 allRows1.Clear();
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
+                //dataGridView1.AutoResizeColumns();
+                //dataGridView1.AutoResizeRows();
+
+                dataGridView1.AllowUserToDeleteRows = false;
+                dataGridView1.AllowUserToOrderColumns = false;
+                dataGridView1.AllowUserToResizeColumns = false;
+                dataGridView1.AllowUserToResizeRows = false;
+                dataGridView1.RowTemplate.Height = 80;
+                dataGridView1.ReadOnly = true;
+                dataGridView1.AllowUserToAddRows = false;
+
+                dataGridView1.Columns.Add("ProductArticul", "Артикул");
 
                 DataGridViewImageColumn imageColumn = new DataGridViewImageColumn();
                 imageColumn.Name = "ProductPhoto";
                 imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
                 imageColumn.HeaderText = "Фото";
-
-                dataGridView1.AutoResizeColumns();
-                dataGridView1.AutoResizeRows();
-                dataGridView1.AllowUserToResizeColumns = false;
-                dataGridView1.RowTemplate.Height = 80;
-                dataGridView1.ReadOnly = true;
-                dataGridView1.AllowUserToAddRows = false;
                 dataGridView1.Columns.Add(imageColumn);
-
                 dataGridView1.Columns["ProductPhoto"].Visible = true;
 
-                dataGridView1.Columns.Add("ProductArticul", "Артикул");
-                dataGridView1.Columns.Add("Name", "Наименование товара");
+                dataGridView1.Columns.Add("Name", "Название товара");
+                dataGridView1.Columns["Name"].Width = 150;
                 dataGridView1.Columns.Add("Desctription", "Описание");
+                dataGridView1.Columns["Desctription"].Width = 150;
                 dataGridView1.Columns.Add("Cost", "Стоимость");
+                dataGridView1.Columns["Cost"].Width = 100;
                 dataGridView1.Columns.Add("Unit", "Единица измерения");
-                dataGridView1.Columns["Unit"].Visible = false;
                 dataGridView1.Columns.Add("ProductQuantityInStock", "Количество на складе");
                 dataGridView1.Columns.Add("ProductCategory", "Категория");
                 dataGridView1.Columns.Add("ProductManufactur", "Производитель");
-                dataGridView1.Columns["ProductManufactur"].Visible = false;
+                dataGridView1.Columns["ProductManufactur"].Width = 120;
                 dataGridView1.Columns.Add("ProductSupplier", "Поставщик");
                 dataGridView1.Columns["ProductSupplier"].Visible = false;
+
+                //dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+                // После добавления всех данных в DataGridView
+                //dataGridView1.Sort(dataGridView1.Columns["ProductArticul"], ListSortDirection.Ascending);
 
                 // Возможность редактирования товара не доступна для продавца
                 if (Authorization.User2.Role != 3)
                 {
                     button2.Visible = false;
+
                     DataGridViewButtonColumn buttonEdit = new DataGridViewButtonColumn();
                     buttonEdit.Name = "Редактировать";
                     buttonEdit.HeaderText = "Редактировать";
                     buttonEdit.Text = "Редактировать";
                     buttonEdit.UseColumnTextForButtonValue = true;
                     dataGridView1.Columns.Add(buttonEdit);
+                    dataGridView1.Columns["Редактировать"].Width = 120;
+
+                    dataGridView1.Columns["ProductManufactur"].Visible = false;
+                    
+                    dataGridView1.Columns["Unit"].Visible = false;
                 }
 
                 // Возможность удаления товара доступна только администратору
-                if (Authorization.User2.Role != 3 && Authorization.User2.Role != 2)
+                if (Authorization.User2.Role == 1)
                 {
                     button2.Visible = false;
                     DataGridViewButtonColumn buttonDel = new DataGridViewButtonColumn();
@@ -200,35 +161,42 @@ namespace kursovoy
                     buttonDel.UseColumnTextForButtonValue = true;
                     dataGridView1.Columns.Add(buttonDel);
                 }
-
-                // Возможность оформления заказа доступна только для продавца
-                if (Authorization.User2.Role != 1 && Authorization.User2.Role != 2)
+                if (Authorization.User2.Role == 2)
                 {
+                    dataGridView1.Size = new Size(987, 452);
+                }
+                // Возможность оформления заказа доступна только для продавца
+                if (Authorization.User2.Role == 3)
+                {
+                    //dataGridView1.Size = new Size(887, 452);
                     button3.Visible = false;
-                    ContextMenuStrip menu = new ContextMenuStrip();
-                    ToolStripMenuItem addToOrderMenu = new ToolStripMenuItem("Добавить в корзину");
-                    addToOrderMenu.Click += AddToOrderMenuClick;
-                    menu.Items.Add(addToOrderMenu);
-                    dataGridView1.ContextMenuStrip = menu;
+                    //ContextMenuStrip menu = new ContextMenuStrip();
+                    //ToolStripMenuItem addToOrderMenu = new ToolStripMenuItem("Добавить в корзину");
+                    //addToOrderMenu.Click += AddToOrderMenuClick;
+                    //menu.Items.Add(addToOrderMenu);
+                    //dataGridView1.ContextMenuStrip = menu;
                 }
                 while (rdr.Read())
                 {
+                    int rowIndex = dataGridView1.Rows.Add();
+                    DataGridViewRow row = dataGridView1.Rows[rowIndex];
+                    row.Cells["ProductArticul"].Value = rdr[0];
                     string imsName = rdr[9].ToString();
                     if (string.IsNullOrEmpty(imsName))
                     {
                         imsName = "picture.png";
                     }
                     Image img = Image.FromFile(@"./photo/" + imsName);
-
-                    int rowIndex = dataGridView1.Rows.Add();
-                    DataGridViewRow row = dataGridView1.Rows[rowIndex];
                     row.Cells["ProductPhoto"].Value = img;
-                    row.Cells["ProductArticul"].Value = rdr[0];
+
                     row.Cells["Name"].Value = rdr[1];
                     row.Cells["Desctription"].Value = rdr[2];
                     row.Cells["Cost"].Value = rdr[3];
+                    row.Cells["Unit"].Value = rdr[4];
                     row.Cells["ProductQuantityInStock"].Value = rdr[5];
                     row.Cells["ProductCategory"].Value = rdr[8];
+                    row.Cells["ProductManufactur"].Value = rdr[7];
+                    
                     allRows1.Add(row);
                 }
                 totalRows1 = allRows1.Count;
@@ -239,6 +207,7 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
+
 
         // выбор страницы пагинации
         // те строки которые нам не нужны на выбраной странице - скрываем
@@ -253,6 +222,7 @@ namespace kursovoy
             {
                 currentPage1 = Convert.ToInt32(l.Text) - 1;
                 UpdatePag(); //Перерисовываем интерфейс
+                FillCount();
             }
         }
 
@@ -279,8 +249,10 @@ namespace kursovoy
 
             // Рассчитываем общее количество страниц
             int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
-            int x = 252;
-            int y = 669, step = 15;
+            int step = 15;
+
+            int x = labelCount.Location.X + 68;
+            int y = labelCount.Location.Y + 38;
 
             // Создаем новые LinkLabel для страниц
             for (int i = 0; i < totalPages; i++)
@@ -288,18 +260,25 @@ namespace kursovoy
                 var linkLabel = new LinkLabel();
                 linkLabel.Text = (i + 1).ToString();
                 linkLabel.Name = "page" + i;
-                linkLabel.ForeColor = Color.Black;
+                // Устанавливаем цвет ссылок
+                linkLabel.LinkColor = Color.Black;      // Цвет ссылки до посещения
+                linkLabel.VisitedLinkColor = Color.Black; // Цвет ссылки после посещения
+                linkLabel.ActiveLinkColor = Color.Black;  // Цвет ссылки при нажатии
                 linkLabel.Font = new Font(linkLabel.Font.FontFamily, 14);
                 linkLabel.AutoSize = true;
                 linkLabel.Location = new Point(x, y);
                 linkLabel.Click += LinkLabel_Click;
+                linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;// Убираем подчеркивание
 
-                // Убираем подчеркивание только у текущей страницы
+                // Добавляем фон только у текущей страницы
                 if (i == currentPage1)
                 {
-                    linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;
+                    linkLabel.BackColor = Color.LightGreen;
                 }
-
+                else
+                {
+                    linkLabel.BackColor = Color.Honeydew; //Устанавливаем дефолтный цвет для не выбранных
+                }
                 this.Controls.Add(linkLabel);
                 x += step;
             }
@@ -309,8 +288,8 @@ namespace kursovoy
             buttonPag2.Enabled = currentPage1 < totalPages - 1;
 
             // Обновляем счетчик записей
-            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}";
-            labelVSE.Text = $"/ {totalRows1}";
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            //labelVSE.Text = $"/ {totalRows1}";
         }
         /// <summary>
         /// Количество строк всего
@@ -328,7 +307,7 @@ namespace kursovoy
                     totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
                 }
 
-                labelVSE.Text = $"/ {totalRecords}";
+                labelVSE.Text = $"/{totalRecords}";
             }
         }
 
@@ -364,7 +343,22 @@ namespace kursovoy
         private void UpdateDataGrid()
         {
             string searchStr = SearchText.Text;
-            string orderBy = comboBox1.SelectedItem?.ToString() == "По убыванию" ? "DESC" : "ASC";
+            string orderByClause = ""; // Объявляем переменную здесь
+
+            if (comboBox1.SelectedItem?.ToString() == "По убыванию")
+            {
+                orderByClause = "Cost DESC";
+            }
+            else if (comboBox1.SelectedItem?.ToString() == "По возрастанию")
+            {
+                orderByClause = "Cost ASC";
+            }
+            else  // если не выбрано ничего, или выбрано значение по умолчанию
+            {
+                orderByClause = "ProductArticul ASC";  // сортировка по артикулу
+            }
+
+
             string selectedCategory = comboBox2.SelectedItem?.ToString();
             int categoryId = -1;
 
@@ -373,13 +367,13 @@ namespace kursovoy
                 categoryId = GetCategoryIdByName(selectedCategory);
             }
 
-            string strCmd = BuildSqlQuery(searchStr, orderBy, categoryId);
+            string strCmd = BuildSqlQuery(searchStr, orderByClause, categoryId); // Передаем строку сортировки
             FillDataGrid(strCmd, categoryId);
             currentPage1 = 0; // Сбрасываем на первую страницу
             UpdatePag(); // Обновляем пагинацию
         }
 
-        private string BuildSqlQuery(string searchStr, string orderBy, int categoryId)
+        private string BuildSqlQuery(string searchStr, string orderByClause, int categoryId)
         {
             string strCmd = "SELECT ProductArticul, Name, Description, Cost, Unit, " +
                            "ProductQuantityInStock, ProductManufactur.ProductManufacturName, " +
@@ -393,7 +387,7 @@ namespace kursovoy
 
             if (!string.IsNullOrWhiteSpace(searchStr) && searchStr.Length >= 3)
             {
-                conditions.Add($"(Name LIKE '%{searchStr}%' OR ProductArticul LIKE '%{searchStr}%')");
+                conditions.Add($"(Name LIKE '%{searchStr}%' OR ProductArticul LIKE '{searchStr}%')");
             }
 
             if (categoryId != -1)
@@ -406,36 +400,56 @@ namespace kursovoy
                 strCmd += " WHERE " + string.Join(" AND ", conditions);
             }
 
-            if (!string.IsNullOrEmpty(orderBy))
+            if (!string.IsNullOrEmpty(orderByClause))
             {
-                strCmd += $" ORDER BY Cost {orderBy}";
+                // Преобразуем поле сортировки к числовому, чтобы правильно сортировать числовые значения
+                if (orderByClause.Contains("ProductArticul"))
+                {
+                    strCmd += $" ORDER BY CONVERT(ProductArticul, UNSIGNED) {orderByClause.Split(' ')[1]}"; // Добавляем CONVERT
+                }
+                else
+                {
+                    strCmd += $" ORDER BY {orderByClause}";
+                }
+            }
+            else
+            {
+                strCmd += $" ORDER BY CONVERT(ProductArticul, UNSIGNED) ASC";
             }
 
             return strCmd;
         }
 
+
+
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
             UpdatePag();
-            labelCount.Text = "Количество записей: ";
-            labelCount.Text += dataGridView1.Rows.Count;
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += dataGridView1.Rows.Count;
+
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
         private void SearchText_TextChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
             UpdatePag();
-            labelCount.Text = "Количество записей: ";
-            labelCount.Text += dataGridView1.Rows.Count;
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += dataGridView1.Rows.Count;
+
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
             UpdatePag();
-            labelCount.Text = "Количество записей: ";
-            labelCount.Text += dataGridView1.Rows.Count;
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += dataGridView1.Rows.Count;
+
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
 
@@ -450,19 +464,19 @@ namespace kursovoy
             {
                 Admin ad = new Admin();
                 ad.Show();
-                this.Hide();
+                this.Close();
             }
             else if (Authorization.User2.Role == 2)
             {
                 СommoditySpecialist CS = new СommoditySpecialist();
                 CS.Show();
-                this.Hide();
+                this.Close();
             }
             else if (Authorization.User2.Role == 3)
             {
                 Seller sl = new Seller();
                 sl.Show();
-                this.Hide();
+                this.Close();
             }
         }
 
@@ -483,21 +497,9 @@ namespace kursovoy
             {
                 currentOrder = orderForm.UpdatedOrder;
             }
-            FillDataGrid("SELECT " +
-            "ProductArticul AS 'Артикул'," +
-             "Name AS 'Наименование товара'," +
-             "Description AS 'Описание'," +
-             "Cost AS 'Стоимость'," +
-             "Unit AS 'Единица измерения'," +
-             "ProductQuantityInStock AS 'Количество на складе'," +
-             "ProductManufactur.ProductManufacturName AS 'Производитель'," +
-             "Supplier.SupplierName AS 'Поставщик'," +
-             "Category.CategoryName AS 'Категория'," +
-             "ProductPhoto " +
-             "FROM Product " +
-             "INNER JOIN ProductManufactur ON Product.ProductManufactur = ProductManufactur.ProductManufacturID " +
-             "INNER JOIN Supplier ON Product.ProductSupplier = Supplier.SupplierID " +
-             "INNER JOIN Category ON Product.ProductCategory = Category.CategoryID", 1);
+            UpdateDataGrid();
+            //UpdatePag();
+            //labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
 
         /// <summary>
@@ -521,6 +523,7 @@ namespace kursovoy
                         return;
                     }
                     currentOrder[productArticleNumber]++;
+                    Value.clearOrder = false;
                 }
                 else
                 {
@@ -531,9 +534,11 @@ namespace kursovoy
                         return;
                     }
                     currentOrder[productArticleNumber] = 1;
+                    Value.clearOrder = false;
                 }
             }
         }
+
 
         /// <summary>
         /// Кнопки Редактирования и удаления товара
@@ -551,10 +556,8 @@ namespace kursovoy
                     ProductsEdit editForm = new ProductsEdit(productId);
                     editForm.ShowDialog();
                     UpdateDataGrid();
-                    FillCount();
                     UpdatePag();
-                    labelCount.Text = "Количество записей: ";
-                    labelCount.Text += dataGridView1.Rows.Count;
+                    labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
                 }
             }
             if (Authorization.User2.Role != 3 && Authorization.User2.Role != 2)
@@ -570,10 +573,8 @@ namespace kursovoy
                         DeleteRecord(id); // Удаляем запись из базы данных
                         dataGridView1.Rows.RemoveAt(e.RowIndex); // Удаляем строку из DataGridView
                         UpdateDataGrid();
-                        FillCount();
                         UpdatePag();
-                        labelCount.Text = "Количество записей: ";
-                        labelCount.Text += dataGridView1.Rows.Count;
+                        labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
                     }
                 }
             }
@@ -604,10 +605,11 @@ namespace kursovoy
             ProductsAdd ProductsAdd = new ProductsAdd();
             ProductsAdd.ShowDialog();
             UpdateDataGrid();
-            FillCount();
             UpdatePag();
-            labelCount.Text = "Количество записей: ";
-            labelCount.Text += dataGridView1.Rows.Count;
+            //labelCount.Text = "Количество записей: ";
+            //labelCount.Text += dataGridView1.Rows.Count;
+            //FillCount();
+            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
 
         /// <summary>
@@ -623,7 +625,7 @@ namespace kursovoy
 
                 if (ProductQuantityInStock == 0)
                 {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ff4e33");
+                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightCoral;
 
                 }
                 else if (ProductQuantityInStock <= 3)
@@ -639,6 +641,7 @@ namespace kursovoy
             {
                 currentPage1--;
                 UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
+                FillCount();
             }
         }
 
@@ -649,28 +652,48 @@ namespace kursovoy
             {
                 currentPage1++;
                 UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
-            }
-        }
-        /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
-        /// </summary>
-        private void ResetInactivityTimer()
-        {
-            // Перезапускаем таймер
-            if (Timer != null)
-            {
-                Timer.Stop();
-                Timer.Start();
+                FillCount();
             }
         }
 
-        /// <summary>
-        /// Запускает отслеживание активности при загрузке окна.
-        /// </summary>
-        private void Products_Shown(object sender, EventArgs e)
+        private void Products_ResizeEnd(object sender, EventArgs e)
         {
-            Users_ActivateTracking();
+            //UpdatePag();
         }
 
+        private void Products_SizeChanged(object sender, EventArgs e)
+        {
+            UpdatePag();
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //if (e.RowIndex > 0)
+            //{
+            //    int ed = dataGridView1.CurrentCell.RowIndex;
+            //    int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["ProductArticul"].Value);
+            //    ViewProduct vp = new ViewProduct(id);
+            //    //this.Close();
+            //    vp.Show();
+            //}
+        }
+
+        private void dataGridView1_MouseDown(object sender, MouseEventArgs e)
+        {
+                if (e.Button == MouseButtons.Right)
+                {
+                    var hit = dataGridView1.HitTest(e.X, e.Y);
+                if (hit.RowIndex >= 0)
+                {
+                    dataGridView1.ClearSelection();
+                    dataGridView1.Rows[hit.RowIndex].Selected = true;
+
+                    dataGridView1.CurrentCell = dataGridView1.Rows[hit.RowIndex].Cells[0];
+
+                    contextMenuStrip1.Show(dataGridView1, e.Location);
+                }
+                
+            }
+        }
     }
 }

@@ -14,56 +14,11 @@ namespace kursovoy
 {
     public partial class ProductsAdd : Form
     {
-        private int inactivityTimeout = 0;
         public ProductsAdd()
         {
             InitializeComponent();
-            Timer.Tick += inactivityTimer_Tick;
-            Timer.Interval = 1000; // Проверка каждые 1 секунду
             LoadDataIntoComboBox();
             label12.Visible = false;
-        }
-        /// <summary>
-        /// Назначение обработчиков событий клавиатуры и мыши для отслеживания активности.
-        /// </summary>
-        private void Users_ActivateTracking()
-        {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
-
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
-            {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
-            }
-        }
-        /// <summary>
-        /// Обработчик любых событий, связанных с активностью пользователя (например, движение мыши или нажатие клавиш).
-        /// Отслеживает действия пользователя и сбрасывает таймер бездействия.
-        /// </summary>
-        private void Users_ActivityDetected(object sender, EventArgs e)
-        {
-            ResetInactivityTimer();
-        }
-        private void inactivityTimer_Tick(object sender, EventArgs e)
-        {
-            // Это событие сработает при превышении заданного времени бездействия
-            if (inactivityTimeout > 0)
-            {
-                inactivityTimeout -= 1000; // Уменьшаем тайм-аут
-            }
-            else
-            {
-                Timer.Stop(); // Останавливаем таймер
-                MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы");
-
-                Authorization authorization = new Authorization();
-                this.Close();
-                authorization.Show();
-            }
         }
         /// <summary>
         /// Для загрузки данных в comboBox
@@ -175,6 +130,7 @@ namespace kursovoy
                             }
                             // Запрос добавления
                             string query2 = "INSERT INTO Product (" +
+                                "ProductArticul," +
                                "Name," +
                                "Description," +
                                "Cost," +
@@ -185,10 +141,10 @@ namespace kursovoy
                                "ProductSupplier," +
                                "ProductPhoto" +
                                ")" +
-                               " VALUES (@value1,@value2,@value3,@value4,@value5,@value6,@value7,@value8,@value9)";
+                               " VALUES (@value0,@value1,@value2,@value3,@value4,@value5,@value6,@value7,@value8,@value9)";
                             using (MySqlCommand cmd = new MySqlCommand(query2, connection))
                             {
-                               // cmd.Parameters.AddWithValue("@value0", textBox6.Text);//Art@value0, "ProductArticul," +
+                                cmd.Parameters.AddWithValue("@value0", textBox6.Text);//Art 
                                 cmd.Parameters.AddWithValue("@value1", textBoxName.Text);//Name
                                 cmd.Parameters.AddWithValue("@value2", textBox5.Text);//description
                                 cmd.Parameters.AddWithValue("@value3", textBox7.Text);//Cost
@@ -204,7 +160,6 @@ namespace kursovoy
                                 MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             connection.Close();
-
                             this.Close();
                         }
                     }
@@ -218,23 +173,7 @@ namespace kursovoy
 
         private void ProductsAdd_Load(object sender, EventArgs e)
         {
-            // Загрузить интервал времени бездействия из App.config
-            if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
-            {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
-            }
-            else
-            {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
-            }
 
-            ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активности
-            // Запрет изменения comboBox
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox3.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         /// <summary>
@@ -244,7 +183,7 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
-            label12.Visible = true;
+            //label12.Visible = true;
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png";
             openFileDialog.Title = "Выберите фотографию";
@@ -262,9 +201,9 @@ namespace kursovoy
                 }
 
                 // Проверка размера файла
-                if (fileInfo.Length > 2 * 1024 * 1024) // 2 Мб в байтах
+                if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб в байтах
                 {
-                    MessageBox.Show("Ошибка: Размер файла должен быть не более 2 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Ошибка: Размер файла должен быть не более 3 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 // Путь к папке для хранения изображений
@@ -288,56 +227,37 @@ namespace kursovoy
                 label12.Text = fileName;
             }
         }
-        /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
-        /// </summary>
-        private void ResetInactivityTimer()
-        {
-            // Перезапускаем таймер
-            if (Timer != null)
-            {
-                Timer.Stop();
-                Timer.Start();
-            }
-        }
-        /// <summary>
-        /// Запускает отслеживание активности при загрузке окна.
-        /// </summary>
-        private void ProductsAdd_Shown(object sender, EventArgs e)
-        {
-            Users_ActivateTracking();
-        }
 
-        //Description
-        private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsControl(e.KeyChar) &&
-                    !char.IsLetter(e.KeyChar))
-            {
-                e.Handled = true; // Отменяем ввод
-            }
-            if (e.KeyChar == ' ')
-            {
-                e.Handled = false;
-            }
-        }
+        ////Description
+        //private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    if (!char.IsControl(e.KeyChar) &&
+        //            !char.IsLetter(e.KeyChar))
+        //    {
+        //        e.Handled = true; // Отменяем ввод
+        //    }
+        //    if (e.KeyChar == ' ')
+        //    {
+        //        e.Handled = false;
+        //    }
+        //}
 
-        //Name
-        private void textBoxName_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsControl(e.KeyChar) &&
-            (e.KeyChar < 'а' || e.KeyChar > 'я') &&
-            (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
-            (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
-             (e.KeyChar < 'a' || e.KeyChar > 'z'))
-            {
-                e.Handled = true;
-            }
-            if (e.KeyChar == ' ')
-            {
-                e.Handled = false;
-            }
-        }
+        ////Name
+        //private void textBoxName_KeyPress(object sender, KeyPressEventArgs e)
+        //{
+        //    if (!char.IsControl(e.KeyChar) &&
+        //    (e.KeyChar < 'а' || e.KeyChar > 'я') &&
+        //    (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
+        //    (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
+        //     (e.KeyChar < 'a' || e.KeyChar > 'z'))
+        //    {
+        //        e.Handled = true;
+        //    }
+        //    if (e.KeyChar == ' ')
+        //    {
+        //        e.Handled = false;
+        //    }
+        //}
         //Cost, count, Art
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
