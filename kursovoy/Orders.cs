@@ -778,9 +778,9 @@ namespace kursovoy
         private void viewOrder_Click(object sender, EventArgs e)
         {
             //  Получаем OrderID из свойства Tag MenuItem
-            int orderID = (int)contextMenuStrip1.Tag; // Cast object to int
-
-            ViewOrder vo = new ViewOrder(orderID);
+            int ed = dataGridView1.CurrentCell.RowIndex;
+            int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
+            ViewOrder vo = new ViewOrder(id);
             vo.ShowDialog();
 
             UpdateDataGrid();
@@ -789,8 +789,7 @@ namespace kursovoy
             //labelCount.Text += " " + dataGridView1.Rows.Count;
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             //FillCount();
-            //int ed = dataGridView1.CurrentCell.RowIndex;
-            //int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
+
             //ViewOrder vo = new ViewOrder(id);
             //this.Close();
             //vo.ShowDialog();
@@ -812,33 +811,7 @@ namespace kursovoy
                 }
             }
         }
-        private void dataGridView1_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                // 1. Проверяем, что кликнули на строку (а не, например, на заголовок)
-                if (e.RowIndex >= 0 && e.RowIndex < dataGridView1.Rows.Count)
-                {
-                    // 2. Выделяем строку, если она еще не выделена.  Важно!
-                    if (!dataGridView1.Rows[e.RowIndex].Selected)
-                    {
-                        dataGridView1.ClearSelection();
-                        dataGridView1.Rows[e.RowIndex].Selected = true;
-                    }
-
-                    // 3. Получаем OrderID для строки *в dataGridView1*
-                    int rowIndex = e.RowIndex;
-                    int orderID = Convert.ToInt32(dataGridView1.Rows[rowIndex].Cells["OrderID"].Value);
-
-                    //  (Необязательно) Передаем OrderID в контекстное меню.
-                    contextMenuStrip1.Tag = orderID; // Сохраняем ID заказа в свойстве Tag MenuItem
-
-                    // 4. Отображаем контекстное меню
-                    contextMenuStrip1.Show(dataGridView1, e.Location);
-                }
-            }
-        }
-
+       
         private void toggleFullscreenButton_Click(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Maximized)
@@ -857,6 +830,25 @@ namespace kursovoy
              //   this.FormBorderStyle = FormBorderStyle.None;  // Убираем границу для истинного полноэкранного режима
                // toggleFullscreenButton.Text = "Окно";
             }
+        }
+
+        private void dataGridView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                var hit = dataGridView1.HitTest(e.X, e.Y);
+                if (hit.RowIndex >= 0)
+                {
+                    dataGridView1.ClearSelection();
+                    dataGridView1.Rows[hit.RowIndex].Selected = true;
+
+                    dataGridView1.CurrentCell = dataGridView1.Rows[hit.RowIndex].Cells[0];
+
+                    contextMenuStrip1.Show(dataGridView1, e.Location);
+                }
+
+            }
+
         }
     }
 }

@@ -680,9 +680,9 @@ namespace kursovoy
 
         private void dataGridView1_MouseDown(object sender, MouseEventArgs e)
         {
-                if (e.Button == MouseButtons.Right)
-                {
-                    var hit = dataGridView1.HitTest(e.X, e.Y);
+            if (e.Button == MouseButtons.Right)
+            {
+                var hit = dataGridView1.HitTest(e.X, e.Y);
                 if (hit.RowIndex >= 0)
                 {
                     dataGridView1.ClearSelection();
@@ -692,7 +692,7 @@ namespace kursovoy
 
                     contextMenuStrip1.Show(dataGridView1, e.Location);
                 }
-                
+
             }
         }
     }

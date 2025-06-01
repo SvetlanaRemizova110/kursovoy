@@ -35,6 +35,8 @@ namespace kursovoy
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Products));
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.добавитьВКорзинуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SearchText = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -54,8 +56,6 @@ namespace kursovoy
             this.labelCount = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.toggleFullscreenButton = new System.Windows.Forms.Button();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.добавитьВКорзинуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -98,6 +98,20 @@ namespace kursovoy
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             this.dataGridView1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseDown);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.добавитьВКорзинуToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(184, 48);
+            // 
+            // добавитьВКорзинуToolStripMenuItem
+            // 
+            this.добавитьВКорзинуToolStripMenuItem.Name = "добавитьВКорзинуToolStripMenuItem";
+            this.добавитьВКорзинуToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.добавитьВКорзинуToolStripMenuItem.Text = "Добавить в корзину";
+            this.добавитьВКорзинуToolStripMenuItem.Click += new System.EventHandler(this.AddToOrderMenuClick);
             // 
             // SearchText
             // 
@@ -360,20 +374,6 @@ namespace kursovoy
             this.toggleFullscreenButton.TabIndex = 7;
             this.toggleFullscreenButton.UseVisualStyleBackColor = false;
             this.toggleFullscreenButton.Click += new System.EventHandler(this.toggleFullscreenButton_Click);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.добавитьВКорзинуToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(184, 26);
-            // 
-            // добавитьВКорзинуToolStripMenuItem
-            // 
-            this.добавитьВКорзинуToolStripMenuItem.Name = "добавитьВКорзинуToolStripMenuItem";
-            this.добавитьВКорзинуToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.добавитьВКорзинуToolStripMenuItem.Text = "Добавить в корзину";
-            this.добавитьВКорзинуToolStripMenuItem.Click += new System.EventHandler(this.AddToOrderMenuClick);
             // 
             // Products
             // 
