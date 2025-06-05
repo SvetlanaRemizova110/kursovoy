@@ -274,7 +274,7 @@ namespace kursovoy
             this.label12.AutoSize = true;
             this.label12.BackColor = System.Drawing.Color.LightGreen;
             this.label12.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.label12.Location = new System.Drawing.Point(859, 217);
+            this.label12.Location = new System.Drawing.Point(860, 255);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(107, 26);
             this.label12.TabIndex = 102;
@@ -337,7 +337,7 @@ namespace kursovoy
             this.button4.BackColor = System.Drawing.Color.LimeGreen;
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button4.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button4.Location = new System.Drawing.Point(817, 250);
+            this.button4.Location = new System.Drawing.Point(817, 215);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(149, 37);
             this.button4.TabIndex = 106;

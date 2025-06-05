@@ -170,7 +170,7 @@ namespace kursovoy
             this.textBox3.Size = new System.Drawing.Size(279, 34);
             this.textBox3.TabIndex = 81;
             this.textBox3.TabStop = false;
-            this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
+            //this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             this.textBox3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox2_KeyPress);
             // 
             // dataGridView3
@@ -279,7 +279,7 @@ namespace kursovoy
             this.textBox2.Size = new System.Drawing.Size(279, 34);
             this.textBox2.TabIndex = 81;
             this.textBox2.TabStop = false;
-            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
+            //this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             this.textBox2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox2_KeyPress);
             // 
             // dataGridView2
@@ -339,7 +339,7 @@ namespace kursovoy
             this.textBox1.Size = new System.Drawing.Size(279, 34);
             this.textBox1.TabIndex = 75;
             this.textBox1.TabStop = false;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            //this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // button5

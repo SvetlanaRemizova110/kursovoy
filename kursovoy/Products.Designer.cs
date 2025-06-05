@@ -104,7 +104,7 @@ namespace kursovoy
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.добавитьВКорзинуToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(184, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(184, 26);
             // 
             // добавитьВКорзинуToolStripMenuItem
             // 
@@ -403,7 +403,9 @@ namespace kursovoy
             this.Controls.Add(this.SearchText);
             this.Controls.Add(this.dataGridView1);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(1121, 720);
             this.Name = "Products";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Товары";

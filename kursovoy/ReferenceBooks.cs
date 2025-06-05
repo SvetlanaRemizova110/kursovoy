@@ -452,22 +452,22 @@ namespace kursovoy
                         using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                         {
                             con.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName", con))
+                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName AND CategoryID != @CategoryID", con))
                             {
                                 checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
+                                checkcmd.Parameters.AddWithValue("@CategoryID", сategoryID);
                                 int count = Convert.ToInt32(checkcmd.ExecuteScalar());
                                 if (count > 0)
                                 {
                                     MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
                                     return;
                                 }
                             }
 
                             MySqlCommand cmd = new MySqlCommand(@"UPDATE Category 
-                            SET CategoryID = @сategoryID,
-                            CategoryName = @сategoryName
-                            WHERE CategoryID = @сategoryID", con);
+                        SET CategoryID = @сategoryID,
+                        CategoryName = @сategoryName
+                        WHERE CategoryID = @сategoryID", con);
 
                             cmd.Parameters.AddWithValue("@сategoryName", textBox1.Text);
                             cmd.Parameters.AddWithValue("@сategoryID", сategoryID);
@@ -537,9 +537,10 @@ namespace kursovoy
                         using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                         {
                             con.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Supplier WHERE SupplierName = @SupplierName", con))
+                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Supplier WHERE SupplierName = @SupplierName AND SupplierID != @SupplierID", con))
                             {
                                 checkcmd.Parameters.AddWithValue("@SupplierName", supplierName);
+                                checkcmd.Parameters.AddWithValue("@SupplierID", supplierID);
                                 int count = Convert.ToInt32(checkcmd.ExecuteScalar());
                                 if (count > 0)
                                 {
@@ -592,9 +593,10 @@ namespace kursovoy
                         using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                         {
                             con.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM ProductManufactur WHERE ProductManufacturName = @ProductManufacturName;", con))
+                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM ProductManufactur WHERE ProductManufacturName = @ProductManufacturName AND ProductManufacturID != @ProductManufacturID;", con))
                             {
                                 checkcmd.Parameters.AddWithValue("@ProductManufacturName", productManufacturName);
+                                checkcmd.Parameters.AddWithValue("@ProductManufacturID", productManufacturID);
                                 int count = Convert.ToInt32(checkcmd.ExecuteScalar());
                                 if (count > 0)
                                 {
@@ -620,70 +622,75 @@ namespace kursovoy
             }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            // Сохраняем текущее положение курсора
-            int selectionStart = textBox1.SelectionStart;
-            int selectionLength = textBox1.SelectionLength;
+        //private void textBox1_TextChanged(object sender, EventArgs e)
+        //{
+        //    // Сохраняем текущее положение курсора
+        //    int selectionStart = textBox1.SelectionStart;
+        //    int selectionLength = textBox1.SelectionLength;
 
-            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-            string[] words = textBox1.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
-            {
-                if (words[i].Length > 0) // Проверка длины слова
-                {
-                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-                }
-            }
-            textBox1.Text = string.Join(" ", words);
+        //    // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+        //    string[] words = textBox1.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        //    for (int i = 0; i < words.Length; i++)
+        //    {
+        //        if (words[i].Length > 0) // Проверка длины слова
+        //        {
+        //            words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+        //        }
+        //    }
+        //    textBox1.Text = string.Join(" ", words);
 
-            // Восстанавливаем положение курсора
-            textBox1.SelectionStart = Math.Min(selectionStart, textBox1.Text.Length);
-            textBox1.SelectionLength = selectionLength;
-        }
+        //    // Восстанавливаем положение курсора
+        //    textBox1.SelectionStart = Math.Min(selectionStart, textBox1.Text.Length);
+        //    textBox1.SelectionLength = selectionLength;
+        //}
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-            // Сохраняем текущее положение курсора
-            int selectionStart = textBox2.SelectionStart;
-            int selectionLength = textBox2.SelectionLength;
+        //private void textBox2_TextChanged(object sender, EventArgs e)
+        //{
+        //    // Сохраняем текущее положение курсора
+        //    int selectionStart = textBox2.SelectionStart;
+        //    int selectionLength = textBox2.SelectionLength;
 
-            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-            string[] words = textBox2.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
-            {
-                if (words[i].Length > 0) // Проверка длины слова
-                {
-                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-                }
-            }
-            textBox2.Text = string.Join(" ", words);
+        //    // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+        //    string[] words = textBox2.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        //    for (int i = 0; i < words.Length; i++)
+        //    {
+        //        if (words[i].Length > 0) // Проверка длины слова
+        //        {
+        //            words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+        //        }
+        //    }
+        //    textBox2.Text = string.Join(" ", words);
 
-            // Восстанавливаем положение курсора
-            textBox2.SelectionStart = Math.Min(selectionStart, textBox2.Text.Length);
-            textBox2.SelectionLength = selectionLength;
-        }
+        //    // Восстанавливаем положение курсора
+        //    textBox2.SelectionStart = Math.Min(selectionStart, textBox2.Text.Length);
+        //    textBox2.SelectionLength = selectionLength;
+        //}
 
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-            // Сохраняем текущее положение курсора
-            int selectionStart = textBox3.SelectionStart;
-            int selectionLength = textBox3.SelectionLength;
+        //private void textBox3_TextChanged(object sender, EventArgs e)
+        //{
+        //    // Сохраняем текущее положение курсора
+        //    int selectionStart = textBox3.SelectionStart;
+        //    int selectionLength = textBox3.SelectionLength;
 
-            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-            string[] words = textBox3.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
-            {
-                if (words[i].Length > 0) // Проверка длины слова
-                {
-                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-                }
-            }
-            textBox3.Text = string.Join(" ", words);
+        //    // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+        //    string[] words = textBox3.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        //    for (int i = 0; i < words.Length; i++)
+        //    {
+        //        if (words[i].Length > 0) // Проверка длины слова
+        //        {
+        //            words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+        //        }
+        //    }
+        //    textBox3.Text = string.Join(" ", words);
 
-            // Восстанавливаем положение курсора
-            textBox3.SelectionStart = Math.Min(selectionStart, textBox3.Text.Length);
-            textBox3.SelectionLength = selectionLength;
-        }
+        //    // Восстанавливаем положение курсора
+        //    textBox3.SelectionStart = Math.Min(selectionStart, textBox3.Text.Length);
+        //    textBox3.SelectionLength = selectionLength;
+        //}
+
+        //private void tabPage1_Click(object sender, EventArgs e)
+        //{
+
+        //}
     }
 }

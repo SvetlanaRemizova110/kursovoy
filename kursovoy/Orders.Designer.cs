@@ -293,7 +293,7 @@ namespace kursovoy
             this.просмотретьЗаказToolStripMenuItem.Name = "просмотретьЗаказToolStripMenuItem";
             this.просмотретьЗаказToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.просмотретьЗаказToolStripMenuItem.Text = "просмотреть заказ";
-            this.просмотретьЗаказToolStripMenuItem.Click += new System.EventHandler(this.viewOrder_Click);
+            this.просмотретьЗаказToolStripMenuItem.Click += new System.EventHandler(this.ViewOrder_Click);
             // 
             // button5
             // 
@@ -372,6 +372,7 @@ namespace kursovoy
             this.Controls.Add(this.dataGridView1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(905, 700);
             this.Name = "Orders";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Заказы";

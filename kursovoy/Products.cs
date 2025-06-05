@@ -37,14 +37,17 @@ namespace kursovoy
                 Value.clearOrder = false;
             }
         }
+        /// <summary>
+        /// Масштабирование формы.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void toggleFullscreenButton_Click(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Maximized)
             {
                 // Восстанавливаем предыдущее состояние (нормальное)
                 this.WindowState = _previousWindowState;
-                //this.FormBorderStyle = _previousBorderStyle; // Восстанавливаем стиль границы
-               // toggleFullscreenButton.Text = "На весь экран";
             }
             else
             {
@@ -52,16 +55,18 @@ namespace kursovoy
                 _previousWindowState = this.WindowState;  // Сохраняем текущее состояние
                 _previousBorderStyle = this.FormBorderStyle; // Сохраняем стиль границы
                 this.WindowState = FormWindowState.Maximized;
-                //this.FormBorderStyle = FormBorderStyle.None;  // Убираем границу для истинного полноэкранного режима
-               // toggleFullscreenButton.Text = "Окно";
             }
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Products_Load(object sender, EventArgs e)
         {
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += dataGridView1.Rows.Count;
             FillCount();
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             labelVSE.Visible = false;

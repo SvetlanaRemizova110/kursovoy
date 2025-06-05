@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -33,8 +32,6 @@ namespace kursovoy
             LoadDataIntoComboBox();// Для загрузки данных в comboBox
             LoadProductData(); // Загрузка данных в поля по артикулу
             LoadImage(); // Загрузка фото товара из Базы данных
-
-            //LoadDefaultImage();
         }
 
         // Загрузка дефолтной картинки
@@ -44,14 +41,6 @@ namespace kursovoy
 
             if (!File.Exists(defaultImagePath))
             {
-                // Если файла нет, создаем его (можно создать пустой или добавить туда дефолтную картинку)
-                //Например:
-                //Bitmap bmp = new Bitmap(100,100);
-                //using(Graphics gr = Graphics.FromImage(bmp)){
-                //    gr.Clear(Color.Gray);
-                //}
-                //bmp.Save(defaultImagePath, System.Drawing.Imaging.ImageFormat.Png);
-
                 MessageBox.Show($"Файл заглушки {DefaultImageName} не найден. Пожалуйста, поместите его в папку photo.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 pictureBox1.Image = null;
                 label12.Text = "";
@@ -71,8 +60,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка загрузки дефолтной картинки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
 
         /// <summary>
         /// Загрузка фото товара из Базы данных
@@ -100,33 +87,6 @@ namespace kursovoy
                 LoadDefaultImage();
             }
         }
-
-        ///// <summary>
-        ///// Загрузка фото по умолчанию
-        ///// </summary>
-        //private void LoadDefaultImage()
-        //{
-        //    string defaultImagePath = Path.Combine(imageDirectory, "picture.png");
-        //    if (File.Exists(defaultImagePath))
-        //    {
-        //        try
-        //        {
-        //            pictureBox1.Image = Image.FromFile(defaultImagePath);
-        //            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            MessageBox.Show($"Ошибка загрузки изображения по умолчанию: {ex.Message}");
-        //            pictureBox1.Image = null;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        MessageBox.Show("Изображение по умолчанию не найдено: picture.png");
-        //        pictureBox1.Image = null;
-        //    }
-        //}
-
         /// <summary>
         ///  Для загрузки данных в comboBox
         /// </summary>
@@ -447,16 +407,29 @@ namespace kursovoy
 
                 try
                 {
-                    // Копируем файл в папку с новым именем
-                    File.Copy(selectedFilePath, targetPath, true);
+                    // Проверяем, существует ли файл с таким именем
+                    if (File.Exists(targetPath))
+                    {
+                        // Если файл существует, просто обновляем информацию в PictureBox и Label
+                        pictureBox1.Image = Image.FromFile(targetPath);
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage; // или StretchImage
+                        _currentPhotoPath = targetPath;
+                        label12.Text = newFileName;
+                        MessageBox.Show("Фотография уже существует.  Использована существующая.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Если файл не существует, копируем его
+                        File.Copy(selectedFilePath, targetPath, true);
 
-                    // Отображаем фото в PictureBox
-                    pictureBox1.Image = Image.FromFile(targetPath);
-                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                        // Отображаем фото в PictureBox
+                        pictureBox1.Image = Image.FromFile(targetPath);
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
-                    // Сохраняем путь к новой фотографии и имя файла
-                    _currentPhotoPath = targetPath;
-                    label12.Text = newFileName;
+                        // Сохраняем путь к новой фотографии и имя файла
+                        _currentPhotoPath = targetPath;
+                        label12.Text = newFileName;
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -21,7 +21,6 @@ namespace kursovoy
         public import()
         {
             InitializeComponent();
-            
         }
         /// <summary>
         /// Заполнение ComboBox названиями таблиц

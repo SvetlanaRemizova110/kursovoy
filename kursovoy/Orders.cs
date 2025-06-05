@@ -48,6 +48,10 @@ namespace kursovoy
         // Список для хранения данных о заказах
         private List<OrderData> orderDataList = new List<OrderData>();
 
+        /// <summary>
+        /// Загрузка данных в datagridview
+        /// </summary>
+        /// <param name="strCmd"></param>
         public void FillDataGrid(string strCmd)
         {
             try
@@ -200,11 +204,17 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Событие при загрузке формы
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Orders_Load(object sender, EventArgs e)
         {
             if (Authorization.User2.Role == 3)
             {
                 this.Size = new Size(905, 608);
+                this.MinimumSize = new Size(905, 608);
                 buttonPag1.Location = new System.Drawing.Point(75, 524);
                 buttonPag2.Location = new System.Drawing.Point(106, 524);
                 labelCount.Location = new System.Drawing.Point(75, 491);
@@ -225,11 +235,10 @@ namespace kursovoy
             //    " INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID");
             //////////////
         }
+        
         /// <summary>
-        /// //////////
+        /// Выбор страницы пагинации, скрытие ненужных строк
         /// </summary>
-        /// выбор страницы пагинации
-        /// те строки которые нам не нужны на выбраной странице - скрываем
         private void LinkLabel_Click(object sender, EventArgs e)
         {
             dataGridView1.ClearSelection();
@@ -244,7 +253,10 @@ namespace kursovoy
                 FillCount();
             }
         }
-        //Пагинация
+        
+        /// <summary>
+        /// Пагинация
+        /// </summary>
         private void UpdatePag()
         {
             // Очищаем только строки, не трогая столбцы
@@ -310,6 +322,7 @@ namespace kursovoy
             //labelVSE.Text = $"/ {totalRows1}";
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
+        
         /// <summary>
         /// Количество строк всего
         /// </summary>
@@ -329,9 +342,9 @@ namespace kursovoy
                 labelVSE.Text = $"/{totalRecords}";
             }
         }
-        ////////////////////////
+
         /// <summary>
-        /// Поиск, сортировка, фильтр
+        /// Поиск, сортировка, фильтрация
         /// </summary>
         private void UpdateDataGrid()
         {
@@ -355,21 +368,28 @@ namespace kursovoy
             UpdatePag(); // Обновляем пагинацию
         }
 
+        /// <summary>
+        /// Обработчик события изменения текста в поле поиска.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SearchText_TextChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += " " + dataGridView1.Rows.Count;
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
+
+        /// <summary>
+        /// Обработчик события изменения выбранного элемента в ComboBox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += " " + dataGridView1.Rows.Count;
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
@@ -526,16 +546,33 @@ namespace kursovoy
                 }
             }
 
+        /// <summary>
+        /// Устанавливаем минимальную дату для dateTimePickerEnd.
+        /// Предотвращает выбор даты окончания раньше даты начала.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dateTimePickerStart_ValueChanged(object sender, EventArgs e)
         {
             dateTimePickerEnd.MinDate = dateTimePickerStart.Value;
         }
 
+        /// <summary>
+        /// Устанавливаем максимальную дату для dateTimePickerStart.
+        /// Предотвращает выбор даты начала позже даты окончания.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dateTimePickerEnd_ValueChanged(object sender, EventArgs e)
         {
             dateTimePickerStart.MaxDate = dateTimePickerEnd.Value;
         }
 
+        /// <summary>
+        /// Изменение статуса
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             if (dataGridView1.Columns[e.ColumnIndex].Name == "OrderStatus")
@@ -664,6 +701,7 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при обновлении статуса заказа: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        
         /// <summary>
         /// Возврат товара на склад
         /// </summary>
@@ -701,41 +739,10 @@ namespace kursovoy
         }
 
         /// <summary>
-        /// Списание товара со склада (при изменении статуса с "Отменён" на "Выполнен")
+        /// Проверка на ввод только чисел в поиске
         /// </summary>
-        /// <param name="orderID"></param>
-        private void DeductProductsFromStock(int orderID)
-        {
-            try
-            {
-                OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
-                if (orderData != null)
-                {
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
-                    {
-                        con.Open();
-                        // Перебираем товары в заказе и списываем их со склада
-                        foreach (var item in orderData.OrderItems)
-                        {
-                            string productArticleNumber = item.Key; 
-                            int quantity = item.Value;
-                            // Уменьшаем количество товара на складе
-                            string query = "UPDATE Product SET ProductQuantityInStock = ProductQuantityInStock - @Quantity WHERE ProductArticul = @ProductArticul"; // Используем ProductArticleNumber
-                            MySqlCommand command = new MySqlCommand(query, con);
-                            command.Parameters.AddWithValue("@ProductArticul", productArticleNumber); 
-                            command.Parameters.AddWithValue("@Quantity", quantity);
-                            command.ExecuteNonQuery();
-                        }
-                        con.Close();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при списании товара со склада: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SearchText_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Проверка на ввод только чисел
@@ -745,6 +752,11 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Кнопка перехода на предыдущую страницу
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonPag1_Click(object sender, EventArgs e)
         {
             if (currentPage1 > 0)
@@ -755,6 +767,11 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Кнопка перехода на следующую страницу
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonPag2_Click(object sender, EventArgs e)
         {
             int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
@@ -766,32 +783,38 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Обновляет навигацию по страницам при изменении размера формы.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Orders_SizeChanged(object sender, EventArgs e)
         {
             UpdatePag();
         }
 
-
-        private void viewOrder_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Просмотр состава заказа
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ViewOrder_Click(object sender, EventArgs e)
         {
             //  Получаем OrderID из свойства Tag MenuItem
             int ed = dataGridView1.CurrentCell.RowIndex;
             int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
             ViewOrder vo = new ViewOrder(id);
             vo.ShowDialog();
-
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += " " + dataGridView1.Rows.Count;
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
-            //FillCount();
-
-            //ViewOrder vo = new ViewOrder(id);
-            //this.Close();
-            //vo.ShowDialog();
         }
 
+        /// <summary>
+        /// Условное форматирование данных
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.ColumnIndex == dataGridView1.Columns["OrderStatus"].Index && e.Value != null)
@@ -809,14 +832,17 @@ namespace kursovoy
             }
         }
        
+        /// <summary>
+        /// Масштабирование формы
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void toggleFullscreenButton_Click(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Maximized)
             {
                 // Восстанавливаем предыдущее состояние (нормальное)
                 this.WindowState = _previousWindowState;
-               // this.FormBorderStyle = _previousBorderStyle; // Восстанавливаем стиль границы
-              //  toggleFullscreenButton.Text = "На весь экран";
             }
             else
             {
@@ -824,11 +850,14 @@ namespace kursovoy
                 _previousWindowState = this.WindowState;  // Сохраняем текущее состояние
                 _previousBorderStyle = this.FormBorderStyle; // Сохраняем стиль границы
                 this.WindowState = FormWindowState.Maximized;
-             //   this.FormBorderStyle = FormBorderStyle.None;  // Убираем границу для истинного полноэкранного режима
-               // toggleFullscreenButton.Text = "Окно";
             }
         }
 
+        /// <summary>
+        /// Событие для выделение всей строки при нажатие ПКМ для просмотра состава заказа
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridView1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
