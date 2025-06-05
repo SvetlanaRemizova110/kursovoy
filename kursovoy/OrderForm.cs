@@ -22,7 +22,6 @@ namespace kursovoy
         public Dictionary<string, int> UpdatedOrder { get; private set; }
         private int orderId; // Добавлено поле для хранения ID заказа
 
-
         public OrderForm(Dictionary<string, int> order)
         {
             InitializeComponent();
@@ -31,14 +30,16 @@ namespace kursovoy
             Products.Value.clearOrder = false;
             InitializeOrderFormUI();
             PopulateOrderDetails(); // Отображение данных заказа
-            UpdateConfirmButtonState(); // Проверка состояния заказа
+            UpdateConfirmButtonState(); 
 
             // Инициализация ID заказа (пока значение по умолчанию, будет изменено после сохранения)
             this.orderId = -1;
-            UpdateOrderInfoLabels();
+            UpdateOrderLabels();
         }
-
-        private void UpdateOrderInfoLabels()
+        /// <summary>
+        /// Обновляет информацию о заказе (дату и номер).
+        /// </summary>
+        private void UpdateOrderLabels()
         {
             orderDateLabel.Text = $"Дата: {DateTime.Now.ToShortDateString()}";
             if (orderId == -1)
@@ -51,6 +52,9 @@ namespace kursovoy
             }
         }
 
+        /// <summary>
+        /// Вывод товаров, добавленных в корзину
+        /// </summary>
         private void InitializeOrderFormUI()
         {
             // Создаем DataGridViewImageColumn
@@ -104,7 +108,6 @@ namespace kursovoy
             dataGridViewOrder.Columns.Add(buttonDecrease);
             dataGridViewOrder.Columns["DecreaseButton"].Width = 50;
         }
-
 
         /// <summary>
         /// Метод для заполнения DataGridView данными о заказе и расчета общей стоимости заказа.
@@ -167,11 +170,18 @@ namespace kursovoy
             UpdateConfirmButtonState();
         }
 
+        /// <summary>
+        /// Проверка состояния заказа
+        /// </summary>
         private void UpdateConfirmButtonState()
         {
             AddOrder.Enabled = order.Count > 0; // Кнопка активна при наличии в заказе товаров.
         }
 
+        /// <summary>
+        /// Получение информации о компании из базы данных.
+        /// </summary>
+        /// <returns></returns>
         private Dictionary<string, string> GetCompanyInfo()
         {
             Dictionary<string, string> companyInfo = new Dictionary<string, string>();
@@ -207,7 +217,11 @@ namespace kursovoy
             return companyInfo;
         }
 
-        // Функция для получения изображения из базы данных и преобразования его в строку Base64
+        /// <summary>
+        /// Функция для получения изображения из базы данных
+        /// </summary>
+        /// <param name="productART"></param>
+        /// <returns></returns>
         private string GetProductImageStringFromDB(string productART)
         {
             string imageString = null;
@@ -403,6 +417,12 @@ namespace kursovoy
                 MessageBox.Show($"Не удалось открыть документ: {ex.Message}");
             }
         }
+        
+        /// <summary>
+        /// Кнопка для оформления заказа
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void AddOrder_Click(object sender, EventArgs e)
         {
             if (order.Count == 0)
@@ -424,7 +444,7 @@ namespace kursovoy
                     button2.Enabled = false;
                     button1.Enabled = false;
 
-                    UpdateOrderInfoLabels();  // Обновляем метки
+                    UpdateOrderLabels();  // Обновляем метки
                 }
             }
             catch (Exception ex)
@@ -687,6 +707,11 @@ namespace kursovoy
             return quantityInStock;
         }
 
+        /// <summary>
+        /// Для работы кнопок "Удалить", "+","-"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridViewOrder_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             DataGridView dataGridOrder = sender as DataGridView;
@@ -770,6 +795,11 @@ namespace kursovoy
             PopulateOrderDetails();
         }
 
+        /// <summary>
+        /// Кнопка для выхода в каталог
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
             if (dataGridViewOrder.Rows.Count == 0 || (dataGridViewOrder.Rows.Count == 1 && dataGridViewOrder.Rows[0].IsNewRow))
@@ -781,6 +811,11 @@ namespace kursovoy
             this.Close();
         }
 
+        /// <summary>
+        /// Cобытие при загрузки формы. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OrderForm_Load(object sender, EventArgs e)
         {
             label5.Text += " " + dataGridViewOrder.Rows.Count;
@@ -791,6 +826,11 @@ namespace kursovoy
             AddOrder.Enabled = true;
         }
 
+        /// <summary>
+        /// Кнопка для генерации чека
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
             try
@@ -815,8 +855,11 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при генерации чека: {ex.Message}", "Ошибка генерации чека", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        //Функция для получения последнего ID заказа
+        
+        /// <summary>
+        /// Функция для получения последнего ID заказа
+        /// </summary>
+        /// <returns></returns>
         private int GetNextOrderId()
         {
             int nextOrderId = 1; // Значение по умолчанию, если нет заказов в базе

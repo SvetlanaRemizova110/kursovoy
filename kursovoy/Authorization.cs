@@ -365,79 +365,7 @@ MessageBox.Show("База данных не существует. Создайт
            //this.Hide(); // Прячем форму авторизации
         }
         
-        private void BackupAllTables()
-        {
-            string[] tables = new string[]
-            {
-           "category",
-            "companyinfo",
-            "employeeee",
-            "`order`",
-            "product",
-            "productmanufactur",
-            "productorder",
-            "role",
-            "supplier",
-            "user"
-            };
-
-            foreach (var table in tables)
-            {
-                BackupTable(table);
-            }
-            MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-        private void BackupTable(string tableName)
-        {
-           try
-            {
-                using (MySqlConnection connection = new MySqlConnection(Program.ConnectionString))
-                {
-                    connection.Open();
-                    string query = $"SELECT * FROM {tableName}";
-                    MySqlCommand command = new MySqlCommand(query, connection);
-                    MySqlDataAdapter adapter = new MySqlDataAdapter(command);
-                    DataTable dataTable = new DataTable();
-
-                    adapter.Fill(dataTable);
-
-                    string backupFilePath = Path.Combine("./ReservCopy/", $"{tableName}_backup_{DateTime.Now:yyyyMMddHHmmss}.csv");
-
-                    using (StreamWriter writer = new StreamWriter(backupFilePath))
-                    {
-                        // Записываем заголовки столбцов
-                        for (int i = 0; i < dataTable.Columns.Count; i++)
-                        {
-                            writer.Write(dataTable.Columns[i]);
-                            if (i < dataTable.Columns.Count - 1)
-                            {
-                                writer.Write(";");
-                            }
-                        }
-                        writer.WriteLine();
-
-                        // Записываем строки данных
-                        foreach (DataRow row in dataTable.Rows)
-                        {
-                            for (int i = 0; i < dataTable.Columns.Count; i++)
-                            {
-                                writer.Write(row[i]);
-                                if (i < dataTable.Columns.Count - 1)
-                                {
-                                    writer.Write(";");
-                                }
-                            }
-                            writer.WriteLine();
-                        }
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Произошла ошибка при резервном копировании таблицы '{tableName}': {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        
 
         /// <summary>
         /// Проверка на пустое поле для ввода пароля при загрузке формы
@@ -451,6 +379,7 @@ MessageBox.Show("База данных не существует. Создайт
                 button1.Enabled = false;
             }
         }
+        
         /// <summary>
         /// При любом изменении пароля кнопка для входа становится активной.
         /// </summary>

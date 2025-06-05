@@ -16,16 +16,13 @@ namespace kursovoy
 {
     public partial class Orders : Form
     {
-        /// <summary>
-        /// 
-        /// </summary>
         private FormWindowState _previousWindowState; // Сохраняем предыдущее состояние окна
         private FormBorderStyle _previousBorderStyle; // Сохраняем стиль границы
 
         private int currentPage1 = 0;
         private int rowsPerPage1 = 20;
         private int totalRows1 = 0;
-        private int totalRecords;//кол-во строк всего
+        private int totalRecords; //кол-во строк всего
         private List<DataGridViewRow> allRows1 = new List<DataGridViewRow>();
 
         public Orders()

@@ -111,7 +111,7 @@ namespace kursovoy
             // 
             this.textBoxI.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBoxI.Location = new System.Drawing.Point(112, 70);
-            this.textBoxI.MaxLength = 30;
+            this.textBoxI.MaxLength = 40;
             this.textBoxI.Name = "textBoxI";
             this.textBoxI.Size = new System.Drawing.Size(340, 34);
             this.textBoxI.TabIndex = 2;
@@ -122,7 +122,7 @@ namespace kursovoy
             // 
             this.textBoxO.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBoxO.Location = new System.Drawing.Point(112, 122);
-            this.textBoxO.MaxLength = 30;
+            this.textBoxO.MaxLength = 40;
             this.textBoxO.Name = "textBoxO";
             this.textBoxO.Size = new System.Drawing.Size(340, 34);
             this.textBoxO.TabIndex = 3;
@@ -146,7 +146,7 @@ namespace kursovoy
             // 
             this.textBoxF.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.textBoxF.Location = new System.Drawing.Point(112, 18);
-            this.textBoxF.MaxLength = 30;
+            this.textBoxF.MaxLength = 40;
             this.textBoxF.Name = "textBoxF";
             this.textBoxF.Size = new System.Drawing.Size(340, 34);
             this.textBoxF.TabIndex = 1;

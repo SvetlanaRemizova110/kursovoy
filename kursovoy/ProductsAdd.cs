@@ -226,40 +226,40 @@ namespace kursovoy
                 // Выводим название файла в Label
                 label12.Text = fileName;
             }
-        }
+            }
 
-        ////Description
-        //private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    if (!char.IsControl(e.KeyChar) &&
-        //            !char.IsLetter(e.KeyChar))
-        //    {
-        //        e.Handled = true; // Отменяем ввод
-        //    }
-        //    if (e.KeyChar == ' ')
-        //    {
-        //        e.Handled = false;
-        //    }
-        //}
+            ////Description
+            //private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
+            //{
+            //    if (!char.IsControl(e.KeyChar) &&
+            //            !char.IsLetter(e.KeyChar))
+            //    {
+            //        e.Handled = true; // Отменяем ввод
+            //    }
+            //    if (e.KeyChar == ' ')
+            //    {
+            //        e.Handled = false;
+            //    }
+            //}
 
-        ////Name
-        //private void textBoxName_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    if (!char.IsControl(e.KeyChar) &&
-        //    (e.KeyChar < 'а' || e.KeyChar > 'я') &&
-        //    (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
-        //    (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
-        //     (e.KeyChar < 'a' || e.KeyChar > 'z'))
-        //    {
-        //        e.Handled = true;
-        //    }
-        //    if (e.KeyChar == ' ')
-        //    {
-        //        e.Handled = false;
-        //    }
-        //}
-        //Cost, count, Art
-        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+            ////Name
+            //private void textBoxName_KeyPress(object sender, KeyPressEventArgs e)
+            //{
+            //    if (!char.IsControl(e.KeyChar) &&
+            //    (e.KeyChar < 'а' || e.KeyChar > 'я') &&
+            //    (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
+            //    (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
+            //     (e.KeyChar < 'a' || e.KeyChar > 'z'))
+            //    {
+            //        e.Handled = true;
+            //    }
+            //    if (e.KeyChar == ' ')
+            //    {
+            //        e.Handled = false;
+            //    }
+            //}
+            //Cost, count, Art
+            private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Проверка на ввод только чисел
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
