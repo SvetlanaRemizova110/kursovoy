@@ -59,7 +59,7 @@ namespace kursovoy
         }
         
         /// <summary>
-        /// 
+        /// Событие при загрузке формы.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
