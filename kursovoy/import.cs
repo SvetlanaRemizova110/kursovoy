@@ -95,7 +95,7 @@ namespace kursovoy
                     connection.Open();
                     if (TableExists(connection, "Category"))
                     {
-                        MessageBox.Show("Таблица Category уже существует.");
+                        MessageBox.Show("Таблица Category уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -110,7 +110,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "Employeeee"))
                     {
-                        MessageBox.Show("Таблица Employeeee уже существует.");
+                        MessageBox.Show("Таблица Employeeee уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -129,7 +129,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "ProductManufactur"))
                     {
-                        MessageBox.Show("Таблица ProductManufactur уже существует.");
+                        MessageBox.Show("Таблица ProductManufactur уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -144,7 +144,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "supplier"))
                     {
-                        MessageBox.Show("Таблица Supplier уже существует.");
+                        MessageBox.Show("Таблица Supplier уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -159,7 +159,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "Role"))
                     {
-                        MessageBox.Show("Таблица Role уже существует.");
+                        MessageBox.Show("Таблица Role уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -174,7 +174,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "User"))
                     {
-                        MessageBox.Show("Таблица User уже существует.");
+                        MessageBox.Show("Таблица User уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -194,7 +194,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "Product"))
                     {
-                        MessageBox.Show("Таблица Product уже существует.");
+                        MessageBox.Show("Таблица Product уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -220,14 +220,14 @@ namespace kursovoy
 
                     if (TableExists(connection, "`Order`"))
                     {
-                        MessageBox.Show("Таблица Order уже существует.");
+                        MessageBox.Show("Таблица Order уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
                         string createOrderTable = @"
                     CREATE TABLE IF NOT EXISTS `Order` (
                       `OrderID` int NOT NULL AUTO_INCREMENT,
-                      `OrderDate` datetime(4) NOT NULL,
+                      `OrderDate` datetime NOT NULL,
                       `OrderStatus` varchar(45) NOT NULL,
                       `OrderUser` int NOT NULL,
                       `OrderPrice` DOUBLE NOT NULL,
@@ -239,7 +239,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "ProductOrder"))
                     {
-                        MessageBox.Show("Таблица ProductOrder уже существует.");
+                        MessageBox.Show("Таблица ProductOrder уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -257,7 +257,7 @@ namespace kursovoy
 
                     if (TableExists(connection, "Companyinfo"))
                     {
-                        MessageBox.Show("Таблица Companyinfo уже существует.");
+                        MessageBox.Show("Таблица Companyinfo уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -274,10 +274,10 @@ namespace kursovoy
                     )";
                         MySqlCommand companyCommand = new MySqlCommand(createCompanyTable, connection);
                         companyCommand.ExecuteNonQuery();
-                        ComboBoxTables();
+                      //  ComboBoxTables();
                     }
 
-                    MessageBox.Show("База данных восстановлена.");
+                    MessageBox.Show("База данных восстановлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     connection.Close();
                 }
@@ -326,15 +326,24 @@ namespace kursovoy
         /// <param name="e"></param>
         private void btnImportData_Click(object sender, EventArgs e)
         {
-            if (comboBox1.SelectedItem == null)
+            try
             {
-                MessageBox.Show("Пожалуйста, выберите таблицу");
+                if (comboBox1.SelectedItem == null)
+                {
+                    MessageBox.Show("Пожалуйста, выберите таблицу", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return;
+                }
+
+                string tableName = comboBox1.SelectedItem.ToString();
+
+                string filePath = textBox1.Text;
+                ImportData(filePath, tableName);
+            }
+            catch (MySqlException)
+            {
+                MessageBox.Show("Базы данных не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            string tableName = comboBox1.SelectedItem.ToString();
-
-            string filePath = textBox1.Text;
-            ImportData(filePath, tableName);
         }
 
         /// <summary>
@@ -347,7 +356,7 @@ namespace kursovoy
             string fullConnectionString = Authorization.Program.ConnectionString;
             if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(selectedTable))
             {
-                MessageBox.Show("Пожалуйста, выберите файл и таблицу.");
+                MessageBox.Show("Пожалуйста, выберите файл и таблицу.","", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
             }
 
@@ -806,31 +815,116 @@ namespace kursovoy
         {
             BackupAllTables();
         }
-        /// <summary>
-        /// Экспорт данных в таблицы БД.
-        /// </summary>
         private void BackupAllTables()
         {
+            // Проверяем существование базы данных
+            if (!DatabaseExists())
+            {
+                MessageBox.Show("База данных не существует или недоступна", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             string[] tables = new string[]
             {
-           "category",
-            "companyinfo",
-            "employeeee",
-            "`order`",
-            "product",
-            "productmanufactur",
-            "productorder",
-            "role",
-            "supplier",
-            "user"
+                "category",
+                "companyinfo",
+                "employeeee",
+                "order",
+                "product",
+                "productmanufactur",
+                "productorder",
+                "role",
+                "supplier",
+                "user"
             };
+
+            bool allTablesEmpty = true;
+            bool hasErrors = false;
 
             foreach (var table in tables)
             {
-                BackupTable(table);
+                // Проверяем существование и заполненность таблицы
+                if (TableExists(table))
+                {
+                    if (TableHasData(table))
+                    {
+                        allTablesEmpty = false;
+                        BackupTable(table);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Таблица '{table}' пуста и не будет экспортирована", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show($"Таблица '{table}' не существует и не будет экспортирована", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    hasErrors = true;
+                }
             }
-            MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (allTablesEmpty)
+            {
+                MessageBox.Show("Все таблицы пусты, резервная копия не создана", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else if (!hasErrors)
+            {
+                MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
+
+        private bool DatabaseExists()
+        {
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool TableExists(string tableName)
+        {
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                {
+                    connection.Open();
+                    string query = $"SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = '{tableName}' LIMIT 1;";
+                    MySqlCommand command = new MySqlCommand(query, connection);
+                    return command.ExecuteScalar() != null;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool TableHasData(string tableName)
+        {
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                {
+                    connection.Open();
+                    string query = $"SELECT EXISTS (SELECT 1 FROM `{tableName}` LIMIT 1);"; // Исправлено: обратные кавычки
+                    MySqlCommand command = new MySqlCommand(query, connection);
+                    return Convert.ToInt32(command.ExecuteScalar()) == 1;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void BackupTable(string tableName)
         {
             try
@@ -838,21 +932,24 @@ namespace kursovoy
                 using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
                     connection.Open();
-                    string query = $"SELECT * FROM {tableName}";
+                    string query = $"SELECT * FROM `{tableName}`"; // Исправлено: обратные кавычки
                     MySqlCommand command = new MySqlCommand(query, connection);
                     MySqlDataAdapter adapter = new MySqlDataAdapter(command);
                     DataTable dataTable = new DataTable();
 
                     adapter.Fill(dataTable);
 
+                    // Создаем директорию, если ее нет
+                    Directory.CreateDirectory("./ReservCopy/");
+
                     string backupFilePath = Path.Combine("./ReservCopy/", $"{tableName}_backup_{DateTime.Now:yyyyMMddHHmmss}.csv");
 
-                    using (StreamWriter writer = new StreamWriter(backupFilePath))
+                    using (StreamWriter writer = new StreamWriter(backupFilePath, false, Encoding.UTF8))  // Явно указана кодировка UTF8
                     {
                         // Записываем заголовки столбцов
                         for (int i = 0; i < dataTable.Columns.Count; i++)
                         {
-                            writer.Write(dataTable.Columns[i]);
+                            writer.Write(EscapeCsvField(dataTable.Columns[i].ColumnName));  // Экранируем имя столбца
                             if (i < dataTable.Columns.Count - 1)
                             {
                                 writer.Write(";");
@@ -865,7 +962,16 @@ namespace kursovoy
                         {
                             for (int i = 0; i < dataTable.Columns.Count; i++)
                             {
-                                writer.Write(row[i]);
+                                // Обрабатываем NULL значения и экранируем данные
+                                if (row.IsNull(i))
+                                {
+                                    writer.Write(""); // Или другое значение по умолчанию
+                                }
+                                else
+                                {
+                                    writer.Write(EscapeCsvField(row[i].ToString()));
+                                }
+
                                 if (i < dataTable.Columns.Count - 1)
                                 {
                                     writer.Write(";");
@@ -874,7 +980,6 @@ namespace kursovoy
                             writer.WriteLine();
                         }
                     }
-
                 }
             }
             catch (Exception ex)
@@ -882,5 +987,268 @@ namespace kursovoy
                 MessageBox.Show($"Произошла ошибка при резервном копировании таблицы '{tableName}': {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        // Функция для экранирования полей CSV
+        private string EscapeCsvField(string field)
+        {
+            if (string.IsNullOrEmpty(field))
+            {
+                return "";
+            }
+
+            // 1. Заключаем поле в двойные кавычки, если оно содержит разделитель, кавычки или перенос строки
+            if (field.Contains(";") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+            {
+                // 2. Заменяем двойные кавычки на две двойные кавычки
+                field = field.Replace("\"", "\"\"");
+                return "\"" + field + "\"";
+            }
+
+            return field;
+        }
     }
-}
+
+        ///// <summary>
+        ///// Экспорт данных в таблицы БД.
+        ///// </summary>
+        //private void BackupAllTables()
+        //{
+        //    // Проверяем существование базы данных
+        //    if (!DatabaseExists())
+        //    {
+        //        MessageBox.Show("База данных не существует или недоступна", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        return;
+        //    }
+
+        //    string[] tables = new string[]
+        //    {
+        //"category",
+        //"companyinfo",
+        //"employeeee",
+        //"order",
+        //"product",
+        //"productmanufactur",
+        //"productorder",
+        //"role",
+        //"supplier",
+        //"user"
+        //    };
+
+        //    bool allTablesEmpty = true;
+        //    bool hasErrors = false;
+
+        //    foreach (var table in tables)
+        //    {
+        //        // Проверяем существование и заполненность таблицы
+        //        if (TableExists(table))
+        //        {
+        //            if (TableHasData(table))
+        //            {
+        //                allTablesEmpty = false;
+        //                BackupTable(table);
+        //            }
+        //            else
+        //            {
+        //                MessageBox.Show($"Таблица '{table}' пуста и не будет экспортирована", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show($"Таблица '{table}' не существует и не будет экспортирована", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //            hasErrors = true;
+        //        }
+        //    }
+
+        //    if (allTablesEmpty)
+        //    {
+        //        MessageBox.Show("Все таблицы пусты, резервная копия не создана", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        //    }
+        //    else if (!hasErrors)
+        //    {
+        //        MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //    }
+        //}
+
+        //private bool DatabaseExists()
+        //{
+        //    try
+        //    {
+        //        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //        {
+        //            connection.Open();
+        //            return true;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
+        //private bool TableExists(string tableName)
+        //{
+        //    try
+        //    {
+        //        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //        {
+        //            connection.Open();
+        //            string query = $"SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = '{tableName}' LIMIT 1;";
+        //            MySqlCommand command = new MySqlCommand(query, connection);
+        //            return command.ExecuteScalar() != null;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
+        //private bool TableHasData(string tableName)
+        //{
+        //    try
+        //    {
+        //        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //        {
+        //            connection.Open();
+        //            string query = $"SELECT EXISTS (SELECT 1 FROM '{tableName}' LIMIT 1);";
+        //            MySqlCommand command = new MySqlCommand(query, connection);
+        //            return Convert.ToInt32(command.ExecuteScalar()) == 1;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
+
+        //private void BackupTable(string tableName)
+        //{
+        //    try
+        //    {
+        //        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //        {
+        //            connection.Open();
+        //            string query = $"SELECT * FROM {tableName}";
+        //            MySqlCommand command = new MySqlCommand(query, connection);
+        //            MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+        //            DataTable dataTable = new DataTable();
+
+        //            adapter.Fill(dataTable);
+
+        //            // Создаем директорию, если ее нет
+        //            Directory.CreateDirectory("./ReservCopy/");
+
+        //            string backupFilePath = Path.Combine("./ReservCopy/", $"{tableName}_backup_{DateTime.Now:yyyyMMddHHmmss}.csv");
+
+        //            using (StreamWriter writer = new StreamWriter(backupFilePath))
+        //            {
+        //                // Записываем заголовки столбцов
+        //                for (int i = 0; i < dataTable.Columns.Count; i++)
+        //                {
+        //                    writer.Write(dataTable.Columns[i]);
+        //                    if (i < dataTable.Columns.Count - 1)
+        //                    {
+        //                        writer.Write(";");
+        //                    }
+        //                }
+        //                writer.WriteLine();
+
+        //                // Записываем строки данных
+        //                foreach (DataRow row in dataTable.Rows)
+        //                {
+        //                    for (int i = 0; i < dataTable.Columns.Count; i++)
+        //                    {
+        //                        writer.Write(row[i]);
+        //                        if (i < dataTable.Columns.Count - 1)
+        //                        {
+        //                            writer.Write(";");
+        //                        }
+        //                    }
+        //                    writer.WriteLine();
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Произошла ошибка при резервном копировании таблицы '{tableName}': {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
+        ///// <summary>
+        ///// Экспорт данных в таблицы БД.
+        ///// </summary>
+        //private void BackupAllTables()
+        //{
+        //    string[] tables = new string[]
+        //    {
+        //   "category",
+        //    "companyinfo",
+        //    "employeeee",
+        //    "`order`",
+        //    "product",
+        //    "productmanufactur",
+        //    "productorder",
+        //    "role",
+        //    "supplier",
+        //    "user"
+        //    };
+
+        //    foreach (var table in tables)
+        //    {
+        //        BackupTable(table);
+        //    }
+        //    MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //}
+        //private void BackupTable(string tableName)
+        //{
+        //    try
+        //    {
+        //        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+        //        {
+        //            connection.Open();
+        //            string query = $"SELECT * FROM {tableName}";
+        //            MySqlCommand command = new MySqlCommand(query, connection);
+        //            MySqlDataAdapter adapter = new MySqlDataAdapter(command);
+        //            DataTable dataTable = new DataTable();
+
+        //            adapter.Fill(dataTable);
+
+        //            string backupFilePath = Path.Combine("./ReservCopy/", $"{tableName}_backup_{DateTime.Now:yyyyMMddHHmmss}.csv");
+
+        //            using (StreamWriter writer = new StreamWriter(backupFilePath))
+        //            {
+        //                // Записываем заголовки столбцов
+        //                for (int i = 0; i < dataTable.Columns.Count; i++)
+        //                {
+        //                    writer.Write(dataTable.Columns[i]);
+        //                    if (i < dataTable.Columns.Count - 1)
+        //                    {
+        //                        writer.Write(";");
+        //                    }
+        //                }
+        //                writer.WriteLine();
+
+        //                // Записываем строки данных
+        //                foreach (DataRow row in dataTable.Rows)
+        //                {
+        //                    for (int i = 0; i < dataTable.Columns.Count; i++)
+        //                    {
+        //                        writer.Write(row[i]);
+        //                        if (i < dataTable.Columns.Count - 1)
+        //                        {
+        //                            writer.Write(";");
+        //                        }
+        //                    }
+        //                    writer.WriteLine();
+        //                }
+        //            }
+
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Произошла ошибка при резервном копировании таблицы '{tableName}': {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
+    }
+

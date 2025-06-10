@@ -214,7 +214,6 @@ namespace kursovoy
             if (Authorization.User2.Role == 3)
             {
                 this.Size = new Size(905, 608);
-                this.MinimumSize = new Size(905, 608);
                 buttonPag1.Location = new System.Drawing.Point(75, 524);
                 buttonPag2.Location = new System.Drawing.Point(106, 524);
                 labelCount.Location = new System.Drawing.Point(75, 491);

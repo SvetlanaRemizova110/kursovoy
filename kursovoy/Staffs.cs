@@ -348,7 +348,11 @@ namespace kursovoy
                             telephone = @telephone,
                             status = @status
                         WHERE EmployeeID = @employeeID", con);
-
+                            if (UserTelephoneExists(maskedTextBox1.Text, con))
+                            {
+                                MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return;
+                            }
                             cmd.Parameters.AddWithValue("@employeeID", employeeID);
                             cmd.Parameters.AddWithValue("@employeeF", textBoxF.Text);
                             cmd.Parameters.AddWithValue("@employeeI", textBoxI.Text);
