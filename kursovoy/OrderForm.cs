@@ -408,9 +408,15 @@ namespace kursovoy
             doc.Close();
             wordApp.Quit();
 
-            // Открытие документа после сохранения
-
-                //Process.Start(filePath);
+                // Открытие документа после сохранения
+                try
+                {
+                    Process.Start(filePath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Не удалось открыть документ: {ex.Message}");
+                }
             }
             catch (Exception ex)
             {

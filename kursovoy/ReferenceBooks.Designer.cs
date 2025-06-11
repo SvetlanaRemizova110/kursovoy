@@ -170,7 +170,6 @@ namespace kursovoy
             this.textBox3.Size = new System.Drawing.Size(279, 34);
             this.textBox3.TabIndex = 81;
             this.textBox3.TabStop = false;
-            //this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             this.textBox3.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox2_KeyPress);
             // 
             // dataGridView3
@@ -181,6 +180,7 @@ namespace kursovoy
             this.dataGridView3.Size = new System.Drawing.Size(418, 371);
             this.dataGridView3.TabIndex = 1;
             this.dataGridView3.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView3_CellContentClick);
+            this.dataGridView3.SelectionChanged += new System.EventHandler(this.dataGridView3_SelectionChanged);
             // 
             // tabPage2
             // 
@@ -279,7 +279,6 @@ namespace kursovoy
             this.textBox2.Size = new System.Drawing.Size(279, 34);
             this.textBox2.TabIndex = 81;
             this.textBox2.TabStop = false;
-            //this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             this.textBox2.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox2_KeyPress);
             // 
             // dataGridView2
@@ -290,6 +289,7 @@ namespace kursovoy
             this.dataGridView2.Size = new System.Drawing.Size(418, 371);
             this.dataGridView2.TabIndex = 1;
             this.dataGridView2.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellContentClick);
+            this.dataGridView2.SelectionChanged += new System.EventHandler(this.dataGridView2_SelectionChanged);
             // 
             // tabPage1
             // 
@@ -339,7 +339,6 @@ namespace kursovoy
             this.textBox1.Size = new System.Drawing.Size(279, 34);
             this.textBox1.TabIndex = 75;
             this.textBox1.TabStop = false;
-            //this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
             // 
             // button5
@@ -399,6 +398,7 @@ namespace kursovoy
             this.dataGridView1.Size = new System.Drawing.Size(418, 371);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            this.dataGridView1.SelectionChanged += new System.EventHandler(this.dataGridView1_SelectionChanged);
             // 
             // tabControl1
             // 
@@ -411,6 +411,7 @@ namespace kursovoy
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(758, 446);
             this.tabControl1.TabIndex = 0;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.dataGridView1_SelectionChanged);
             // 
             // button2
             // 

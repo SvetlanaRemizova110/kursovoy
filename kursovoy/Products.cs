@@ -26,7 +26,7 @@ namespace kursovoy
         {
             public static bool clearOrder;
         }
-      
+
         public Products()
         {
             InitializeComponent();
@@ -57,7 +57,7 @@ namespace kursovoy
                 this.WindowState = FormWindowState.Maximized;
             }
         }
-        
+
         /// <summary>
         /// Событие при загрузке формы.
         /// </summary>
@@ -151,7 +151,7 @@ namespace kursovoy
                     dataGridView1.Columns["Редактировать"].Width = 120;
 
                     dataGridView1.Columns["ProductManufactur"].Visible = false;
-                    
+
                     dataGridView1.Columns["Unit"].Visible = false;
                 }
 
@@ -201,7 +201,7 @@ namespace kursovoy
                     row.Cells["ProductQuantityInStock"].Value = rdr[5];
                     row.Cells["ProductCategory"].Value = rdr[8];
                     row.Cells["ProductManufactur"].Value = rdr[7];
-                    
+
                     allRows1.Add(row);
                 }
                 totalRows1 = allRows1.Count;
@@ -574,12 +574,25 @@ namespace kursovoy
                     DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo);
                     if (dialogResult == DialogResult.Yes)
                     {
-                        MessageBox.Show("Запись удалена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        DeleteRecord(id); // Удаляем запись из базы данных
-                        dataGridView1.Rows.RemoveAt(e.RowIndex); // Удаляем строку из DataGridView
-                        UpdateDataGrid();
-                        UpdatePag();
-                        labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+                        try
+                        {
+                            DeleteRecord(id); // Удаляем запись из базы данных
+                            MessageBox.Show("Запись удалена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            dataGridView1.Rows.RemoveAt(e.RowIndex); // Удаляем строку из DataGridView
+                            UpdateDataGrid();
+                            UpdatePag();
+                            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+                        }
+                        catch (MySqlException ex) when (ex.Number == 1451)
+                        {
+                            MessageBox.Show("Невозможно удалить товар, так как он используется в других таблицах.",
+                                           "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ошибка при удалении: {ex.Message}",
+                                           "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
             }
@@ -699,6 +712,11 @@ namespace kursovoy
                 }
 
             }
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
         }
     }
 }

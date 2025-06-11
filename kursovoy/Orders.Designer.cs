@@ -62,7 +62,6 @@ namespace kursovoy
             // 
             // button1
             // 
-            this.button1.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.button1.BackColor = System.Drawing.Color.ForestGreen;
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button1.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -76,7 +75,6 @@ namespace kursovoy
             // 
             // dataGridView1
             // 
-            this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Comic Sans MS", 9.75F);
@@ -114,7 +112,6 @@ namespace kursovoy
             // 
             // label2
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.LightGreen;
             this.label2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -126,7 +123,6 @@ namespace kursovoy
             // 
             // comboBox1
             // 
-            this.comboBox1.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.comboBox1.FormattingEnabled = true;
@@ -141,7 +137,6 @@ namespace kursovoy
             // 
             // label3
             // 
-            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.LightGreen;
             this.label3.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -153,7 +148,6 @@ namespace kursovoy
             // 
             // SearchText
             // 
-            this.SearchText.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.SearchText.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.SearchText.Location = new System.Drawing.Point(328, 72);
             this.SearchText.MaxLength = 3;
@@ -204,7 +198,6 @@ namespace kursovoy
             // 
             // labelCount
             // 
-            this.labelCount.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelCount.AutoSize = true;
             this.labelCount.BackColor = System.Drawing.Color.LightGreen;
             this.labelCount.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -216,7 +209,6 @@ namespace kursovoy
             // 
             // labelVSE
             // 
-            this.labelVSE.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.labelVSE.AutoSize = true;
             this.labelVSE.BackColor = System.Drawing.Color.LightGreen;
             this.labelVSE.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -228,7 +220,6 @@ namespace kursovoy
             // 
             // buttonPag2
             // 
-            this.buttonPag2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.buttonPag2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.buttonPag2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonPag2.Location = new System.Drawing.Point(106, 524);
@@ -242,7 +233,6 @@ namespace kursovoy
             // 
             // buttonPag1
             // 
-            this.buttonPag1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.buttonPag1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.buttonPag1.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonPag1.Location = new System.Drawing.Point(75, 524);
@@ -256,7 +246,6 @@ namespace kursovoy
             // 
             // panel1
             // 
-            this.panel1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.button2);
@@ -270,7 +259,6 @@ namespace kursovoy
             // 
             // label1
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.LightGreen;
             this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -297,7 +285,6 @@ namespace kursovoy
             // 
             // button5
             // 
-            this.button5.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.button5.BackColor = System.Drawing.Color.LightCoral;
             this.button5.Enabled = false;
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
@@ -312,7 +299,6 @@ namespace kursovoy
             // 
             // label4
             // 
-            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label4.Location = new System.Drawing.Point(628, 492);
@@ -323,7 +309,6 @@ namespace kursovoy
             // 
             // label7
             // 
-            this.label7.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.label7.Location = new System.Drawing.Point(12, 8);
@@ -334,7 +319,6 @@ namespace kursovoy
             // 
             // toggleFullscreenButton
             // 
-            this.toggleFullscreenButton.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.toggleFullscreenButton.BackColor = System.Drawing.Color.LimeGreen;
             this.toggleFullscreenButton.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.toggleFullscreenButton.Font = new System.Drawing.Font("Comic Sans MS", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -351,7 +335,7 @@ namespace kursovoy
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Honeydew;
-            this.ClientSize = new System.Drawing.Size(889, 661);
+            this.ClientSize = new System.Drawing.Size(899, 694);
             this.ContextMenuStrip = this.contextMenuStrip1;
             this.ControlBox = false;
             this.Controls.Add(this.toggleFullscreenButton);
@@ -372,7 +356,6 @@ namespace kursovoy
             this.Controls.Add(this.dataGridView1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(905, 700);
             this.Name = "Orders";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Заказы";

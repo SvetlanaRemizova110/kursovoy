@@ -245,123 +245,13 @@ namespace kursovoy
             }
         }
 
-        /// <summary>
-        /// Добавление пользователя
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        //private void button3_Click(object sender, EventArgs e)
-        //{
-        //    if (comboBox1.Text == "" || comboBox2.Text == "" || textBox1.Text == "" || textBox7.Text == "")
-        //    {
-        //        MessageBox.Show("Необходимо заполнить все поля!");
-        //    }
-        //    else
-        //    {
-        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-        //        if (dialogResult == DialogResult.Yes)
-        //        {
-        //            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
-        //            {
-        //                try
-        //                {
-        //                    connection.Open();
-        //                    int roleid;
-        //                    string roleidQuery = "SELECT RoleID FROM Role WHERE Role = @role";
-        //                    using (MySqlCommand roleCmd = new MySqlCommand(roleidQuery, connection))
-        //                    {
-        //                        roleCmd.Parameters.AddWithValue("@role", comboBox1.Text);
-        //                        object result = roleCmd.ExecuteScalar();
-        //                        roleid = result != null ? Convert.ToInt32(result) : 0;
-        //                        if (roleid == 0)
-        //                        {
-        //                            MessageBox.Show("Роль не найдена.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                            return;
-        //                        }
-        //                    }
-        //                    int userFIO;
-        //                    string userFIOQuery = "SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @employeeF AND EmployeeI LIKE @employeeI AND EmployeeO LIKE @employeeO;";
-        //                    string[] fioParts = comboBox2.Text.Split(' ');
-        //                    if (fioParts.Length >= 3)
-        //                    {
-        //                        string employeeF = fioParts[0];
-        //                        string employeeI = fioParts[1];
-        //                        string employeeO = fioParts[2];
 
-        //                        using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, connection))
-        //                        {
-        //                            userFIOCmd.Parameters.AddWithValue("@employeeF", employeeF);
-        //                            userFIOCmd.Parameters.AddWithValue("@employeeI", employeeI);
-        //                            userFIOCmd.Parameters.AddWithValue("@employeeO", employeeO);
-        //                            object result = userFIOCmd.ExecuteScalar();
-        //                            userFIO = result != null ? Convert.ToInt32(result) : 0;
-        //                            if (userFIO == 0)
-        //                            {
-        //                                MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                                return;
-        //                            }
-        //                        }
-        //                        if (UserFIOExists(userFIO, connection))
-        //                        {
-        //                            MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                            return;
-        //                        }
-        //                        if (UserExists(textBox7.Text, connection))
-        //                        {
-        //                            MessageBox.Show("Пользователь с таким Логином уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                            return;
-        //                        }
-        //                        string query = "INSERT INTO user (UserFIO, Login, Password, RoleID) VALUES (@value1,@value2,@value3,@value4)";
-        //                        using (MySqlCommand cmd = new MySqlCommand(query, connection))
-        //                        {
-        //                            //UserID,cmd.Parameters.AddWithValue("@value0", textBox2.Text);
-        //                            cmd.Parameters.AddWithValue("@value1", userFIO);
-        //                            cmd.Parameters.AddWithValue("@value2", textBox7.Text);
-        //                            if (textBox1.Text.Length < 10)
-        //                            {
-        //                                string hashedPassword = HashPassword(textBox1.Text);
-        //                                cmd.Parameters.AddWithValue("@value3", hashedPassword);
-        //                            }
-        //                            else
-        //                            {
-        //                                string hashedPassword = textBox1.Text;
-        //                                cmd.Parameters.AddWithValue("@value3", hashedPassword);
-        //                            }
-        //                            cmd.Parameters.AddWithValue("@value4", roleid);
-        //                            cmd.ExecuteNonQuery();
-        //                            MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                            comboBox2.SelectedItem = null;
-        //                            comboBox1.SelectedItem = null;
-        //                            textBox7.Text = "";
-        //                            textBox1.Text = "";
-        //                            textBox2.Text = "";
-        //                            FillDataGrid("SELECT UserID AS 'Идентификатор'," +
-        //                            "employeeee.EmployeeF AS 'Ф сотрудника'," +
-        //                            "employeeee.EmployeeI AS 'И сотрудника'," +
-        //                            "employeeee.EmployeeO AS 'О сотрудника'," +
-        //                            "role.Role AS 'Роль'," +
-        //                            "Login AS 'Логин'," +
-        //                            "Password AS 'Пароль'" +
-        //                            "FROM user " +
-        //                            " INNER JOIN employeeee ON user.UserFIO = employeeee.EmployeeID" +
-        //                            " INNER JOIN role ON user.RoleID = role.RoleID");
-        //                        }
-        //                        connection.Close();
-        //                    }
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show("Ошибка: " + ex);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
         //Работа кнопок с таблицы
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             //При нажатии на кнопку "Выбрать"
-            if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0) {
+            if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
+            {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 textBox2.Text = row.Cells["UserID"].Value.ToString();
                 comboBox2.Text = row.Cells["UserFIO"].Value.ToString();
@@ -369,15 +259,28 @@ namespace kursovoy
                 textBox7.Text = row.Cells["Login"].Value.ToString();
                 textBox1.Text = row.Cells["Password"].Value.ToString();
             }
+
             // При нажатии кнопки "Удалить"
             if (e.ColumnIndex == dataGridView1.Columns["Удалить"].Index && e.RowIndex >= 0)
             {
                 int id = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["UserID"].Value);
+
+                // Проверяем, не пытаемся ли мы удалить текущего пользователя
+                string currentUserFIO = Authorization.User2.FIO; // Получаем ФИО текущего пользователя
+                string selectedUserFIO = (string)dataGridView1.Rows[e.RowIndex].Cells["UserFIO"].Value; // Получаем ФИО удаляемого пользователя
+
+                if (selectedUserFIO == currentUserFIO)
+                {
+                    MessageBox.Show("Вы не можете удалить самого себя!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return; // Прекращаем удаление
+                }
+
                 DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
                     DeleteRecord(id); // Удаляем запись из базы данных
                     dataGridView1.Rows.RemoveAt(e.RowIndex); // Удаляем строку из DataGridView
+                    MessageBox.Show("Запись успешно удалена.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -735,5 +638,9 @@ namespace kursovoy
             Users_ActivateTracking();
         }
 
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
+        }
     }
 }

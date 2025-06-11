@@ -63,51 +63,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Admin.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Admin.cs" />
     <Compile Include="Admin.Designer.cs">
       <DependentUpon>Admin.cs</DependentUpon>
     </Compile>
-    <Compile Include="Authorization.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Authorization.cs" />
     <Compile Include="Authorization.Designer.cs">
       <DependentUpon>Authorization.cs</DependentUpon>
     </Compile>
-    <Compile Include="import.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="import.cs" />
     <Compile Include="import.Designer.cs">
       <DependentUpon>import.cs</DependentUpon>
     </Compile>
-    <Compile Include="OrderForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="OrderForm.cs" />
     <Compile Include="OrderForm.Designer.cs">
       <DependentUpon>OrderForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Orders.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Orders.cs" />
     <Compile Include="Orders.Designer.cs">
       <DependentUpon>Orders.cs</DependentUpon>
     </Compile>
-    <Compile Include="Products.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Products.cs" />
     <Compile Include="Products.Designer.cs">
       <DependentUpon>Products.cs</DependentUpon>
     </Compile>
-    <Compile Include="ProductsAdd.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ProductsAdd.cs" />
     <Compile Include="ProductsAdd.Designer.cs">
       <DependentUpon>ProductsAdd.cs</DependentUpon>
     </Compile>
-    <Compile Include="ProductsEdit.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ProductsEdit.cs" />
     <Compile Include="ProductsEdit.Designer.cs">
       <DependentUpon>ProductsEdit.cs</DependentUpon>
     </Compile>
@@ -118,39 +102,27 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ReferenceBooks.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ReferenceBooks.cs" />
     <Compile Include="ReferenceBooks.Designer.cs">
       <DependentUpon>ReferenceBooks.cs</DependentUpon>
     </Compile>
-    <Compile Include="Seller.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Seller.cs" />
     <Compile Include="Seller.Designer.cs">
       <DependentUpon>Seller.cs</DependentUpon>
     </Compile>
-    <Compile Include="Staffs.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Staffs.cs" />
     <Compile Include="Staffs.Designer.cs">
       <DependentUpon>Staffs.cs</DependentUpon>
     </Compile>
-    <Compile Include="Users.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Users.cs" />
     <Compile Include="Users.Designer.cs">
       <DependentUpon>Users.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewOrder.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ViewOrder.cs" />
     <Compile Include="ViewOrder.Designer.cs">
       <DependentUpon>ViewOrder.cs</DependentUpon>
     </Compile>
-    <Compile Include="СommoditySpecialist.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="СommoditySpecialist.cs" />
     <Compile Include="СommoditySpecialist.Designer.cs">
       <DependentUpon>СommoditySpecialist.cs</DependentUpon>
     </Compile>
@@ -280,6 +252,12 @@
     <None Include="Resources\Лого %281%29.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="photo\105232371.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\144365326.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="photo\147596897.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -301,6 +279,15 @@
     <Content Include="photo\158074124.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="photo\159874927.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\169504777.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\169735225.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="photo\169881547.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -319,6 +306,9 @@
     <Content Include="photo\180021567.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="photo\180190918.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="photo\188433865.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -329,6 +319,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="photo\210960902.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\211044139.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="photo\214758654.png">
@@ -382,6 +375,15 @@
     <Content Include="photo\274863286.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="photo\27565279.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\27565279.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\303063284.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="photo\316630648.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -392,6 +394,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="photo\355155012.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\378697836.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\390153521.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="photo\411973450.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="photo\41359273.png">

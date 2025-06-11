@@ -223,59 +223,182 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            textBox4.Text = "";
-            string categoryName = textBox1.Text;
-            if (textBox1.Text == "")
+            AddOrUpdateCategory(false); // false - добавление
+        }
+
+        /// <summary>
+        /// Изменение категории
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button5_Click(object sender, EventArgs e)
+        {
+            AddOrUpdateCategory(true); // true - редактирование
+        }
+
+        /// <summary>
+        /// Общий метод для добавления и редактирования категорий
+        /// </summary>
+        /// <param name="isUpdate">True - редактирование, False - добавление</param>
+        private void AddOrUpdateCategory(bool isUpdate)
+        {
+            string categoryName = textBox1.Text.Trim(); // Trim убирает пробелы в начале и конце
+            string categoryId = textBox4.Text.Trim(); //  Для редактирования
+
+            if (string.IsNullOrEmpty(categoryName)) // Проверка на пустоту более современным способом
             {
-                MessageBox.Show("Необходимо заполнить поле!");
+                MessageBox.Show("Необходимо заполнить поле!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            else
+
+            if (isUpdate && string.IsNullOrEmpty(categoryId))
             {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить категорию?", "Подтверждение удаления", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
+                MessageBox.Show("Необходимо выбрать категорию для редактирования!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string message = isUpdate ? "Вы уверены, что хотите изменить эту категорию?" : "Вы уверены, что хотите добавить категорию?";
+            string title = isUpdate ? "Подтверждение изменения" : "Подтверждение добавления";
+            MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question; // Более подходящие иконки
+
+            DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
+            if (dialogResult == DialogResult.Yes)
+            {
+                using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
-                    using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
+                    try
                     {
-                        try
+                        conn.Open();
+
+                        // Проверка на существование записи (ТОЛЬКО для добавления)
+                        if (!isUpdate)
                         {
-                            conn.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName", conn))
+                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Category WHERE CategoryName = @CategoryName", conn))
                             {
                                 checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
                                 int count = Convert.ToInt32(checkcmd.ExecuteScalar());
                                 if (count > 0)
                                 {
-                                    MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+                                    MessageBox.Show("Категория с таким названием уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return;
                                 }
                             }
-                            string query = "INSERT INTO Category(CategoryName) VALUES (@value0)";
-                            using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                            {
-                                cmd.Parameters.AddWithValue("@value0", categoryName);
-                                cmd.ExecuteNonQuery();
-                                MessageBox.Show("Запись добавлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                textBox4.Text = "";
-                                textBox1.Text = "";
-                                FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
-                            }
+                        }
+
+                        string query;
+                        MySqlCommand cmd;
+
+                        if (isUpdate)
+                        {
+                            // Редактирование записи
+                            query = "UPDATE Category SET CategoryName = @CategoryName WHERE CategoryID = @CategoryID";
+                            cmd = new MySqlCommand(query, conn);
+                            cmd.Parameters.AddWithValue("@CategoryName", categoryName);
+                            cmd.Parameters.AddWithValue("@CategoryID", categoryId); // Используем ID
+                        }
+                        else
+                        {
+                            // Добавление записи
+                            query = "INSERT INTO Category(CategoryName) VALUES (@CategoryName)";
+                            cmd = new MySqlCommand(query, conn);
+                            cmd.Parameters.AddWithValue("@CategoryName", categoryName);
+                        }
+
+                        cmd.ExecuteNonQuery();
+                        MessageBox.Show("Запись успешно обновлена.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        //int rowsAffected = cmd.ExecuteNonQuery();
+
+                        //if (rowsAffected > 0)
+                        //{
+                        MessageBox.Show($"Категория {(isUpdate ? "успешно изменена" : "успешно добавлена")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            textBox4.Text = "";
+                            textBox1.Text = "";
+                            FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM Category"); // Обновляем DataGridView
+                        //}
+                        else
+                        {
+                            MessageBox.Show($"Не удалось {(isUpdate ? "изменить" : "добавить")} категорию.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (MySqlException ex)
+                    {
+                        MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    finally
+                    {
+                        if (conn.State == System.Data.ConnectionState.Open)
+                        {
                             conn.Close();
-                        }
-                        catch (MySqlException ex)
-                        {
-                            MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
-                            textBox1.Text = "";
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message);
-                            textBox1.Text = "";
                         }
                     }
                 }
             }
         }
+        /// <summary>
+        /// Добавление категории
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //    textBox4.Text = "";
+        //    string categoryName = textBox1.Text;
+        //    if (textBox1.Text == "")
+        //    {
+        //        MessageBox.Show("Необходимо заполнить поле!");
+        //    }
+        //    else
+        //    {
+        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить категорию?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+        //        if (dialogResult == DialogResult.Yes)
+        //        {
+        //            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
+        //            {
+        //                try
+        //                {
+        //                    conn.Open();
+        //                    using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName", conn))
+        //                    {
+        //                        checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
+        //                        int count = Convert.ToInt32(checkcmd.ExecuteScalar());
+        //                        if (count > 0)
+        //                        {
+        //                            MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+        //                            return;
+        //                        }
+        //                    }
+        //                    string query = "INSERT INTO Category(CategoryName) VALUES (@value0)";
+        //                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+        //                    {
+        //                        cmd.Parameters.AddWithValue("@value0", categoryName);
+        //                        cmd.ExecuteNonQuery();
+        //                        MessageBox.Show("Запись добавлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                        textBox4.Text = "";
+        //                        textBox1.Text = "";
+        //                        FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
+        //                    }
+        //                    conn.Close();
+        //                }
+        //                catch (MySqlException ex)
+        //                {
+        //                    MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
+        //                    textBox1.Text = "";
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message);
+        //                    textBox1.Text = "";
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Добавление поставщика
@@ -429,58 +552,58 @@ namespace kursovoy
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button5_Click(object sender, EventArgs e)
-        {
-            string categoryName = textBox1.Text;
-            if (textBox1.Text == "")
-            {
-                MessageBox.Show("Необходимо заполнить все поля!");
-            }
-            else
-            {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение измения", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
-                {
+        //private void button5_Click(object sender, EventArgs e)
+        //{
+        //    string categoryName = textBox1.Text;
+        //    if (textBox1.Text == "")
+        //    {
+        //        MessageBox.Show("Необходимо заполнить все поля!");
+        //    }
+        //    else
+        //    {
+        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение измения", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+        //        if (dialogResult == DialogResult.Yes)
+        //        {
 
-                    if (textBox4.Text == "")
-                    {
-                        MessageBox.Show("Данной записи не существует! Выберите заново.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        int сategoryID = Convert.ToInt32(textBox4.Text);
-                        using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
-                        {
-                            con.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName AND CategoryID != @CategoryID", con))
-                            {
-                                checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
-                                checkcmd.Parameters.AddWithValue("@CategoryID", сategoryID);
-                                int count = Convert.ToInt32(checkcmd.ExecuteScalar());
-                                if (count > 0)
-                                {
-                                    MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                            }
+        //            if (textBox4.Text == "")
+        //            {
+        //                MessageBox.Show("Данной записи не существует! Выберите заново.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            }
+        //            else
+        //            {
+        //                int сategoryID = Convert.ToInt32(textBox4.Text);
+        //                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+        //                {
+        //                    con.Open();
+        //                    using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName AND CategoryID != @CategoryID", con))
+        //                    {
+        //                        checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
+        //                        checkcmd.Parameters.AddWithValue("@CategoryID", сategoryID);
+        //                        int count = Convert.ToInt32(checkcmd.ExecuteScalar());
+        //                        if (count > 0)
+        //                        {
+        //                            MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //                            return;
+        //                        }
+        //                    }
 
-                            MySqlCommand cmd = new MySqlCommand(@"UPDATE Category 
-                        SET CategoryID = @сategoryID,
-                        CategoryName = @сategoryName
-                        WHERE CategoryID = @сategoryID", con);
+        //                    MySqlCommand cmd = new MySqlCommand(@"UPDATE Category 
+        //                SET CategoryID = @сategoryID,
+        //                CategoryName = @сategoryName
+        //                WHERE CategoryID = @сategoryID", con);
 
-                            cmd.Parameters.AddWithValue("@сategoryName", textBox1.Text);
-                            cmd.Parameters.AddWithValue("@сategoryID", сategoryID);
-                            cmd.ExecuteNonQuery();
-                            con.Close();
-                        }
-                        textBox4.Text = "";
-                        textBox1.Text = "";
-                        FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
-                    }
-                }
-            }
-        }
+        //                    cmd.Parameters.AddWithValue("@сategoryName", textBox1.Text);
+        //                    cmd.Parameters.AddWithValue("@сategoryID", сategoryID);
+        //                    cmd.ExecuteNonQuery();
+        //                    con.Close();
+        //                }
+        //                textBox4.Text = "";
+        //                textBox1.Text = "";
+        //                FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
+        //            }
+        //        }
+        //    }
+        //}
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -620,6 +743,21 @@ namespace kursovoy
                     }
                 }
             }
+        }
+
+        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        {
+            dataGridView1.ClearSelection();
+        }
+
+        private void dataGridView2_SelectionChanged(object sender, EventArgs e)
+        {
+            dataGridView2.ClearSelection();
+        }
+
+        private void dataGridView3_SelectionChanged(object sender, EventArgs e)
+        {
+            dataGridView3.ClearSelection();
         }
 
         //private void textBox1_TextChanged(object sender, EventArgs e)

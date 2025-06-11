@@ -86,9 +86,8 @@ namespace kursovoy
 
             isOrderCancelled = false;
 
-            if (!isOrderCancelled || Authorization.User2.Role != 3)
+            if (!isOrderCancelled)
             {
-
                 DataGridViewButtonColumn plusButtonColumn = new DataGridViewButtonColumn();
                 plusButtonColumn.Name = "Добавить";
                 plusButtonColumn.Text = "+";
@@ -109,9 +108,10 @@ namespace kursovoy
                 deleteButtonColumn.UseColumnTextForButtonValue = true;
                 dataGridView1.Columns.Add(deleteButtonColumn);
                 dataGridView1.Columns["Удалить"].Width = 68;
+
             }
 
-
+            
             MySqlDataReader rdr = cmd.ExecuteReader();
             initialQuantities.Clear();
             maxAvailableQuantities.Clear();
@@ -217,6 +217,11 @@ namespace kursovoy
         {
             if (e.RowIndex >= 0)
             {
+                if (Authorization.User2.Role == 3)
+                {
+                    MessageBox.Show("Продавец не может отменять заказ!","Информация",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                    return;
+                }
                 if (isOrderCancelled)
                 {
                     MessageBox.Show("Заказ отменен. Редактирование запрещено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
