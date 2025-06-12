@@ -20,12 +20,9 @@ namespace kursovoy
         public static class Program
         {
             //Общее подключение к бд
-
-            //public static string ConnectionString { get; } = "host=localhost;uid=root;pwd=;database=db45";
-            //public static string ConnectionStringNotDB { get; } = "host=localhost;uid=root;pwd=;";
             public static string ConnectionString { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};database={ConfigurationManager.AppSettings["db"]};";
             public static string ConnectionStringNotDB { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};";
-            //public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45";
+            //public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45;";
             //public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
         }
         public class CaptchaGenerator
@@ -186,7 +183,6 @@ namespace kursovoy
                 }
             }
         }
-        //
         /// <summary>
         /// Класс User - получение информации о пользователе
         /// </summary>
@@ -198,7 +194,6 @@ namespace kursovoy
             public string FIO { get; set; }
             public string RoleName { get; set; }
         }
-
         /// <summary>
         /// Класс User2 - получения информации о пользователе и использование его для разграничения прав доступа пользователей
         /// </summary>
@@ -210,7 +205,6 @@ namespace kursovoy
             public static string FIO { get; set; }
             public static string RoleName { get; set; }
         }
-
         /// <summary>
         /// Выход из приложения
         /// </summary>
@@ -242,11 +236,11 @@ namespace kursovoy
                 using (MySqlConnection con = new MySqlConnection(Program.ConnectionString))
                 {
                     con.Open();
-                    MySqlCommand cmd = new MySqlCommand($"SELECT u.*, e.EmployeeF, e.EmployeeI, e.EmployeeO, r.Role"+
-                    " FROM user u "+
-                    " INNER JOIN employeeee e ON u.UserFIO = e.EmployeeID "+
-                    " INNER JOIN role r ON u.RoleID = r.RoleID "+
-                    $" WHERE u.Login = '{login}' AND u.Password = '{hashedPassword}';", con); 
+                    MySqlCommand cmd = new MySqlCommand($"SELECT u.*, e.EmployeeF, e.EmployeeI, e.EmployeeO, r.Role" +
+                    " FROM user u " +
+                    " INNER JOIN employeeee e ON u.UserFIO = e.EmployeeID " +
+                    " INNER JOIN role r ON u.RoleID = r.RoleID " +
+                    $" WHERE u.Login = '{login}' AND u.Password = '{hashedPassword}';", con);
                     MySqlDataAdapter ad = new MySqlDataAdapter(cmd);
                     DataTable tb = new DataTable();
                     ad.Fill(tb);
@@ -275,12 +269,12 @@ namespace kursovoy
                     string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
                     if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
                     {
-                        
+
                         user = new User { };
                     }
                     else
                     {
-MessageBox.Show("База данных не существует. Создайте базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("База данных не существует. Создайте базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         user = new User { };
                     }
                 }
@@ -304,7 +298,6 @@ MessageBox.Show("База данных не существует. Создайт
             }
             return user;
         }
-
         /// <summary>
         /// Метод для хеширования пароля
         /// </summary>
@@ -325,7 +318,6 @@ MessageBox.Show("База данных не существует. Создайт
                 return builder.ToString(); // Возвращаем хеш как строку
             }
         }
-
         /// <summary>
         /// Метод для входа в учетную запись в зависимости от роли
         /// </summary>
@@ -337,23 +329,18 @@ MessageBox.Show("База данных не существует. Создайт
             {
                 case 1:
                     User2.Role = 1;
-                   //BackupAllTables();
-
                     Admin ad = new Admin();
                     ad.Show();
                     this.Hide();
                     break;
                 case 2:
                     User2.Role = 2;
-                    //BackupAllTables();
-
                     СommoditySpecialist CS = new СommoditySpecialist();
                     CS.Show();
                     this.Hide();
                     break;
                 case 3:
                     User2.Role = 3;
-                    //BackupAllTables();
                     Seller sl = new Seller();
                     sl.Show();
                     this.Hide();
@@ -362,11 +349,7 @@ MessageBox.Show("База данных не существует. Создайт
                     //MessageBox.Show("Ваша роль в системе не определена. Обратитесь к администратору.");
                     break;
             }
-           //this.Hide(); // Прячем форму авторизации
         }
-        
-        
-
         /// <summary>
         /// Проверка на пустое поле для ввода пароля при загрузке формы
         /// </summary>
@@ -379,7 +362,6 @@ MessageBox.Show("База данных не существует. Создайт
                 button1.Enabled = false;
             }
         }
-        
         /// <summary>
         /// При любом изменении пароля кнопка для входа становится активной.
         /// </summary>
@@ -389,7 +371,6 @@ MessageBox.Show("База данных не существует. Создайт
         {
             button1.Enabled = true;
         }
-
         /// <summary>
         /// Кнопка для обновления капчи.
         /// </summary>
@@ -403,7 +384,6 @@ MessageBox.Show("База данных не существует. Создайт
             label4.Visible = true;
             captchaTextBox.Visible = true;
         }
-
         /// <summary>
         /// Обработчик нажатия клавиш, ввод только русских букв.
         /// </summary>
