@@ -242,8 +242,8 @@ namespace kursovoy
         /// <param name="isUpdate">True - редактирование, False - добавление</param>
         private void AddOrUpdateCategory(bool isUpdate)
         {
-            string categoryName = textBox1.Text.Trim(); // Trim убирает пробелы в начале и конце
-            string categoryId = textBox4.Text.Trim(); //  Для редактирования
+            string categoryName = textBox1.Text.Trim();
+            string categoryId = textBox4.Text.Trim();
 
             if (string.IsNullOrEmpty(categoryName)) // Проверка на пустоту более современным способом
             {
@@ -307,19 +307,11 @@ namespace kursovoy
                         cmd.ExecuteNonQuery();
                         MessageBox.Show("Запись успешно обновлена.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        //int rowsAffected = cmd.ExecuteNonQuery();
-
-                        //if (rowsAffected > 0)
-                        //{
                         MessageBox.Show($"Категория {(isUpdate ? "успешно изменена" : "успешно добавлена")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             textBox4.Text = "";
                             textBox1.Text = "";
                             FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM Category"); // Обновляем DataGridView
-                        //}
-                        //else
-                        //{
-                        //    MessageBox.Show($"Не удалось {(isUpdate ? "изменить" : "добавить")} категорию.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        //}
+
                     }
                     catch (MySqlException ex)
                     {
@@ -329,193 +321,11 @@ namespace kursovoy
                     {
                         MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    finally
-                    {
-                        if (conn.State == System.Data.ConnectionState.Open)
-                        {
-                            conn.Close();
-                        }
-                    }
+
                 }
             }
         }
-        /// <summary>
-        /// Добавление категории
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        //private void button1_Click(object sender, EventArgs e)
-        //{
-        //    textBox4.Text = "";
-        //    string categoryName = textBox1.Text;
-        //    if (textBox1.Text == "")
-        //    {
-        //        MessageBox.Show("Необходимо заполнить поле!");
-        //    }
-        //    else
-        //    {
-        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить категорию?", "Подтверждение удаления", MessageBoxButtons.YesNo);
-        //        if (dialogResult == DialogResult.Yes)
-        //        {
-        //            using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
-        //            {
-        //                try
-        //                {
-        //                    conn.Open();
-        //                    using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName", conn))
-        //                    {
-        //                        checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
-        //                        int count = Convert.ToInt32(checkcmd.ExecuteScalar());
-        //                        if (count > 0)
-        //                        {
-        //                            MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-        //                            return;
-        //                        }
-        //                    }
-        //                    string query = "INSERT INTO Category(CategoryName) VALUES (@value0)";
-        //                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-        //                    {
-        //                        cmd.Parameters.AddWithValue("@value0", categoryName);
-        //                        cmd.ExecuteNonQuery();
-        //                        MessageBox.Show("Запись добавлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //                        textBox4.Text = "";
-        //                        textBox1.Text = "";
-        //                        FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
-        //                    }
-        //                    conn.Close();
-        //                }
-        //                catch (MySqlException ex)
-        //                {
-        //                    MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
-        //                    textBox1.Text = "";
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message);
-        //                    textBox1.Text = "";
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-        /// <summary>
-        /// Добавление поставщика
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void button3_Click(object sender, EventArgs e)
-        {
-            string supplierName = textBox2.Text;
-            if (textBox2.Text == "")
-            {
-                MessageBox.Show("Необходимо заполнить поле!");
-            }
-            else
-            {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить поставщика?", "Подтверждение удаления", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
-                    {
-                        try
-                        {
-                            conn.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Supplier WHERE SupplierName = @SupplierName", conn))
-                            {
-                                checkcmd.Parameters.AddWithValue("@SupplierName", supplierName);
-                                int count = Convert.ToInt32(checkcmd.ExecuteScalar());
-                                if (count > 0)
-                                {
-                                    MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                            }
-                            string query = "INSERT INTO Supplier(SupplierName) VALUES (@SupplierName)";
-                            using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                            {
-                                cmd.Parameters.AddWithValue("@SupplierName", supplierName);
-                                cmd.ExecuteNonQuery();
-                                MessageBox.Show("Запись добавлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                textBox2.Text = "";
-                                FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM Supplier");
-                            }
-                            conn.Close();
-                        }
-                        catch (MySqlException ex)
-                        {
-                            MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
-                            textBox2.Text = "";
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message);
-                            textBox2.Text = "";
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Добавление производителя
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void button4_Click(object sender, EventArgs e)
-        {
-            string productManufacturName = textBox3.Text;
-            if (string.IsNullOrEmpty(productManufacturName))
-            {
-                MessageBox.Show("Необходимо заполнить поле!");
-            }
-            else
-            {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить производителя?", "Подтверждение удаления", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
-                    {
-                        try
-                        {
-                            conn.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM ProductManufactur WHERE ProductManufacturName = @ProductManufacturName;", conn))
-                            {
-                                checkcmd.Parameters.AddWithValue("@ProductManufacturName", productManufacturName);
-                                int count = Convert.ToInt32(checkcmd.ExecuteScalar());
-                                if (count > 0)
-                                {
-                                    MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return;
-                                }
-                            }
-                            string query = "INSERT INTO ProductManufactur(ProductManufacturName) VALUES (@ProductManufacturName)"; // Используем productManufacturName
-                            using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                            {
-                                cmd.Parameters.AddWithValue("@ProductManufacturName", productManufacturName); // Используем productManufacturName
-                                cmd.ExecuteNonQuery();
-                                MessageBox.Show("Запись добавлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                textBox3.Text = "";
-                                FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM ProductManufactur");
-                            }
-                            conn.Close();
-                        }
-                        catch (MySqlException ex)
-                        {
-                            MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
-                            textBox3.Text = "";
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message);
-                            textBox3.Text = "";
-                        }
-                    }
-                }
-            }
-        }
-
+      
         //Проверка ввода для категории
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -547,64 +357,6 @@ namespace kursovoy
             }
         }
 
-        /// <summary>
-        /// Изменение категории
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        //private void button5_Click(object sender, EventArgs e)
-        //{
-        //    string categoryName = textBox1.Text;
-        //    if (textBox1.Text == "")
-        //    {
-        //        MessageBox.Show("Необходимо заполнить все поля!");
-        //    }
-        //    else
-        //    {
-        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение измения", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-        //        if (dialogResult == DialogResult.Yes)
-        //        {
-
-        //            if (textBox4.Text == "")
-        //            {
-        //                MessageBox.Show("Данной записи не существует! Выберите заново.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            }
-        //            else
-        //            {
-        //                int сategoryID = Convert.ToInt32(textBox4.Text);
-        //                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
-        //                {
-        //                    con.Open();
-        //                    using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM Category WHERE CategoryName = @CategoryName AND CategoryID != @CategoryID", con))
-        //                    {
-        //                        checkcmd.Parameters.AddWithValue("@CategoryName", categoryName);
-        //                        checkcmd.Parameters.AddWithValue("@CategoryID", сategoryID);
-        //                        int count = Convert.ToInt32(checkcmd.ExecuteScalar());
-        //                        if (count > 0)
-        //                        {
-        //                            MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                            return;
-        //                        }
-        //                    }
-
-        //                    MySqlCommand cmd = new MySqlCommand(@"UPDATE Category 
-        //                SET CategoryID = @сategoryID,
-        //                CategoryName = @сategoryName
-        //                WHERE CategoryID = @сategoryID", con);
-
-        //                    cmd.Parameters.AddWithValue("@сategoryName", textBox1.Text);
-        //                    cmd.Parameters.AddWithValue("@сategoryID", сategoryID);
-        //                    cmd.ExecuteNonQuery();
-        //                    con.Close();
-        //                }
-        //                textBox4.Text = "";
-        //                textBox1.Text = "";
-        //                FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
-        //            }
-        //        }
-        //    }
-        //}
-
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
@@ -634,115 +386,206 @@ namespace kursovoy
         }
 
         /// <summary>
+        /// Добавление поставщика
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button3_Click(object sender, EventArgs e)
+        {
+            AddOrUpdateSupplier(false); // false - добавление
+        }
+
+        /// <summary>
         /// Изменение поставщика
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button6_Click(object sender, EventArgs e)
+        private void button6_Click(object sender, EventArgs e) // Assuming you have a button6 for updating
         {
-            string supplierName = textBox2.Text;
-            if (textBox2.Text == "")
+            AddOrUpdateSupplier(true); // true - редактирование
+        }
+
+        /// <summary>
+        /// Общий метод для добавления и редактирования поставщиков
+        /// </summary>
+        /// <param name="isUpdate">True - редактирование, False - добавление</param>
+        private void AddOrUpdateSupplier(bool isUpdate)
+        {
+            string supplierName = textBox2.Text.Trim();
+            string supplierId = textBox5.Text.Trim(); 
+
+            if (string.IsNullOrEmpty(supplierName))
             {
-                MessageBox.Show("Необходимо заполнить все поля!");
+                MessageBox.Show("Необходимо заполнить поле 'Название поставщика'!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            else
+
+            if (isUpdate && string.IsNullOrEmpty(supplierId))
             {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение измения", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
+                MessageBox.Show("Необходимо выбрать поставщика для редактирования!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string message = isUpdate ? "Вы уверены, что хотите изменить этого поставщика?" : "Вы уверены, что хотите добавить поставщика?";
+            string title = isUpdate ? "Подтверждение изменения" : "Подтверждение добавления";
+            MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question;
+
+            DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
+            if (dialogResult == DialogResult.Yes)
+            {
+                using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
-                    if (textBox5.Text == "")
+                    try
                     {
-                        MessageBox.Show("Данной записи не существует! Выберите заново.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        int supplierID = Convert.ToInt32(textBox5.Text);
-                        using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                        conn.Open();
+
+                        // Check for existing supplier (only for adding)
+                        if (!isUpdate)
                         {
-                            con.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Supplier WHERE SupplierName = @SupplierName AND SupplierID != @SupplierID", con))
+                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Supplier WHERE SupplierName = @SupplierName", conn))
                             {
                                 checkcmd.Parameters.AddWithValue("@SupplierName", supplierName);
-                                checkcmd.Parameters.AddWithValue("@SupplierID", supplierID);
                                 int count = Convert.ToInt32(checkcmd.ExecuteScalar());
                                 if (count > 0)
                                 {
-                                    MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("Поставщик с таким названием уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return;
                                 }
                             }
-                            MySqlCommand cmd = new MySqlCommand(@"UPDATE Supplier 
-                            SET SupplierID = @supplierID,
-                            SupplierName = @supplierName
-                            WHERE SupplierID = @supplierID", con);
-
-                            cmd.Parameters.AddWithValue("@supplierName", textBox2.Text);
-                            cmd.Parameters.AddWithValue("@supplierID", supplierID);
-                            cmd.ExecuteNonQuery();
-                            con.Close();
                         }
-                        textBox5.Text = ""; //id
-                        textBox2.Text = "";//сategoryName
-                        FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM `Supplier`");
+
+                        string query;
+                        MySqlCommand cmd;
+
+                        if (isUpdate)
+                        {
+                            // Update supplier
+                            query = "UPDATE Supplier SET SupplierName = @SupplierName WHERE SupplierID = @SupplierID";
+                            cmd = new MySqlCommand(query, conn);
+                            cmd.Parameters.AddWithValue("@SupplierName", supplierName);
+                            cmd.Parameters.AddWithValue("@SupplierID", supplierId);
+                        }
+                        else
+                        {
+                            // Add supplier
+                            query = "INSERT INTO Supplier(SupplierName) VALUES (@SupplierName)";
+                            cmd = new MySqlCommand(query, conn);
+                            cmd.Parameters.AddWithValue("@SupplierName", supplierName);
+                        }
+
+                            MessageBox.Show($"Поставщик {(isUpdate ? "успешно изменен" : "успешно добавлен")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            textBox2.Text = "";
+                            textBox5.Text = "";
+                            FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM Supplier");
                     }
+                    catch (MySqlException ex)
+                    {
+                        MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
                 }
             }
         }
 
         /// <summary>
-        /// Изменение производителя
+        /// Добавление или изменение производителя
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void button7_Click(object sender, EventArgs e)
+        /// <param name="isUpdate">True - изменение, False - добавление</param>
+        private void AddOrUpdateManufacturer(bool isUpdate)
         {
-            string productManufacturName = textBox3.Text;
-            if (textBox3.Text == "")
+            string manufacturerName = textBox3.Text.Trim(); //Trim() - удаляет все пробелы из строки.
+            string manufacturerId = textBox5.Text.Trim();   
+
+            if (string.IsNullOrEmpty(manufacturerName))
             {
-                MessageBox.Show("Необходимо заполнить все поля!");
+                MessageBox.Show("Необходимо заполнить поле 'Название производителя'!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            else
+
+            if (isUpdate && string.IsNullOrEmpty(manufacturerId))
             {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение измения", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (dialogResult == DialogResult.Yes)
+                MessageBox.Show("Необходимо выбрать производителя для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string message = isUpdate ? "Вы уверены, что хотите изменить этого производителя?" : "Вы уверены, что хотите добавить производителя?";
+            string title = isUpdate ? "Подтверждение" : "Подтверждение добавления";
+            MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question;
+
+            DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
+
+            if (dialogResult == DialogResult.Yes)
+            {
+                using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
-                    if (textBox6.Text == "")
+                    try
                     {
-                        MessageBox.Show("Данной записи не существует! Выберите заново.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        int productManufacturID = Convert.ToInt32(textBox6.Text);
-                        using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                        conn.Open();
+
+                        // Check for duplicate name (only on insert)
+                        if (!isUpdate)
                         {
-                            con.Open();
-                            using (MySqlCommand checkcmd = new MySqlCommand("SELECT count(*) FROM ProductManufactur WHERE ProductManufacturName = @ProductManufacturName AND ProductManufacturID != @ProductManufacturID;", con))
+                            using (MySqlCommand checkCmd = new MySqlCommand("SELECT COUNT(*) FROM ProductManufactur WHERE ProductManufacturName = @ProductManufacturName", conn))
                             {
-                                checkcmd.Parameters.AddWithValue("@ProductManufacturName", productManufacturName);
-                                checkcmd.Parameters.AddWithValue("@ProductManufacturID", productManufacturID);
-                                int count = Convert.ToInt32(checkcmd.ExecuteScalar());
+                                checkCmd.Parameters.AddWithValue("@ProductManufacturName", manufacturerName);
+                                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
                                 if (count > 0)
                                 {
-                                    MessageBox.Show("Запись уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("Производитель с таким именем уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     return;
                                 }
                             }
-                            MySqlCommand cmd = new MySqlCommand(@"UPDATE ProductManufactur 
-                            SET ProductManufacturID = @productManufacturID,
-                            ProductManufacturName = @productManufacturName
-                            WHERE ProductManufacturID = @productManufacturID", con);
-
-                            cmd.Parameters.AddWithValue("@productManufacturName", textBox3.Text);
-                            cmd.Parameters.AddWithValue("@productManufacturID", productManufacturID);
-                            cmd.ExecuteNonQuery();
-                            con.Close();
                         }
-                        textBox4.Text = ""; //id
-                        textBox1.Text = "";//сategoryName
-                        FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM `ProductManufactur`");
+
+                        string query;
+                        MySqlCommand cmd;
+
+                        if (isUpdate)
+                        {
+                            // Update existing manufacturer
+                            query = "UPDATE ProductManufactur SET ProductManufacturName = @ProductManufacturName WHERE ProductManufacturID = @ProductManufacturID";
+                            cmd = new MySqlCommand(query, conn);
+                            cmd.Parameters.AddWithValue("@ProductManufacturName", manufacturerName);
+                            cmd.Parameters.AddWithValue("@ProductManufacturID", manufacturerId);
+                        }
+                        else
+                        {
+                            // Insert new manufacturer
+                            query = "INSERT INTO ProductManufactur (ProductManufacturName) VALUES (@ProductManufacturName)";
+                            cmd = new MySqlCommand(query, conn);
+                            cmd.Parameters.AddWithValue("@ProductManufacturName", manufacturerName);
+                        }
+
+                            MessageBox.Show($"Производитель {(isUpdate ? "успешно изменен" : "успешно добавлен")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            textBox3.Text = "";
+                            textBox5.Text = "";
+                            FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM ProductManufactur"); // Refresh data grid
+
+                    }
+                    catch (MySqlException ex)
+                    {
+                        MessageBox.Show($"Ошибка базы данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Произошла непредвиденная ошибка: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
+        }
+        
+        private void button4_Click(object sender, EventArgs e)
+        {
+            AddOrUpdateManufacturer(false); // False for adding
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            AddOrUpdateManufacturer(true); // True for updating
         }
 
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
@@ -759,76 +602,5 @@ namespace kursovoy
         {
             dataGridView3.ClearSelection();
         }
-
-        //private void textBox1_TextChanged(object sender, EventArgs e)
-        //{
-        //    // Сохраняем текущее положение курсора
-        //    int selectionStart = textBox1.SelectionStart;
-        //    int selectionLength = textBox1.SelectionLength;
-
-        //    // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-        //    string[] words = textBox1.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-        //    for (int i = 0; i < words.Length; i++)
-        //    {
-        //        if (words[i].Length > 0) // Проверка длины слова
-        //        {
-        //            words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-        //        }
-        //    }
-        //    textBox1.Text = string.Join(" ", words);
-
-        //    // Восстанавливаем положение курсора
-        //    textBox1.SelectionStart = Math.Min(selectionStart, textBox1.Text.Length);
-        //    textBox1.SelectionLength = selectionLength;
-        //}
-
-        //private void textBox2_TextChanged(object sender, EventArgs e)
-        //{
-        //    // Сохраняем текущее положение курсора
-        //    int selectionStart = textBox2.SelectionStart;
-        //    int selectionLength = textBox2.SelectionLength;
-
-        //    // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-        //    string[] words = textBox2.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-        //    for (int i = 0; i < words.Length; i++)
-        //    {
-        //        if (words[i].Length > 0) // Проверка длины слова
-        //        {
-        //            words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-        //        }
-        //    }
-        //    textBox2.Text = string.Join(" ", words);
-
-        //    // Восстанавливаем положение курсора
-        //    textBox2.SelectionStart = Math.Min(selectionStart, textBox2.Text.Length);
-        //    textBox2.SelectionLength = selectionLength;
-        //}
-
-        //private void textBox3_TextChanged(object sender, EventArgs e)
-        //{
-        //    // Сохраняем текущее положение курсора
-        //    int selectionStart = textBox3.SelectionStart;
-        //    int selectionLength = textBox3.SelectionLength;
-
-        //    // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-        //    string[] words = textBox3.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-        //    for (int i = 0; i < words.Length; i++)
-        //    {
-        //        if (words[i].Length > 0) // Проверка длины слова
-        //        {
-        //            words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-        //        }
-        //    }
-        //    textBox3.Text = string.Join(" ", words);
-
-        //    // Восстанавливаем положение курсора
-        //    textBox3.SelectionStart = Math.Min(selectionStart, textBox3.Text.Length);
-        //    textBox3.SelectionLength = selectionLength;
-        //}
-
-        //private void tabPage1_Click(object sender, EventArgs e)
-        //{
-
-        //}
     }
 }

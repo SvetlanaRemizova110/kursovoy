@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -51,7 +50,6 @@ namespace kursovoy
                 orderNumberLabel.Text = $"Номер заказа: {orderId}";
             }
         }
-
         /// <summary>
         /// Вывод товаров, добавленных в корзину
         /// </summary>
@@ -116,7 +114,6 @@ namespace kursovoy
         {
             dataGridViewOrder.Rows.Clear();
             decimal totalOrderPrice = 0;
-
             foreach (var product in order)
             {
                 string productART = product.Key;
@@ -144,12 +141,10 @@ namespace kursovoy
                 {
                     MessageBox.Show($"Файл изображения не найден: {imagePath}");
                 }
-
                 // Добавляем строку в таблицу
                 dataGridViewOrder.Rows.Add(productImage, productName, product.Value, productCost, finalPrice);
                 totalOrderPrice += finalPrice;
             }
-
             // Обновление итоговой суммы и скидок
             label1.Text = $"Итоговая сумма: {totalOrderPrice:F2} руб.";
             label3.Visible = false;
@@ -169,7 +164,6 @@ namespace kursovoy
 
             UpdateConfirmButtonState();
         }
-
         /// <summary>
         /// Проверка состояния заказа
         /// </summary>
@@ -177,7 +171,6 @@ namespace kursovoy
         {
             AddOrder.Enabled = order.Count > 0; // Кнопка активна при наличии в заказе товаров.
         }
-
         /// <summary>
         /// Получение информации о компании из базы данных.
         /// </summary>
@@ -213,10 +206,8 @@ namespace kursovoy
                     MessageBox.Show($"Ошибка при получении информации о компании: {ex.Message}");
                 }
             }
-
             return companyInfo;
         }
-
         /// <summary>
         /// Функция для получения изображения из базы данных
         /// </summary>
@@ -251,7 +242,6 @@ namespace kursovoy
             }
             return imageString;
         }
-
         /// <summary>
         /// Генерация документа заказа в формате Word.
         /// </summary>
@@ -260,8 +250,8 @@ namespace kursovoy
         {
             try
             {
-                //Get company info from db
-                var companyInfo = GetCompanyInfo();
+            //Get company info from db
+            var companyInfo = GetCompanyInfo();
 
             // Инициализация Word
             var wordApp = new Microsoft.Office.Interop.Word.Application();
@@ -436,7 +426,6 @@ namespace kursovoy
                 MessageBox.Show("Ваш заказ пуст!");
                 return;
             }
-
             try
             {
                 // Сохранение заказа в базе данных и получение его ID
@@ -457,7 +446,6 @@ namespace kursovoy
             {
                 MessageBox.Show($"Ошибка при сохранении заказа: {ex.Message}");
             }
-
         }
 
         /// <summary>
@@ -546,7 +534,6 @@ namespace kursovoy
                 return newOrderId;
             }
         }
-
         /// <summary>
         /// Метод обрабатывает изменение количества товара
         /// </summary>

@@ -16,6 +16,8 @@ namespace kursovoy
         private FormWindowState _previousWindowState; // Сохраняем предыдущее состояние окна
         private FormBorderStyle _previousBorderStyle; // Сохраняем стиль границы
 
+        private ContextMenuStrip contextMenuStrip1 = new ContextMenuStrip();
+
         private int currentPage1 = 0;
         private int rowsPerPage1 = 20;
         private int totalRows1 = 0;
@@ -133,10 +135,6 @@ namespace kursovoy
                 dataGridView1.Columns.Add("ProductSupplier", "Поставщик");
                 dataGridView1.Columns["ProductSupplier"].Visible = false;
 
-                //dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                // После добавления всех данных в DataGridView
-                //dataGridView1.Sort(dataGridView1.Columns["ProductArticul"], ListSortDirection.Ascending);
-
                 // Возможность редактирования товара не доступна для продавца
                 if (Authorization.User2.Role != 3)
                 {
@@ -175,11 +173,11 @@ namespace kursovoy
                 {
                     //dataGridView1.Size = new Size(887, 452);
                     button3.Visible = false;
-                    //ContextMenuStrip menu = new ContextMenuStrip();
-                    //ToolStripMenuItem addToOrderMenu = new ToolStripMenuItem("Добавить в корзину");
-                    //addToOrderMenu.Click += AddToOrderMenuClick;
-                    //menu.Items.Add(addToOrderMenu);
-                    //dataGridView1.ContextMenuStrip = menu;
+                 
+                    ToolStripMenuItem addToOrderMenu = new ToolStripMenuItem("Добавить в корзину");
+                    addToOrderMenu.Click += AddToOrderMenuClick;
+                    contextMenuStrip1.Items.Add(addToOrderMenu);
+                    dataGridView1.ContextMenuStrip = contextMenuStrip1;
                 }
                 while (rdr.Read())
                 {
@@ -503,8 +501,6 @@ namespace kursovoy
                 currentOrder = orderForm.UpdatedOrder;
             }
             UpdateDataGrid();
-            //UpdatePag();
-            //labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
 
         /// <summary>
@@ -624,9 +620,6 @@ namespace kursovoy
             ProductsAdd.ShowDialog();
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += dataGridView1.Rows.Count;
-            //FillCount();
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
 
@@ -674,26 +667,9 @@ namespace kursovoy
             }
         }
 
-        private void Products_ResizeEnd(object sender, EventArgs e)
-        {
-            //UpdatePag();
-        }
-
         private void Products_SizeChanged(object sender, EventArgs e)
         {
             UpdatePag();
-        }
-
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            //if (e.RowIndex > 0)
-            //{
-            //    int ed = dataGridView1.CurrentCell.RowIndex;
-            //    int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["ProductArticul"].Value);
-            //    ViewProduct vp = new ViewProduct(id);
-            //    //this.Close();
-            //    vp.Show();
-            //}
         }
 
         private void dataGridView1_MouseDown(object sender, MouseEventArgs e)

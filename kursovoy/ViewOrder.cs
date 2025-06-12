@@ -108,9 +108,7 @@ namespace kursovoy
                 deleteButtonColumn.UseColumnTextForButtonValue = true;
                 dataGridView1.Columns.Add(deleteButtonColumn);
                 dataGridView1.Columns["Удалить"].Width = 68;
-
             }
-
             
             MySqlDataReader rdr = cmd.ExecuteReader();
             initialQuantities.Clear();
@@ -247,12 +245,9 @@ namespace kursovoy
                     int newQuantity = currentQuantity - 1;
                     if (newQuantity == 0)
                     {
-                        //if (MessageBox.Show("Вы уверены, что хотите удалить товар из заказа?", "Подтверждение", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                        //{
-                            DeleteProductFromOrder(e.RowIndex);
+                        DeleteProductFromOrder(e.RowIndex);
                         FillDataGrid();
                         FillDataGriOrder();
-                        //}
                     }
                     else
                     {
@@ -283,13 +278,11 @@ namespace kursovoy
             }
 
             // Проверяем, если ли в заказе остался только один товар в количестве 1
-            if (dataGridView1.Rows.Count == 1 /*&& Convert.ToInt32(dataGridView1.Rows[0].Cells["ProductCount"].Value) == 1*/)
+            if (dataGridView1.Rows.Count == 1)
             {
                 CancelOrder(rowIndex); // Отменяем заказ и возвращаем товар
                 return; // Выходим из метода, чтобы не удалять товар
             }
-            // Проверяем, прошло ли более 14 дней с даты заказа
-
 
             if (MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
@@ -331,7 +324,6 @@ namespace kursovoy
 
         private void ChangeProductQuantity(string productID, int rowIndex, int newQuantity)
         {
-
             // Проверяем, прошло ли более 14 дней с даты заказа
             if ((DateTime.Now - orderDate).TotalDays > 14)
             {

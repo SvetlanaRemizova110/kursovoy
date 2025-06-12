@@ -170,9 +170,7 @@ namespace kursovoy
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
                 dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                //dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
                 dataGridView1.AllowUserToDeleteRows = false;
-                //dataGridView1.AllowUserToOrderColumns = false;
                 dataGridView1.AllowUserToResizeColumns = false;
                 dataGridView1.AllowUserToResizeRows = false;
 
@@ -295,7 +293,6 @@ namespace kursovoy
         {
             int userId = -1;
             string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @employeeF AND EmployeeI LIKE @employeeI AND EmployeeO LIKE @employeeO;";
-            //string query = "SELECT EmployeeID FROM Employee WHERE EmployeeFIO = @employeeFIO";
             using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
                 connection.Open();
@@ -392,14 +389,12 @@ namespace kursovoy
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
-    ((e.KeyChar >= 'А' && e.KeyChar <= 'Я') ||
-     (e.KeyChar >= 'а' && e.KeyChar <= 'я') ||
-     (e.KeyChar == 'Ё') || (e.KeyChar == 'ё')))
+                ((e.KeyChar >= 'А' && e.KeyChar <= 'Я') ||
+                 (e.KeyChar >= 'а' && e.KeyChar <= 'я') ||
+                 (e.KeyChar == 'Ё') || (e.KeyChar == 'ё')))
             {
                 e.Handled = true;
             }
-
-
         }
 
         /// <summary>
@@ -446,8 +441,6 @@ namespace kursovoy
                                 }
                             }
                             int userFIO;
-                            //string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE EmployeeF LIKE @userF AND EmployeeI LIKE @userI AND EmployeeO LIKE @userO;";
-                            //string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE EmployeeF + EmployeeI + EmployeeO LIKE @userFIO;";
                             string userFIOQuery = "  SELECT EmployeeID FROM employeeee WHERE CONCAT(EmployeeF, EmployeeI, EmployeeO) = @userFIO; ";
                             string[] fioParts = comboBox2.Text.Split(' ');
                             if (fioParts.Length >= 3)
@@ -459,15 +452,8 @@ namespace kursovoy
                                 using (MySqlCommand userFIOCmd = new MySqlCommand(userFIOQuery, con))
                                 {
                                     userFIOCmd.Parameters.AddWithValue("@userFIO", employeeF + employeeI + employeeO);
-                                    //userFIOCmd.Parameters.AddWithValue("@userI", employeeI);
-                                    //userFIOCmd.Parameters.AddWithValue("@userO", employeeO);
                                     object result = userFIOCmd.ExecuteScalar();
                                     userFIO = result != null ? Convert.ToInt32(result) : 0;
-                                    //if (userFIO == 0)
-                                    //{
-                                    //    MessageBox.Show("ФИО сотрудника не найдено.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    //    return;
-                                    //}
                                 }
 
                                 cmd.Parameters.AddWithValue("@userid", userID);
@@ -475,8 +461,6 @@ namespace kursovoy
                                 string selectedUSERFIO = comboBox2.Text.ToString();
                                 int userFio = GetEmployeeIDByName(selectedUSERFIO, con);
                                 cmd.Parameters.AddWithValue("@userFIO", userFIO);
-                                //cmd.Parameters.AddWithValue("@userI", userFIO);
-                                //cmd.Parameters.AddWithValue("@userO", userFIO);
 
                                 string selectedRoleid = comboBox1.Text.ToString();
                                 int role = GetRoleidByName(selectedRoleid, con);
@@ -573,7 +557,6 @@ namespace kursovoy
                                     string query = "INSERT INTO user (UserFIO, Login, Password, RoleID) VALUES (@value1,@value2,@value3,@value4)";
                                     using (MySqlCommand cmd = new MySqlCommand(query, connection))
                                     {
-                                        //UserID,cmd.Parameters.AddWithValue("@value0", textBox2.Text);
                                         cmd.Parameters.AddWithValue("@value1", userFIO);
                                         cmd.Parameters.AddWithValue("@value2", textBox7.Text);
                                         if (textBox1.Text.Length < 10)

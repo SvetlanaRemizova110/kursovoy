@@ -186,14 +186,6 @@ namespace kursovoy
 
             if (!File.Exists(defaultImagePath))
             {
-                // Если файла нет, создаем его (можно создать пустой или добавить туда дефолтную картинку)
-                //Например:
-                //Bitmap bmp = new Bitmap(100,100);
-                //using(Graphics gr = Graphics.FromImage(bmp)){
-                //    gr.Clear(Color.Gray);
-                //}
-                //bmp.Save(defaultImagePath, System.Drawing.Imaging.ImageFormat.Png);
-
                 MessageBox.Show($"Файл заглушки {DefaultImageName} не найден. Пожалуйста, поместите его в папку photo.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 pictureBox1.Image = null;
                 label12.Text = "";
@@ -290,36 +282,7 @@ namespace kursovoy
         {
             LoadDefaultImage();
         }
-        ////Description
-        //private void textBox5_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    if (!char.IsControl(e.KeyChar) &&
-        //            !char.IsLetter(e.KeyChar))
-        //    {
-        //        e.Handled = true; // Отменяем ввод
-        //    }
-        //    if (e.KeyChar == ' ')
-        //    {
-        //        e.Handled = false;
-        //    }
-        //}
-
-        ////Name
-        //private void textBoxName_KeyPress(object sender, KeyPressEventArgs e)
-        //{
-        //    if (!char.IsControl(e.KeyChar) &&
-        //    (e.KeyChar < 'а' || e.KeyChar > 'я') &&
-        //    (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
-        //    (e.KeyChar < 'A' || e.KeyChar > 'Z') &&
-        //     (e.KeyChar < 'a' || e.KeyChar > 'z'))
-        //    {
-        //        e.Handled = true;
-        //    }
-        //    if (e.KeyChar == ' ')
-        //    {
-        //        e.Handled = false;
-        //    }
-        //}
+        
         //Cost, count, Art
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {

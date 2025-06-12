@@ -228,13 +228,9 @@ namespace kursovoy
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             labelVSE.Visible = false;
             label7.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
-            //FillDataGrid("SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
-            //    " OrderStatus AS 'Статус заказа', e.EmployeeF AS 'Фамилия', e.EmployeeI AS 'Имя', e.EmployeeO AS 'Отчетво', OrderPrice AS 'Сумма заказа'" +
-            //    " FROM `order`" +
-            //    " INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID");
-            //////////////
+
         }
-        
+
         /// <summary>
         /// Выбор страницы пагинации, скрытие ненужных строк
         /// </summary>
@@ -252,7 +248,7 @@ namespace kursovoy
                 FillCount();
             }
         }
-        
+
         /// <summary>
         /// Пагинация
         /// </summary>
@@ -321,7 +317,7 @@ namespace kursovoy
             //labelVSE.Text = $"/ {totalRows1}";
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
-        
+
         /// <summary>
         /// Количество строк всего
         /// </summary>
@@ -400,35 +396,35 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
-                DateTime startDate = dateTimePickerStart.Value;
-                DateTime endDate = dateTimePickerEnd.Value;
+            DateTime startDate = dateTimePickerStart.Value;
+            DateTime endDate = dateTimePickerEnd.Value;
 
-                string startDate2 = dateTimePickerStart.Value.ToString("yyyy-MM-dd");
-                string endDate2 = dateTimePickerEnd.Value.ToString("yyyy-MM-dd");
+            string startDate2 = dateTimePickerStart.Value.ToString("yyyy-MM-dd");
+            string endDate2 = dateTimePickerEnd.Value.ToString("yyyy-MM-dd");
 
-                // Проверка дат
-                if (startDate > endDate)
+            // Проверка дат
+            if (startDate > endDate)
+            {
+                MessageBox.Show("Дата начала периода не может быть больше даты окончания периода.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
-                    MessageBox.Show("Дата начала периода не может быть больше даты окончания периода.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                    // Сохранение файла
+                    SaveFileDialog saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.FileName = $"Отчет по заказам_{startDate2}_{endDate2}.xlsx";
+                    saveFileDialog.DefaultExt = "xlsx";
+                    saveFileDialog.Filter = "Excel Files|*.xlsx";
 
-                try
-                {
-                    using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        // Сохранение файла
-                        SaveFileDialog saveFileDialog = new SaveFileDialog();
-                        saveFileDialog.FileName = $"Отчет по заказам_{startDate2}_{endDate2}.xlsx";
-                        saveFileDialog.DefaultExt = "xlsx";
-                        saveFileDialog.Filter = "Excel Files|*.xlsx";
+                        connection.Open();
 
-                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                        {
-                            connection.Open();
-
-                            // Запрос для получения данных о заказах за указанный период
-                            string query = @"SELECT
+                        // Запрос для получения данных о заказах за указанный период
+                        string query = @"SELECT
                                         OrderID AS 'Номер заказа',
                                         OrderDate AS 'Дата заказа',
                                         OrderStatus AS 'Статус заказа',
@@ -440,27 +436,27 @@ namespace kursovoy
                                     INNER JOIN employeeee e ON `order`.OrderUser = e.EmployeeID
                                     WHERE OrderDate BETWEEN @startDate AND @endDate AND OrderStatus = 'Завершен'";
 
-                            using (MySqlCommand command = new MySqlCommand(query, connection))
+                        using (MySqlCommand command = new MySqlCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@startDate", startDate);
+                            command.Parameters.AddWithValue("@endDate", endDate);
+
+                            using (MySqlDataAdapter adapter = new MySqlDataAdapter(command))
                             {
-                                command.Parameters.AddWithValue("@startDate", startDate);
-                                command.Parameters.AddWithValue("@endDate", endDate);
+                                System.Data.DataTable dataTable = new System.Data.DataTable();
+                                adapter.Fill(dataTable);
 
-                                using (MySqlDataAdapter adapter = new MySqlDataAdapter(command))
-                                {
-                                    System.Data.DataTable dataTable = new System.Data.DataTable();
-                                    adapter.Fill(dataTable);
+                                // Подсчет общего дохода
+                                decimal totalRevenue = dataTable.AsEnumerable().Sum(row => Convert.ToDecimal(row["Сумма заказа"]));
+                                int totalOrders = dataTable.Rows.Count;
+                                double averagePrice = totalOrders > 0 ? (double)totalRevenue / totalOrders : 0;
 
-                                    // Подсчет общего дохода
-                                    decimal totalRevenue = dataTable.AsEnumerable().Sum(row => Convert.ToDecimal(row["Сумма заказа"]));
-                                    int totalOrders = dataTable.Rows.Count;
-                                    double averagePrice = totalOrders > 0 ? (double)totalRevenue / totalOrders : 0;
+                                // Создание Excel-приложения и книги
+                                Excel.Application excelApp = new Excel.Application();
+                                Excel.Workbook workbook = excelApp.Workbooks.Add();
+                                Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1]; // Explicit cast
 
-                                    // Создание Excel-приложения и книги
-                                    Excel.Application excelApp = new Excel.Application();
-                                    Excel.Workbook workbook = excelApp.Workbooks.Add();
-                                    Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1]; // Explicit cast
-
-                                    // **Добавляем вывод текущей даты в первую строку**
+                                // **Добавляем вывод текущей даты в первую строку**
                                 // Заголовок на весь лист
                                 var periodHeader = $"Отчет за период: {startDate.ToShortDateString()} - {endDate.ToShortDateString()}";
                                 worksheet.Range["A1:G1"].Merge(); // Объединяем ячейки для заголовка
@@ -469,81 +465,81 @@ namespace kursovoy
                                 worksheet.Cells[1, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter; // Центрируем заголовок
                                 worksheet.Cells[1, 1].Font.Size = 14; // Увеличиваем размер шрифта
 
-                                                                      // Сдвигаем заголовки столбцов на строку вниз
+                                // Сдвигаем заголовки столбцов на строку вниз
                                 for (int i = 0; i < dataTable.Columns.Count; i++)
-                                    {
-                                        worksheet.Cells[2, i + 1] = dataTable.Columns[i].ColumnName;
-                                    }
-
-                                    // Данные
-                                    for (int i = 0; i < dataTable.Rows.Count; i++)
-                                    {
-                                        for (int j = 0; j < dataTable.Columns.Count; j++)
-                                        {
-                                            worksheet.Cells[i + 3, j + 1] = dataTable.Rows[i][j].ToString();
-                                        }
-                                    }
-
-                                    // Итоговая информация
-                                    int lastRow = dataTable.Rows.Count + 3;
-                                    worksheet.Cells[lastRow, 1] = "Общий доход:";
-                                    worksheet.Cells[lastRow, 2] = totalRevenue.ToString("F2");
-                                    worksheet.Cells[lastRow + 1, 1] = "Количество заказов:";
-                                    worksheet.Cells[lastRow + 1, 2] = totalOrders.ToString();
-
-                                    // Распределение по сотрудникам
-                                    var employeeDistribution = dataTable.AsEnumerable()
-                                        .GroupBy(row => $"{row.Field<string>("Фамилия")} {row.Field<string>("Имя")} {row.Field<string>("Отчество")}")
-                                        .Select(g => new
-                                        {
-                                            Employee = g.Key,
-                                            Count = g.Count(),
-                                            TotalPrice = g.Sum(row => Convert.ToDecimal(row["Сумма заказа"]))
-                                        });
-
-                                    //worksheet.Cells[lastRow + 4, 1] = "Распределение по сотрудникам:";
-                                    worksheet.Cells[lastRow + 3, 1] = "Сотрудник";
-                                    worksheet.Cells[lastRow + 3, 2] = "Количество заказов";
-                                    worksheet.Cells[lastRow + 3, 3] = "Сумма заказов";
-
-                                    int currentRow = lastRow + 4;
-                                    foreach (var employee in employeeDistribution)
-                                    {
-                                        worksheet.Cells[currentRow, 1] = employee.Employee;
-                                        worksheet.Cells[currentRow, 2] = employee.Count.ToString();
-                                        worksheet.Cells[currentRow, 3] = employee.TotalPrice.ToString("F2");
-                                        currentRow++;
-                                    }
-
-                                    // Авторазмер столбцов
-                                    worksheet.Columns.AutoFit();
-
-                                    workbook.SaveAs(saveFileDialog.FileName);
-                                    MessageBox.Show("Отчет успешно сформирован и сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                                    // Закрытие Excel
-                                    workbook.Close();
-                                    excelApp.Quit();
-
-                                    // Очистка COM-объектов
-                                    System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
-                                    System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
-                                    System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
-                                    excelApp = null;
-                                    workbook = null;
-                                    worksheet = null;
-                                    GC.Collect();
-                                    connection.Close();
+                                {
+                                    worksheet.Cells[2, i + 1] = dataTable.Columns[i].ColumnName;
                                 }
+
+                                // Данные
+                                for (int i = 0; i < dataTable.Rows.Count; i++)
+                                {
+                                    for (int j = 0; j < dataTable.Columns.Count; j++)
+                                    {
+                                        worksheet.Cells[i + 3, j + 1] = dataTable.Rows[i][j].ToString();
+                                    }
+                                }
+
+                                // Итоговая информация
+                                int lastRow = dataTable.Rows.Count + 3;
+                                worksheet.Cells[lastRow, 1] = "Общий доход:";
+                                worksheet.Cells[lastRow, 2] = totalRevenue.ToString("F2");
+                                worksheet.Cells[lastRow + 1, 1] = "Количество заказов:";
+                                worksheet.Cells[lastRow + 1, 2] = totalOrders.ToString();
+
+                                // Распределение по сотрудникам
+                                var employeeDistribution = dataTable.AsEnumerable()
+                                    .GroupBy(row => $"{row.Field<string>("Фамилия")} {row.Field<string>("Имя")} {row.Field<string>("Отчество")}")
+                                    .Select(g => new
+                                    {
+                                        Employee = g.Key,
+                                        Count = g.Count(),
+                                        TotalPrice = g.Sum(row => Convert.ToDecimal(row["Сумма заказа"]))
+                                    });
+
+                                //worksheet.Cells[lastRow + 4, 1] = "Распределение по сотрудникам:";
+                                worksheet.Cells[lastRow + 3, 1] = "Сотрудник";
+                                worksheet.Cells[lastRow + 3, 2] = "Количество заказов";
+                                worksheet.Cells[lastRow + 3, 3] = "Сумма заказов";
+
+                                int currentRow = lastRow + 4;
+                                foreach (var employee in employeeDistribution)
+                                {
+                                    worksheet.Cells[currentRow, 1] = employee.Employee;
+                                    worksheet.Cells[currentRow, 2] = employee.Count.ToString();
+                                    worksheet.Cells[currentRow, 3] = employee.TotalPrice.ToString("F2");
+                                    currentRow++;
+                                }
+
+                                // Авторазмер столбцов
+                                worksheet.Columns.AutoFit();
+
+                                workbook.SaveAs(saveFileDialog.FileName);
+                                MessageBox.Show("Отчет успешно сформирован и сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                // Закрытие Excel
+                                workbook.Close();
+                                excelApp.Quit();
+
+                                // Очистка COM-объектов
+                                System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
+                                System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
+                                System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
+                                excelApp = null;
+                                workbook = null;
+                                worksheet = null;
+                                GC.Collect();
+                                connection.Close();
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при формировании отчета: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при формировании отчета: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         /// <summary>
         /// Устанавливаем минимальную дату для dateTimePickerEnd.
@@ -702,7 +698,7 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при обновлении статуса заказа: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
+
         /// <summary>
         /// Возврат товара на склад
         /// </summary>
@@ -832,7 +828,7 @@ namespace kursovoy
                 }
             }
         }
-       
+
         /// <summary>
         /// Масштабирование формы
         /// </summary>

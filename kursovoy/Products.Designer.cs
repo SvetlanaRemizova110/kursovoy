@@ -29,14 +29,11 @@ namespace kursovoy
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Products));
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.добавитьВКорзинуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SearchText = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
@@ -57,7 +54,6 @@ namespace kursovoy
             this.label7 = new System.Windows.Forms.Label();
             this.toggleFullscreenButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dataGridView1
@@ -72,7 +68,6 @@ namespace kursovoy
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.ContextMenuStrip = this.contextMenuStrip1;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Comic Sans MS", 9.75F);
@@ -94,25 +89,10 @@ namespace kursovoy
             this.dataGridView1.Size = new System.Drawing.Size(1083, 452);
             this.dataGridView1.TabIndex = 10;
             this.dataGridView1.TabStop = false;
-            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             this.dataGridView1.SelectionChanged += new System.EventHandler(this.dataGridView1_SelectionChanged);
             this.dataGridView1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseDown);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.добавитьВКорзинуToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(184, 26);
-            // 
-            // добавитьВКорзинуToolStripMenuItem
-            // 
-            this.добавитьВКорзинуToolStripMenuItem.Name = "добавитьВКорзинуToolStripMenuItem";
-            this.добавитьВКорзинуToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.добавитьВКорзинуToolStripMenuItem.Text = "Добавить в корзину";
-            this.добавитьВКорзинуToolStripMenuItem.Click += new System.EventHandler(this.AddToOrderMenuClick);
             // 
             // SearchText
             // 
@@ -411,10 +391,8 @@ namespace kursovoy
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Товары";
             this.Load += new System.EventHandler(this.Products_Load);
-            this.ResizeEnd += new System.EventHandler(this.Products_ResizeEnd);
             this.SizeChanged += new System.EventHandler(this.Products_SizeChanged);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -442,7 +420,5 @@ namespace kursovoy
         private System.Windows.Forms.Label labelCount;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button toggleFullscreenButton;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem добавитьВКорзинуToolStripMenuItem;
     }
 }

@@ -139,9 +139,6 @@ namespace kursovoy
                 allRows1.Clear();
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
-
-                //dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-                //dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
                 dataGridView1.AllowUserToAddRows = false;
                 dataGridView1.ReadOnly = true;
                 // Отключение возможности перемещения строк
@@ -214,7 +211,7 @@ namespace kursovoy
                 string cleanNumber = new string(maskedTextBox1.Text.Where(char.IsDigit).ToArray());
                 Console.WriteLine(cleanNumber);
                 maskedTextBox1.Text = row.Cells["telephone"].Value.ToString(); //telephone
-                comboBoxStatus.Text = row.Cells["status"].Value.ToString(); //status \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                comboBoxStatus.Text = row.Cells["status"].Value.ToString(); //status 
             }
             FillDataGrid("SELECT EmployeeID AS 'id', " +
                "EmployeeF AS 'Фамилия'," +
@@ -475,77 +472,6 @@ namespace kursovoy
             }
         }
 
-        /// <summary>
-        /// Добавление сотрудника
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        //private void button6_Click(object sender, EventArgs e)
-        //{
-        //    if (maskedTextBox1.Text == "" || textBoxF.Text == "" ||textBoxI.Text == "" ||textBoxO.Text == ""|| comboBoxStatus.Text == "")
-        //    {
-        //        MessageBox.Show("Необходимо заполнить все поля!");
-        //    }
-        //    else
-        //    {
-        //        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-        //        if (dialogResult == DialogResult.Yes)
-        //        {
-        //            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
-        //            {
-        //                try
-        //                {
-        //                    connection.Open();
-
-        //                    //string query = "INSERT INTO Employee (EmployeeFIO, telephone, pasport) VALUES (@value1,@value2,@value3)";
-        //                    string query = "INSERT INTO employeeee (EmployeeF, EmployeeI, EmployeeO, telephone, status) VALUES (@value1,@value4,@value5,@value2, @status)";
-        //                    using (MySqlCommand cmd = new MySqlCommand(query, connection))
-        //                    {
-        //                        //if (UserFIOExists(textBox4.Text, connection))
-        //                        //{
-        //                        //    MessageBox.Show("Пользователь с таким ФИО уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                        //    return;
-        //                        //}
-        //                        if (UserTelephoneExists(maskedTextBox1.Text, connection))
-        //                        {
-        //                            MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                            return;
-        //                        }
-        //                        cmd.Parameters.AddWithValue("@value1", textBoxF.Text);
-        //                        cmd.Parameters.AddWithValue("@value4", textBoxI.Text);
-        //                        cmd.Parameters.AddWithValue("@value5", textBoxO.Text);
-        //                        cmd.Parameters.AddWithValue("@value2", maskedTextBox1.Text);
-        //                        cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);//////////////////////
-
-        //                        cmd.ExecuteNonQuery();
-        //                        MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        //                        maskedTextBox1.Text = ""; //telephone
-        //                        textBoxF.Text = ""; //FIO
-        //                        textBoxI.Text = ""; //FIO
-        //                        textBoxO.Text = ""; //FIO
-        //                        textBox2.Text = ""; //id
-        //                        comboBoxStatus.SelectedItem = null; //
-        //                        FillDataGrid("SELECT EmployeeID AS 'id', " +
-        //                           "EmployeeF AS 'Фамилия'," +
-        //                           "left(EmployeeI, 1) AS 'Имя'," +
-        //                           "left(EmployeeO, 1) AS 'Отчетство'," +
-        //                           "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
-        //                           "status AS 'Статус'" +
-        //                           " FROM  employeeee; ");
-        //                    }
-        //                    connection.Close();
-        //                }
-
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show("Ошибка: " + ex);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-        
         //Очистка всех полей
         private void button2_Click(object sender, EventArgs e)
         {
