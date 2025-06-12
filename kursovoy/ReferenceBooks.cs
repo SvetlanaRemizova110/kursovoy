@@ -316,10 +316,10 @@ namespace kursovoy
                             textBox1.Text = "";
                             FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM Category"); // Обновляем DataGridView
                         //}
-                        else
-                        {
-                            MessageBox.Show($"Не удалось {(isUpdate ? "изменить" : "добавить")} категорию.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
+                        //else
+                        //{
+                        //    MessageBox.Show($"Не удалось {(isUpdate ? "изменить" : "добавить")} категорию.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        //}
                     }
                     catch (MySqlException ex)
                     {
