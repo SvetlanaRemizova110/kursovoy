@@ -247,13 +247,13 @@ namespace kursovoy
 
             if (string.IsNullOrEmpty(categoryName)) // Проверка на пустоту более современным способом
             {
-                MessageBox.Show("Необходимо заполнить поле!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (isUpdate && string.IsNullOrEmpty(categoryId))
             {
-                MessageBox.Show("Необходимо выбрать категорию для редактирования!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Необходимо выбрать запись для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -305,7 +305,6 @@ namespace kursovoy
                         }
 
                         cmd.ExecuteNonQuery();
-                        MessageBox.Show("Запись успешно обновлена.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         MessageBox.Show($"Категория {(isUpdate ? "успешно изменена" : "успешно добавлена")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             textBox4.Text = "";
@@ -416,13 +415,13 @@ namespace kursovoy
 
             if (string.IsNullOrEmpty(supplierName))
             {
-                MessageBox.Show("Необходимо заполнить поле 'Название поставщика'!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (isUpdate && string.IsNullOrEmpty(supplierId))
             {
-                MessageBox.Show("Необходимо выбрать поставщика для редактирования!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Необходимо выбрать запись для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -438,8 +437,6 @@ namespace kursovoy
                     try
                     {
                         conn.Open();
-
-                        // Check for existing supplier (only for adding)
                         if (!isUpdate)
                         {
                             using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Supplier WHERE SupplierName = @SupplierName", conn))
@@ -502,13 +499,13 @@ namespace kursovoy
 
             if (string.IsNullOrEmpty(manufacturerName))
             {
-                MessageBox.Show("Необходимо заполнить поле 'Название производителя'!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             if (isUpdate && string.IsNullOrEmpty(manufacturerId))
             {
-                MessageBox.Show("Необходимо выбрать производителя для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Необходимо выбрать запись для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -601,6 +598,11 @@ namespace kursovoy
         private void dataGridView3_SelectionChanged(object sender, EventArgs e)
         {
             dataGridView3.ClearSelection();
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

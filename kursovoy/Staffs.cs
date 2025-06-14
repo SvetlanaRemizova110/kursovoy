@@ -327,7 +327,7 @@ namespace kursovoy
         {
             if (maskedTextBox1.Text == "" || textBoxF.Text == "" || textBoxI.Text == "" || textBoxO.Text == "" || comboBoxStatus.Text == "")
             {
-                MessageBox.Show("Необходимо заполнить все поля!");
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             else
             {

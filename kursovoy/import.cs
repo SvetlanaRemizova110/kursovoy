@@ -25,9 +25,66 @@ namespace kursovoy
         private void btnRestoreDatabase_Click(object sender, EventArgs e)
         {
             string dbName = $"db45";
-            CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-            CreateTables(Authorization.Program.ConnectionString, dbName);
+
+            // Проверяем, существует ли база данных
+            if (DatabaseExists(Authorization.Program.ConnectionStringNotDB, dbName))
+            {
+                var result = MessageBox.Show("База данных уже существует. Хотите удалить и восстановить её заново?","Восстановление БД", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    // Удаляем существующую базу
+                    DropDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                    // Создаём новую
+                    CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                    CreateTables(Authorization.Program.ConnectionString, dbName);
+                }
+                else
+                {
+                    MessageBox.Show("Восстановление базы данных отменено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            else
+            {
+                CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                CreateTables(Authorization.Program.ConnectionString, dbName);
+            }
         }
+
+        /// <summary>
+        /// Проверяет существование базы данных
+        /// </summary>
+        /// <param name="connectionString">Строка подключения без указания БД</param>
+        /// <param name="dbName"></param>
+        /// <returns></returns>
+        static bool DatabaseExists(string connectionString, string dbName)
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string checkDbQuery = $"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{dbName}';";
+                MySqlCommand command = new MySqlCommand(checkDbQuery, connection);
+                object result = command.ExecuteScalar();
+                return result != null && result.ToString() == dbName;
+            }
+        }
+
+        /// <summary>
+        /// Удаляет базу данных
+        /// </summary>
+        /// <param name="connectionString">Строка подключения без указания БД</param>
+        /// <param name="dbName">Имя базы данных</param>
+        static void DropDatabase(string connectionString, string dbName)
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string dropDbQuery = $"DROP DATABASE IF EXISTS {dbName};";
+                MySqlCommand command = new MySqlCommand(dropDbQuery, connection);
+                command.ExecuteNonQuery();
+            }
+        }
+
         /// <summary>
         /// Функция создания БД
         /// </summary>
@@ -41,7 +98,6 @@ namespace kursovoy
                 string createDbQuery = $"CREATE DATABASE IF NOT EXISTS {dbName};";
                 MySqlCommand command = new MySqlCommand(createDbQuery, connection);
                 command.ExecuteNonQuery();
-                // MessageBox.Show($"База данных {dbName} создана или уже существует.");
             }
         }
         /// <summary>
@@ -67,8 +123,8 @@ namespace kursovoy
                       CategoryID int NOT NULL AUTO_INCREMENT,
                       CategoryName varchar(30) NOT NULL,
                       PRIMARY KEY (CategoryID));";
-                        MySqlCommand cmd = new MySqlCommand(createCategoryTable, connection);
-                        cmd.ExecuteNonQuery();
+                        MySqlCommand cmdCategory = new MySqlCommand(createCategoryTable, connection);
+                        cmdCategory.ExecuteNonQuery();
                     }
 
                     if (TableExists(connection, "Employeeee"))
@@ -86,8 +142,8 @@ namespace kursovoy
                       telephone varchar(20) NOT NULL,
                       status varchar(10) NOT NULL,
                       PRIMARY KEY (EmployeeID));";
-                        MySqlCommand cmd = new MySqlCommand(createEmployeeTable, connection);
-                        cmd.ExecuteNonQuery();
+                        MySqlCommand cmdEmployee = new MySqlCommand(createEmployeeTable, connection);
+                        cmdEmployee.ExecuteNonQuery();
                     }
 
                     if (TableExists(connection, "ProductManufactur"))
@@ -226,7 +282,7 @@ namespace kursovoy
                     {
                         string createCompanyTable = @"CREATE TABLE Companyinfo (
                       idcompanyinfo int NOT NULL AUTO_INCREMENT,
-                      company_name varchar(24) NOT NULL,
+                      company_name varchar(30) NOT NULL,
                       company_adress varchar(45) NOT NULL,
                       company_phone varchar(16) NOT NULL,
                       company_inn varchar(12) NOT NULL,
@@ -239,7 +295,7 @@ namespace kursovoy
                         companyCommand.ExecuteNonQuery();
                     }
 
-                    MessageBox.Show("База данных восстановлена.", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("База данных восстановлена.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     connection.Close();
                 }
@@ -289,7 +345,7 @@ namespace kursovoy
             {
                 if (comboBox1.SelectedItem == null)
                 {
-                    MessageBox.Show("Пожалуйста, выберите таблицу", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    MessageBox.Show("Пожалуйста, выберите таблицу", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                     return;
                 }
                 string tableName = comboBox1.SelectedItem.ToString();
@@ -309,15 +365,14 @@ namespace kursovoy
         /// <param name="selectedTable"></param>
         private void ImportData(string filePath, string selectedTable)
         {
-            string fullConnectionString = Authorization.Program.ConnectionString;
             if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(selectedTable))
             {
-                MessageBox.Show("Пожалуйста, выберите файл и таблицу.", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Пожалуйста, выберите файл и таблицу.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
             }
             try
             {
-                using (var connection = new MySqlConnection(fullConnectionString))
+                using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
                     connection.Open();
                     using (var transaction = connection.BeginTransaction())
@@ -349,7 +404,7 @@ namespace kursovoy
                                 }
                             }
                             transaction.Commit();
-                            MessageBox.Show("Импорт данных завершен успешно.");
+                            MessageBox.Show("Импорт данных завершен успешно.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         catch (Exception ex)
                         {
@@ -358,6 +413,11 @@ namespace kursovoy
                         }
                     }
                 }
+            }
+            catch (MySqlException)
+            {
+                MessageBox.Show("Базы данных не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
             catch (Exception ex)
             {
@@ -653,7 +713,7 @@ namespace kursovoy
                         MySqlScript script = new MySqlScript(connection, sqlScript);
                         script.Execute();
 
-                        MessageBox.Show("Восстановление завершено успешно!", "Успех");
+                        MessageBox.Show("Восстановление завершено успешно!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
                 catch (MySqlException ex)
@@ -707,7 +767,7 @@ namespace kursovoy
             // Проверяем существование базы данных
             if (!DatabaseExists())
             {
-                MessageBox.Show("База данных не существует или недоступна", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("База данных не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             string[] tables = new string[]
@@ -847,13 +907,26 @@ namespace kursovoy
                             for (int i = 0; i < dataTable.Columns.Count; i++)
                             {
                                 // Обрабатываем NULL значения и экранируем данные
-                                if (row.IsNull(i))
+                                string cellValue = row[i] == DBNull.Value ? null : row[i].ToString();
+
+                                if (tableName.ToLower() == "order" && dataTable.Columns[i].ColumnName.ToLower() == "orderdate")
+                                {
+                                    cellValue = TryParseAndFormatDate(cellValue);
+                                }
+
+                                if (tableName.ToLower() == "order" && dataTable.Columns[i].ColumnName.ToLower() == "orderprice")
+                                {
+                                    cellValue = FixNumberFormat(cellValue);
+                                }
+
+
+                                if (cellValue == null)
                                 {
                                     writer.Write(""); // Или другое значение по умолчанию
                                 }
                                 else
                                 {
-                                    writer.Write(EscapeCsvField(row[i].ToString()));
+                                    writer.Write(EscapeCsvField(cellValue));
                                 }
 
                                 if (i < dataTable.Columns.Count - 1)
@@ -889,6 +962,11 @@ namespace kursovoy
             }
 
             return field;
+        }
+
+        private void import_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

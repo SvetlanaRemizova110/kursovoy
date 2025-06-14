@@ -39,7 +39,7 @@ namespace kursovoy
         {
             public int OrderID { get; set; }
             public string OrderStatus { get; set; }
-            public DateTime OrderDate { get; set; } // Добавлено хранение даты заказа
+            public DateTime OrderDate { get; set; }
 
             // Хранение количества товаров в заказе
             public Dictionary<string, int> OrderItems { get; set; } = new Dictionary<string, int>();
@@ -75,7 +75,6 @@ namespace kursovoy
                         dataGridView1.AllowUserToOrderColumns = false;
                         dataGridView1.AllowUserToResizeColumns = false;
                         dataGridView1.AllowUserToResizeRows = false;
-
                         dataGridView1.ReadOnly = false;
                         dataGridView1.AllowUserToAddRows = false;
 
@@ -95,7 +94,6 @@ namespace kursovoy
 
                         if (Authorization.User2.Role == 2)
                         {
-                            // Создаем ComboBoxColumn для статуса заказа
                             DataGridViewComboBoxColumn statusColumn = new DataGridViewComboBoxColumn();
                             statusColumn.Name = "OrderStatus";
                             statusColumn.HeaderText = "Статус заказа";
@@ -123,7 +121,7 @@ namespace kursovoy
                             {
                                 OrderID = orderID,
                                 OrderStatus = rdr["Статус заказа"].ToString(),
-                                OrderDate = orderDate  // Сохраняем дату заказа
+                                OrderDate = orderDate
                             };
                             // Загружаем информацию о товарах в заказе
                             LoadOrderItems(orderID, orderData);
@@ -228,7 +226,6 @@ namespace kursovoy
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             labelVSE.Visible = false;
             label7.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
-
         }
 
         /// <summary>
@@ -244,7 +241,7 @@ namespace kursovoy
             if (l != null)
             {
                 currentPage1 = Convert.ToInt32(l.Text) - 1;
-                UpdatePag(); //Перерисовываем интерфейс
+                UpdatePag();
                 FillCount();
             }
         }
@@ -285,7 +282,7 @@ namespace kursovoy
                 var linkLabel = new LinkLabel();
                 linkLabel.Text = (i + 1).ToString();
                 linkLabel.Name = "page" + i;
-                // Устанавливаем цвет ссылок
+                // Устанавливаем цвет ссылки
                 linkLabel.LinkColor = Color.Black;      // Цвет ссылки до посещения
                 linkLabel.VisitedLinkColor = Color.Black; // Цвет ссылки после посещения
                 linkLabel.ActiveLinkColor = Color.Black;  // Цвет ссылки при нажатии
@@ -302,7 +299,7 @@ namespace kursovoy
                 }
                 else
                 {
-                    linkLabel.BackColor = Color.Honeydew; //Устанавливаем дефолтный цвет для не выбранных
+                    linkLabel.BackColor = Color.Honeydew;
                 }
                 this.Controls.Add(linkLabel);
                 x += step;
@@ -313,8 +310,6 @@ namespace kursovoy
             buttonPag2.Enabled = currentPage1 < totalPages - 1;
 
             // Обновляем счетчик записей
-            //labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}";
-            //labelVSE.Text = $"/ {totalRows1}";
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
 
@@ -580,15 +575,15 @@ namespace kursovoy
 
                 if (orderData != null)
                 {
-                    // Получаем старый статус заказа из списка данных
+                    // Получаем статус заказа
                     string oldStatus = orderData.OrderStatus;
 
-                    // **Добавляем проверку на изменение статуса с "Отменён" на "Завершен"**
+                    // Попытка изменения статуса с "Отменён" на "Завершен"
                     if (oldStatus == "Отменён" && newStatus == "Завершен")
                     {
                         MessageBox.Show("Изменение статуса заказа с 'Отменён' на 'Завершен' запрещено.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus; // Возвращаем старый статус
-                        return; // Прекращаем выполнение метода
+                        return;
                     }
 
                     // Проверяем, прошло ли больше 14 дней с даты заказа
@@ -596,12 +591,12 @@ namespace kursovoy
                     {
                         MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = orderData.OrderStatus; // Возвращаем старый статус
-                        return; // Прекращаем выполнение метода
+                        return;
                     }
                     // Проверяем, что статус изменился
                     if (oldStatus != newStatus)
                     {
-                        // Обновляем статус заказа в базе данных
+                        // Обновляем статус заказа
                         UpdateOrderStatus(orderID, newStatus);
 
                         // Если статус изменился с "Выполнен" на "Отменён", возвращаем товар на склад
@@ -609,11 +604,11 @@ namespace kursovoy
                         {
                             ReturnProductsToStock(orderID);
                         }
-
-                        // Обновляем статус заказа в списке данных
+                        // Обновляем статус заказа
                         orderData.OrderStatus = newStatus;
 
-
+                        UpdateDataGrid();
+                        UpdatePag();
                     }
                 }
             }
@@ -659,7 +654,7 @@ namespace kursovoy
                         else
                         {
                             MessageBox.Show($"Товар с артикулом {productArticleNumber} не найден.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return false; // Товар не найден
+                            return false;
                         }
                     }
                     con.Close();
@@ -719,7 +714,7 @@ namespace kursovoy
                             string productArticleNumber = item.Key;
                             int quantity = item.Value;
                             // Увеличиваем количество товара на складе
-                            string query = "UPDATE Product SET ProductQuantityInStock = ProductQuantityInStock + @Quantity WHERE ProductArticul = @ProductArticul"; // Используем ProductArticleNumber
+                            string query = "UPDATE Product SET ProductQuantityInStock = ProductQuantityInStock + @Quantity WHERE ProductArticul = @ProductArticul"; 
                             MySqlCommand command = new MySqlCommand(query, con);
                             command.Parameters.AddWithValue("@ProductArticul", productArticleNumber);
                             command.Parameters.AddWithValue("@Quantity", quantity);
@@ -742,10 +737,9 @@ namespace kursovoy
         /// <param name="e"></param>
         private void SearchText_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Проверка на ввод только чисел
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
-                e.Handled = true; // Отменить ввод, если символ не является цифрой
+                e.Handled = true;
             }
         }
 
@@ -759,7 +753,7 @@ namespace kursovoy
             if (currentPage1 > 0)
             {
                 currentPage1--;
-                UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
+                UpdatePag(); // Обновляем пагинацию
                 FillCount();
             }
         }
@@ -775,7 +769,7 @@ namespace kursovoy
             if (currentPage1 < totalPages - 1)
             {
                 currentPage1++;
-                UpdatePag(); // Обновляем только пагинацию, без полной перезагрузки данных
+                UpdatePag(); // Обновляем пагинацию
                 FillCount();
             }
         }
@@ -797,7 +791,6 @@ namespace kursovoy
         /// <param name="e"></param>
         private void ViewOrder_Click(object sender, EventArgs e)
         {
-            //  Получаем OrderID из свойства Tag MenuItem
             int ed = dataGridView1.CurrentCell.RowIndex;
             int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
             ViewOrder vo = new ViewOrder(id);
@@ -869,9 +862,7 @@ namespace kursovoy
 
                     contextMenuStrip1.Show(dataGridView1, e.Location);
                 }
-
             }
-
         }
     }
 }

@@ -278,7 +278,7 @@ namespace kursovoy
                 {
                     DeleteRecord(id); // Удаляем запись из базы данных
                     dataGridView1.Rows.RemoveAt(e.RowIndex); // Удаляем строку из DataGridView
-                    MessageBox.Show("Запись успешно удалена.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Запись удалена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -406,7 +406,7 @@ namespace kursovoy
         {
             if (comboBox1.Text == "" || comboBox2.Text == "" || textBox1.Text == "" || textBox7.Text == "")
             {
-                MessageBox.Show("Необходимо заполнить все поля!");
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             else
             {

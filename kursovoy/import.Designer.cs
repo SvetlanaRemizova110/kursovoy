@@ -297,6 +297,7 @@ namespace kursovoy
             this.Name = "import";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Спец. возможности";
+            this.Load += new System.EventHandler(this.import_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);

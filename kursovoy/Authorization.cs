@@ -121,7 +121,7 @@ namespace kursovoy
             //Проверка на заполненность полей ввода логина и пароля, в случае отсутствия выводим сообщение
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Пожалуйста, заполните все поля", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -146,7 +146,7 @@ namespace kursovoy
                 else
                 {
                     //Если пользователь с указанным логином и паролем не найден выводим сообщение об ошибке
-                    MessageBox.Show("Неверный логин или пароль", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Неверный логин или пароль", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     failedLoginAttempts++;
                     //Проверка кол-ва неверных попыток ввода логина/пароля, если кол-во попыток больше или равно допустимому кол-ву - выводим панель CAPTCHA
                     if (failedLoginAttempts >= 1)
@@ -161,25 +161,25 @@ namespace kursovoy
                         {
                             //Блокируем кнопку для входа 
                             button1.Enabled = false;
-                            MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show("Блокировка 10 сек", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             Thread.Sleep(10000);
                             button1.Enabled = true;
-                            MessageBox.Show("Система разблокирована!", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            MessageBox.Show("Система разблокирована!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }
             }
             else
             {
-                MessageBox.Show("Неверная CAPTCHA!", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Неверная CAPTCHA!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 if (failedLoginAttempts >= 1)
                 {
                     //Блокируем кнопку для входа 
                     button1.Enabled = false;
-                    MessageBox.Show("Блокировка 10 сек", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Блокировка 10 сек", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     Thread.Sleep(10000);
                     button1.Enabled = true;
-                    MessageBox.Show("Система разблокирована!", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("Система разблокирована!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -212,7 +212,7 @@ namespace kursovoy
         /// <param name="e"></param>
         private void exit_Click(object sender, EventArgs e)
         {
-            DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите выйти из приложения?", "Подтверждение на выход", MessageBoxButtons.YesNo);
+            DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите выйти из приложения?", "Подтверждение на выход", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)
             {
                 import.AutomaticBackup();
@@ -269,12 +269,11 @@ namespace kursovoy
                     string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
                     if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
                     {
-
                         user = new User { };
                     }
                     else
                     {
-                        MessageBox.Show("База данных не существует. Создайте базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("База данных не существует. Сначало восстановите базу данных.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         user = new User { };
                     }
                 }
@@ -324,7 +323,6 @@ namespace kursovoy
         /// <param name="user"></param>
         private void SwitchRole(int role)
         {
-            // Определите форму для отображения в зависимости от роли
             switch (role)
             {
                 case 1:

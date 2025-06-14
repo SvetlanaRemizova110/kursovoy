@@ -86,22 +86,22 @@ namespace kursovoy
         {
             if (textBoxName.Text == "" || textBox5.Text == "" || textBox7.Text == "" || textBox2.Text == "" || textBox1.Text == "" || comboBox1.Text == "" || comboBox2.Text == "" || comboBox3.Text == "")
             {
-                MessageBox.Show("Необходимо заполнить все поля!");
-            }//textBox6.Text == "" ||
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             else
             {
                 using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
                     try
                     {
-                        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить товар?", "Подтверждение добавления!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                         if (dialogResult == DialogResult.Yes)
                         {
                             connection.Open();
                             // Проверка на дублирование данных(по артикулу)
                             if (UserProductArticulExists(textBox6.Text, connection))
                             {
-                                MessageBox.Show("Товар с таким артикулом уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("Товар с таким артикулом уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return;
                             }
                             // Для получения ID производителя

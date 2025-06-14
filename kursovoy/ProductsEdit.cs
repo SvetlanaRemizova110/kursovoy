@@ -196,11 +196,11 @@ namespace kursovoy
         {
             if (textBox6.Text == "" || textBoxName.Text == "" || textBox5.Text == "" || textBox7.Text == "" || textBox2.Text == "" || textBox1.Text == "" || comboBox1.Text == "" || comboBox2.Text == "" || comboBox3.Text == "")
             {
-                MessageBox.Show("Необходимо заполнить все поля!");
+                MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите отредактировать этот товар?", "Подтверждение редактирования!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)
             {
                 using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
@@ -215,7 +215,7 @@ namespace kursovoy
                         //Проверяем, не занят ли новый артикль
                         if (!IsArticulUnique(newArticul, con))
                         {
-                            MessageBox.Show("Артикул уже существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Товар с таким артикулом уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return; // Прерываем выполнение, если артикул не уникален
                         }
 
@@ -415,7 +415,7 @@ namespace kursovoy
                         pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage; // или StretchImage
                         _currentPhotoPath = targetPath;
                         label12.Text = newFileName;
-                        MessageBox.Show("Фотография уже существует.  Использована существующая.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Фотография уже существует. Использована существующая.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {

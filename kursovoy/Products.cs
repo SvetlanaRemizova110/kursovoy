@@ -101,8 +101,6 @@ namespace kursovoy
                 allRows1.Clear();
                 dataGridView1.Rows.Clear();
                 dataGridView1.Columns.Clear();
-                //dataGridView1.AutoResizeColumns();
-                //dataGridView1.AutoResizeRows();
 
                 dataGridView1.AllowUserToDeleteRows = false;
                 dataGridView1.AllowUserToOrderColumns = false;
@@ -173,7 +171,7 @@ namespace kursovoy
                 {
                     //dataGridView1.Size = new Size(887, 452);
                     button3.Visible = false;
-                 
+                    contextMenuStrip1.Items.Clear();
                     ToolStripMenuItem addToOrderMenu = new ToolStripMenuItem("Добавить в корзину");
                     addToOrderMenu.Click += AddToOrderMenuClick;
                     contextMenuStrip1.Items.Add(addToOrderMenu);
@@ -292,7 +290,6 @@ namespace kursovoy
 
             // Обновляем счетчик записей
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
-            //labelVSE.Text = $"/ {totalRows1}";
         }
         /// <summary>
         /// Количество строк всего
@@ -429,9 +426,6 @@ namespace kursovoy
         {
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += dataGridView1.Rows.Count;
-
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
@@ -439,9 +433,6 @@ namespace kursovoy
         {
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += dataGridView1.Rows.Count;
-
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
@@ -449,9 +440,6 @@ namespace kursovoy
         {
             UpdateDataGrid();
             UpdatePag();
-            //labelCount.Text = "Количество записей: ";
-            //labelCount.Text += dataGridView1.Rows.Count;
-
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
@@ -567,7 +555,7 @@ namespace kursovoy
                 if (e.ColumnIndex == dataGridView1.Columns["Удалить"].Index && e.RowIndex >= 0)
                 {
                     int id = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["ProductArticul"].Value);
-                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (dialogResult == DialogResult.Yes)
                     {
                         try
@@ -578,6 +566,8 @@ namespace kursovoy
                             UpdateDataGrid();
                             UpdatePag();
                             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+                            FillCount();
+                            UpdateDataGrid();
                         }
                         catch (MySqlException ex) when (ex.Number == 1451)
                         {

@@ -423,7 +423,7 @@ namespace kursovoy
         {
             if (order.Count == 0)
             {
-                MessageBox.Show("Ваш заказ пуст!");
+                MessageBox.Show("Ваш заказ пуст!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             try
@@ -432,7 +432,7 @@ namespace kursovoy
                 orderId = SaveOrderToDB();
                 if (orderId > 0)
                 {
-                    MessageBox.Show("Заказ успешно оформлен!", "Оформление заказа!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Заказ успешно оформлен!", "Оформление заказа", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     button3.Enabled = true;
                     AddOrder.Enabled = false;
@@ -550,7 +550,6 @@ namespace kursovoy
                 string productId = GetProductIdByName(productName);
                 if (!int.TryParse(dataGridViewOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value?.ToString(), out int newQuantity))
                 {
-                    MessageBox.Show("Введите целое число!");
                     PopulateOrderDetails(); // Перезаполнение таблицы
                     return;
                 }
@@ -571,7 +570,7 @@ namespace kursovoy
                     }
                     else
                     {
-                        MessageBox.Show($"Количество товара не может превышать {maxQuantity}!");
+                        MessageBox.Show($"Количество товара не может превышать {maxQuantity}!", "",MessageBoxButtons.OK, MessageBoxIcon.Stop);
                         dataGridOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value = order[productId];
                     }
                 }
@@ -744,7 +743,7 @@ namespace kursovoy
                     }
                     else
                     {
-                        MessageBox.Show("На складе недостаточно товара.");
+                        MessageBox.Show("На складе недостаточно товара.","Ошибка",MessageBoxButtons.OK,MessageBoxIcon.Stop);
                     }
                 }
             }
@@ -831,7 +830,7 @@ namespace kursovoy
                 if (orderId > 0)
                 {
                     GenerateOrderDocument(orderId); // Генерирация чека
-                    MessageBox.Show("Чек успешно сгенерирован и сохранён как OrderTicket.docx.", "Генерация чека", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Чек успешно сгенерирован и сохранён в папке checks.", "Генерация чека", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Products.currentOrder.Clear();
                     order.Clear();
                     PopulateOrderDetails();
