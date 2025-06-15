@@ -27,6 +27,9 @@ namespace kursovoy
             Timer.Tick += inactivityTimer_Tick;
             Timer.Interval = 1000;
         }
+        /// <summary>
+        /// Отслеживание активности пользователя путем подписки на события мыши и клавиатуры
+        /// </summary>
         private void Users_ActivateTracking()
         {
             this.MouseMove += Users_ActivityDetected;
@@ -39,10 +42,20 @@ namespace kursovoy
                 control.MouseClick += Users_ActivityDetected;
             }
         }
+        /// <summary>
+        /// Обработчик активности пользователя - сбрасывает таймер бездействия
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Users_ActivityDetected(object sender, EventArgs e)
         {
             ResetInactivityTimer();
         }
+        /// <summary>
+        /// Обработчик тика таймера бездействия
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void inactivityTimer_Tick(object sender, EventArgs e)
         {
             if (isTimerTickRunning)
@@ -78,11 +91,13 @@ namespace kursovoy
             ad.Show();
             this.Close();
         }
+        /// <summary>
+        /// Загружает данные в ComboBox
+        /// </summary>
         private void LoadDataIntoComboBox()
         {
             string queryEmployee = "SELECT EmployeeF,EmployeeI,EmployeeO FROM employeeee";
             string queryRole = "SELECT Role FROM `role`";
-
             using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
                 connection.Open();
@@ -118,7 +133,6 @@ namespace kursovoy
             {
                 inactivityTimeout = 30000;
             }
-
             initialInactivityTimeout = inactivityTimeout;
             ResetInactivityTimer();
             Timer.Start();
@@ -135,7 +149,10 @@ namespace kursovoy
             label2.Text += " " + dataGridView1.Rows.Count;
             role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
         }
-
+        /// <summary>
+        /// Заполняет DataGridView данными из БД
+        /// </summary>
+        /// <param name="strCmd"></param>
         public void FillDataGrid(string strCmd)
         {
             try
@@ -143,7 +160,6 @@ namespace kursovoy
                 using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
                     conn.Open();
-
                     using (MySqlCommand cmd = new MySqlCommand(strCmd, conn))
                     {
                         using (MySqlDataReader rdr = cmd.ExecuteReader())
@@ -204,7 +220,13 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при заполнении DataGridView: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        /// <summary>
+        /// Проверяет, существует ли пользователь с указанным логином
+        /// </summary>
+        /// <param name="login"></param>
+        /// <param name="connection"></param>
+        /// <param name="userIdToExclude"></param>
+        /// <returns></returns>
         private bool UserExists(string login, MySqlConnection connection, int? userIdToExclude = null)
         {
             string checkQuery = "SELECT COUNT(*) FROM User WHERE Login = @login";
@@ -212,7 +234,6 @@ namespace kursovoy
             {
                 checkQuery += " AND UserID != @userId";
             }
-
             using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
             {
                 checkCmd.Parameters.AddWithValue("@login", login);
@@ -223,9 +244,9 @@ namespace kursovoy
                 return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
             }
         }
-
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            // Обработка клика по кнопке "Выбрать"
             if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
@@ -235,7 +256,7 @@ namespace kursovoy
                 textBox7.Text = row.Cells["Login"].Value.ToString();
                 textBox1.Text = row.Cells["Password"].Value.ToString();
             }
-
+            // Обработка клика по кнопке "Удалить"
             if (e.ColumnIndex == dataGridView1.Columns["Удалить"].Index && e.RowIndex >= 0)
             {
                 int id = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["UserID"].Value);
@@ -247,7 +268,6 @@ namespace kursovoy
                     MessageBox.Show("Вы не можете удалить самого себя!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
                 DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
@@ -257,10 +277,14 @@ namespace kursovoy
                 }
             }
         }
-
+        /// <summary>
+        /// Получает ID сотрудника по его ФИО
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="con"></param>
+        /// <returns></returns>
         private int GetEmployeeIDByName(string userName, MySqlConnection con)
         {
-
             string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE CONCAT(EmployeeF, ' ', EmployeeI, ' ', EmployeeO) = @userName;";
             using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
@@ -268,7 +292,6 @@ namespace kursovoy
                 using (var command = new MySqlCommand(userFIOQuery, connection))
                 {
                     command.Parameters.AddWithValue("@userName", userName);
-
                     object result = command.ExecuteScalar();
                     if (result != null)
                     {
@@ -281,7 +304,12 @@ namespace kursovoy
                 }
             }
         }
-
+        /// <summary>
+        /// Получает ID роли по её названию
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <param name="con"></param>
+        /// <returns></returns>
         private int GetRoleidByName(string roleName, MySqlConnection con)
         {
             string query = "SELECT RoleID FROM Role WHERE Role = @role";
@@ -303,7 +331,10 @@ namespace kursovoy
                 }
             }
         }
-
+        /// <summary>
+        /// Удаляет запись пользователя из БД по ID
+        /// </summary>
+        /// <param name="id"></param>
         private void DeleteRecord(int id)
         {
             string query = "DELETE FROM user WHERE UserID = @UserID";
@@ -317,7 +348,11 @@ namespace kursovoy
                 }
             }
         }
-
+        /// <summary>
+        /// Хеширует пароль с помощью SHA256
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
         private string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -331,7 +366,6 @@ namespace kursovoy
                 return builder.ToString();
             }
         }
-
         private void button2_Click(object sender, EventArgs e)
         {
             comboBox2.SelectedItem = null;
@@ -340,7 +374,11 @@ namespace kursovoy
             textBox1.Text = "";
             textBox2.Text = "";
         }
-
+        /// <summary>
+        /// Обработчик ввода в поле пароля - запрещает русские буквы
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
@@ -351,7 +389,6 @@ namespace kursovoy
                 e.Handled = true;
             }
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(comboBox1.Text) || string.IsNullOrEmpty(comboBox2.Text) || string.IsNullOrEmpty(textBox1.Text) || string.IsNullOrEmpty(textBox7.Text))
@@ -359,41 +396,35 @@ namespace kursovoy
                 MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
                 connection.Open();
                 int employeeId = GetEmployeeIDByName(comboBox2.Text, connection);
                 int roleId = GetRoleidByName(comboBox1.Text, connection);
-
                 if (employeeId == -1)
                 {
                     MessageBox.Show("Не удалось найти EmployeeID для указанного ФИО.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
                 if (roleId == -1)
                 {
                     MessageBox.Show("Не удалось найти RoleID для указанной роли.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
+                //Добавление пользователя
                 if (textBox2.Text != "")
                 {
                     int userId = Convert.ToInt32(textBox2.Text);
-
                     // Проверка на существование логина, исключая текущего пользователя
                     if (UserExists(textBox7.Text, connection, userId))
                     {
                         MessageBox.Show("Пользователь с таким логином уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
-
                     DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (dialogResult == DialogResult.Yes)
                     {
                         string hashedPassword = textBox1.Text.Length < 10 ? HashPassword(textBox1.Text) : textBox1.Text;
-
                         string query = @"UPDATE user SET UserFIO = @userFIO, RoleID = @roleID, Login = @login, Password = @password WHERE UserID = @userID";
                         using (MySqlCommand cmd = new MySqlCommand(query, connection))
                         {
@@ -402,12 +433,12 @@ namespace kursovoy
                             cmd.Parameters.AddWithValue("@roleID", roleId);
                             cmd.Parameters.AddWithValue("@login", textBox7.Text);
                             cmd.Parameters.AddWithValue("@password", hashedPassword);
-
                             cmd.ExecuteNonQuery();
                             MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }
+                //Редактирование пользователя
                 else
                 {
                     // Проверка на существование логина
@@ -416,12 +447,10 @@ namespace kursovoy
                         MessageBox.Show("Пользователь с таким логином уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
-
                     DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (dialogResult == DialogResult.Yes)
                     {
                         string hashedPassword = textBox1.Text.Length < 10 ? HashPassword(textBox1.Text) : textBox1.Text;
-
                         string query = "INSERT INTO user (UserFIO, Login, Password, RoleID) VALUES (@userFIO, @login, @password, @roleID)";
                         using (MySqlCommand cmd = new MySqlCommand(query, connection))
                         {
@@ -429,16 +458,12 @@ namespace kursovoy
                             cmd.Parameters.AddWithValue("@login", textBox7.Text);
                             cmd.Parameters.AddWithValue("@password", hashedPassword);
                             cmd.Parameters.AddWithValue("@roleID", roleId);
-
                             cmd.ExecuteNonQuery();
                             MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
                 }
-
-                connection.Close(); // Ensure connection is closed after operations.
-
-                // Clear fields and refresh the data grid
+                connection.Close();
                 comboBox2.SelectedItem = null;
                 comboBox1.SelectedItem = null;
                 textBox7.Text = "";
@@ -456,22 +481,36 @@ namespace kursovoy
                     " INNER JOIN role ON user.RoleID = role.RoleID");
             }
         }
-
+        /// <summary>
+        /// Обработчик кнопки очистки поля пароля
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button5_Click(object sender, EventArgs e)
         {
             textBox1.Text = "";
         }
-
+        /// <summary>
+        /// Сбрасывает таймер бездействия в начальное состояние
+        /// </summary>
         private void ResetInactivityTimer()
         {
             inactivityTimeout = initialInactivityTimeout;
         }
-
+        /// <summary>
+        /// Активирует отслеживание активности при показе формы
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Users_Shown(object sender, EventArgs e)
         {
             Users_ActivateTracking();
         }
-
+        /// <summary>
+        /// Отключает выделение строк в DataGridView
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
             dataGridView1.ClearSelection();

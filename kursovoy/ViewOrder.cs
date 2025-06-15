@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,9 +20,9 @@ namespace kursovoy
         private Dictionary<string, int> initialQuantities = new Dictionary<string, int>();
         private Dictionary<string, int> maxAvailableQuantities = new Dictionary<string, int>();
 
-        private decimal discountRate = 0.15m; // Размер скидки (15%)
-        private decimal discountThreshold = 2000m; // Порог суммы для применения скидки
-        private DateTime orderDate; // Добавляем переменную для хранения даты заказа
+        private decimal discountRate = 0.15m; 
+        private decimal discountThreshold = 2000m; 
+        private DateTime orderDate; 
 
         public ViewOrder(int id)
         {
@@ -31,7 +30,6 @@ namespace kursovoy
             this.OrderID = id;
             defaultLabel4BackColor = label4.BackColor;
         }
-
         private void ViewOrder_Load(object sender, EventArgs e)
         {
             FillDataGrid();
@@ -39,7 +37,6 @@ namespace kursovoy
             label7.Text = "Количество записей: ";
             label7.Text += dataGridView1.Rows.Count;
         }
-
         void FillDataGrid()
         {
             MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
@@ -55,13 +52,11 @@ namespace kursovoy
             dataGridView1.Columns.Clear();
             dataGridView1.AutoResizeColumns();
             dataGridView1.AutoResizeRows();
-
             dataGridView1.AllowUserToDeleteRows = false;
             dataGridView1.AllowUserToOrderColumns = false;
             dataGridView1.AllowUserToResizeColumns = false;
             dataGridView1.AllowUserToResizeRows = false;
             dataGridView1.RowTemplate.Height = 80;
-
             dataGridView1.ReadOnly = true;
             dataGridView1.AllowUserToAddRows = false;
 
@@ -82,7 +77,6 @@ namespace kursovoy
             dataGridView1.Columns.Add("OrderID", "Заказ");
             dataGridView1.Columns["OrderID"].Visible = false;
             dataGridView1.Columns["product.Name"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-
 
             isOrderCancelled = false;
 
@@ -109,24 +103,17 @@ namespace kursovoy
                 dataGridView1.Columns.Add(deleteButtonColumn);
                 dataGridView1.Columns["Удалить"].Width = 68;
             }
-            
             MySqlDataReader rdr = cmd.ExecuteReader();
             initialQuantities.Clear();
             maxAvailableQuantities.Clear();
-
             while (rdr.Read())
             {
                 string productID = rdr[0].ToString();
                 int productCount = Convert.ToInt32(rdr[4]);
                 decimal productCost = Convert.ToDecimal(rdr[2]);
-
-
                 int rowIndex = dataGridView1.Rows.Add();
                 DataGridViewRow row = dataGridView1.Rows[rowIndex];
-
                 row.Cells["ProductID"].Value = productID;
-
-
                 string imsName = rdr[6].ToString();
                 if (string.IsNullOrEmpty(imsName))
                 {
@@ -134,25 +121,23 @@ namespace kursovoy
                 }
                 Image img = Image.FromFile(@"./photo/" + imsName);
                 row.Cells["ProductPhoto"].Value = img;
-
                 row.Cells["product.Name"].Value = rdr[1].ToString();
-                row.Cells["product.Cost"].Value = productCost.ToString("F2"); // Отображаем стоимость без скидки
+                row.Cells["product.Cost"].Value = productCost.ToString("F2"); 
                 row.Cells["product.Unit"].Value = rdr[3].ToString();
                 row.Cells["ProductCount"].Value = productCount.ToString();
                 row.Cells["OrderID"].Value = rdr[5].ToString();
-
-                // Изначально не показываем цену со скидкой, она будет расчитана в UpdateOrderPrice
-                row.Cells["DiscountedCost"].Value = productCost.ToString("F2"); // Показываем ту же цену, что и без скидки
+                row.Cells["DiscountedCost"].Value = productCost.ToString("F2"); 
 
                 initialQuantities[productID] = productCount;
                 maxAvailableQuantities[productID] = productCount;
             }
             con.Close();
 
-            // После загрузки всех данных, пересчитываем итоговую сумму заказа и применяем скидку если нужно
             UpdateOrderPrice();
         }
-
+        /// <summary>
+        /// Заполняет информацию о заказе
+        /// </summary>
         public void FillDataGriOrder()
         {
             try
@@ -169,12 +154,10 @@ namespace kursovoy
                         while (rdr.Read())
                         {
                             label2.Text = $"Номер заказа: {rdr["Номер заказа"]}";
-
                             DateTime tempOrderDate = Convert.ToDateTime(rdr["Дата заказа"]);
                             label1.Text = $"Дата заказа: {tempOrderDate}";
                             orderDate = tempOrderDate;  //Сохраняем дату заказа
                             label4.Text = $"Статус заказа: {rdr["Статус заказа"]}";
-
                             string orderStatus = rdr["Статус заказа"].ToString();
                             isOrderCancelled = (orderStatus == "Отменён");
 
@@ -186,13 +169,9 @@ namespace kursovoy
                             {
                                 label4.BackColor = defaultLabel4BackColor;
                             }
-
                             label4.Refresh();
-
                             string employeeName = $"{rdr["Фамилия"]} {rdr["Имя"]} {rdr["Отчество"]}";
-
                             label3.Text = $"Сотрудник: {employeeName}";
-
                             decimal orderPrice = Convert.ToDecimal(rdr["Сумма заказа"]);
                             label5.Text = $"Сумма заказа: {orderPrice:F2} руб.";
                         }
@@ -262,7 +241,10 @@ namespace kursovoy
                 }
             }
         }
-
+        /// <summary>
+        /// Удаляет товар из заказа
+        /// </summary>
+        /// <param name="rowIndex"></param>
         private void DeleteProductFromOrder(int rowIndex)
         {
             if ((DateTime.Now - orderDate).TotalDays > 14)
@@ -270,20 +252,17 @@ namespace kursovoy
                 MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             if (isOrderCancelled)
             {
                 MessageBox.Show("Заказ отменен. Редактирование запрещено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-
             // Проверяем, если ли в заказе остался только один товар в количестве 1
             if (dataGridView1.Rows.Count == 1)
             {
                 CancelOrder(rowIndex); // Отменяем заказ и возвращаем товар
                 return; 
             }
-
             if (MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 try
@@ -293,26 +272,21 @@ namespace kursovoy
                     string productID = dataGridView1.Rows[rowIndex].Cells["ProductID"].Value.ToString();
                     string orderID = OrderID.ToString();
                     int quantityToRemove = Convert.ToInt32(dataGridView1.Rows[rowIndex].Cells["ProductCount"].Value);
-
                     string query = "DELETE FROM productorder WHERE ProductID = @ProductID AND OrderID = @OrderID";
                     MySqlCommand cmd = new MySqlCommand(query, con);
                     cmd.Parameters.AddWithValue("@ProductID", productID);
                     cmd.Parameters.AddWithValue("@OrderID", orderID);
                     cmd.ExecuteNonQuery();
-
                     string updateStockQuery = "UPDATE product SET ProductQuantityInStock = ProductQuantityInStock + @Quantity WHERE ProductArticul = @ProductID";
                     MySqlCommand updateStockCmd = new MySqlCommand(updateStockQuery, con);
                     updateStockCmd.Parameters.AddWithValue("@Quantity", quantityToRemove);
                     updateStockCmd.Parameters.AddWithValue("@ProductID", productID);
                     updateStockCmd.ExecuteNonQuery();
                     con.Close();
-
                     dataGridView1.Rows.RemoveAt(rowIndex);
                     UpdateOrderPrice(); // Пересчитываем сумму заказа
-
                     initialQuantities.Remove(productID);
                     maxAvailableQuantities.Remove(productID);
-
                     MessageBox.Show("Товар успешно удален из заказа.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -321,7 +295,12 @@ namespace kursovoy
                 }
             }
         }
-
+        /// <summary>
+        /// Изменяет количество товара в заказе
+        /// </summary>
+        /// <param name="productID"></param>
+        /// <param name="rowIndex"></param>
+        /// <param name="newQuantity"></param>
         private void ChangeProductQuantity(string productID, int rowIndex, int newQuantity)
         {
             // Проверяем, прошло ли более 14 дней с даты заказа
@@ -341,7 +320,6 @@ namespace kursovoy
                 CancelOrder(rowIndex); // Отменяем заказ и возвращаем товар
                 return;
             }
-
             try
             {
                 if (MessageBox.Show("Отменить одну единицу товара в заказе?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
@@ -349,7 +327,6 @@ namespace kursovoy
                     MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
                     con.Open();
                     int oldQuantity = Convert.ToInt32(dataGridView1.Rows[rowIndex].Cells["ProductCount"].Value);
-
                     string query = "UPDATE productorder SET ProductCount = @NewQuantity WHERE ProductID = @ProductID AND OrderID = @OrderID";
                     MySqlCommand cmd = new MySqlCommand(query, con);
                     cmd.Parameters.AddWithValue("@NewQuantity", newQuantity);
@@ -367,7 +344,6 @@ namespace kursovoy
 
                     dataGridView1.Rows[rowIndex].Cells["ProductCount"].Value = newQuantity;
                     UpdateOrderPrice(); // Пересчитываем сумму заказа
-
                     maxAvailableQuantities[productID] -= (newQuantity - oldQuantity);
                 }
             }
@@ -376,24 +352,22 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при изменении количества товара: {ex.Message}");
             }
         }
-
+        /// <summary>
+        /// Метод для обновления общей стоимости заказа с учетом возможной скидки
+        /// </summary>
         private void UpdateOrderPrice()
         {
             decimal totalOrderPriceWithoutDiscount = 0;
             decimal totalOrderPriceWithDiscount = 0;
 
-            // Проходим по каждой строке DataGridView и суммируем стоимость товаров БЕЗ скидки
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 decimal productCost = Convert.ToDecimal(row.Cells["product.Cost"].Value); // Цена БЕЗ скидки
                 int quantity = Convert.ToInt32(row.Cells["ProductCount"].Value);
                 totalOrderPriceWithoutDiscount += productCost * quantity;
             }
-
             // Проверяем, должна ли применяться скидка
             bool applyDiscount = totalOrderPriceWithoutDiscount >= discountThreshold;
-
-            // Если скидка должна применяться, вычисляем стоимость со скидкой для каждого товара и суммируем
             if (applyDiscount)
             {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
@@ -407,21 +381,19 @@ namespace kursovoy
             }
             else
             {
-                // Если скидка не применяется, просто суммируем цены без скидки и отображаем их же в DiscountedCost
                 totalOrderPriceWithDiscount = totalOrderPriceWithoutDiscount;
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
                     row.Cells["DiscountedCost"].Value = row.Cells["product.Cost"].Value; // Показываем цену без скидки
                 }
             }
-
-            // Обновляем отображение суммы заказа на форме
             label5.Text = $"Сумма заказа: {totalOrderPriceWithDiscount:F2} руб.";
-
-            // Обновляем сумму заказа в базе данных
             UpdateOrderPriceInDatabase(totalOrderPriceWithDiscount);
         }
-
+        /// <summary>
+        /// Метод для обновления суммы заказа в базе данных
+        /// </summary>
+        /// <param name="newPrice"></param>
         private void UpdateOrderPriceInDatabase(decimal newPrice)
         {
             try
@@ -444,8 +416,10 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при обновлении суммы заказа в базе данных: {ex.Message}");
             }
         }
-
-        // Добавляем метод для отмены заказа
+        /// <summary>
+        /// Метод для отмены заказа
+        /// </summary>
+        /// <param name="rowIndex"></param>
         private void CancelOrder(int rowIndex)
         {
             try
@@ -458,7 +432,6 @@ namespace kursovoy
                         // Возвращаем товар на склад
                         string productID = dataGridView1.Rows[rowIndex].Cells["ProductID"].Value.ToString();
                         int quantityToRemove = Convert.ToInt32(dataGridView1.Rows[rowIndex].Cells["ProductCount"].Value);
-
                         string updateStockQuery = "UPDATE product SET ProductQuantityInStock = ProductQuantityInStock + @Quantity WHERE ProductArticul = @ProductID";
                         MySqlCommand updateStockCmd = new MySqlCommand(updateStockQuery, con);
                         updateStockCmd.Parameters.AddWithValue("@Quantity", quantityToRemove);
@@ -474,11 +447,10 @@ namespace kursovoy
                         }
                         con.Close();
 
-                        isOrderCancelled = true; // Устанавливаем флаг отмены заказа
+                        isOrderCancelled = true;
                         label4.Text = "Статус заказа: Отменён";
                         label4.BackColor = Color.LightCoral;
                         MessageBox.Show("Заказ успешно отменен. Товар возвращен на склад.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                         // Обновляем отображение заказа
                         FillDataGriOrder();
                         FillDataGrid();

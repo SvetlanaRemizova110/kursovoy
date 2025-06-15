@@ -440,7 +440,7 @@ namespace kursovoy
                                 // Итоговая информация
                                 int lastRow = dataTable.Rows.Count + 3;
                                 worksheet.Cells[lastRow, 1] = "Общий доход:";
-                                worksheet.Cells[lastRow, 2] = totalRevenue.ToString("F2");
+                                worksheet.Cells[lastRow, 7] = totalRevenue.ToString("F2");
                                 worksheet.Cells[lastRow + 1, 1] = "Количество заказов:";
                                 worksheet.Cells[lastRow + 1, 2] = totalOrders.ToString();
                                 // Распределение по сотрудникам
