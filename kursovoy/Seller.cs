@@ -16,7 +16,6 @@ namespace kursovoy
         {
             InitializeComponent();
         }
-        
         private void button4_Click(object sender, EventArgs e)
         {
             Authorization ad = new Authorization();
@@ -35,7 +34,6 @@ namespace kursovoy
             pr.Show();
             this.Close();
         }
-
         private void Seller_Load(object sender, EventArgs e)
         {
             label2.Text = Authorization.User2.FIO;

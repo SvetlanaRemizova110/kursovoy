@@ -126,23 +126,6 @@ namespace kursovoy
             this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox2.Font = new System.Drawing.Font("Comic Sans MS", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Items.AddRange(new object[] {
-            "Все категории",
-            "Корм сухой ",
-            "Игрушки для кошек и собак",
-            "Лежанка для кошек и собак",
-            "Корм влажный ",
-            "Переноска для кошек и собак",
-            "Миска для кошек и собак",
-            "Витамины и добавки",
-            "Ошейник для собак",
-            "Лакомства для кошек и собак",
-            "Поводок для собак",
-            "Шлейка для кошек",
-            "Когтеточка для кошек",
-            "Лосьон для животных",
-            "Пеленка для кошек и собак",
-            "Клетка для животных"});
             this.comboBox2.Location = new System.Drawing.Point(437, 101);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(297, 34);

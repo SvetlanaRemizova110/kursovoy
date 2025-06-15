@@ -11,8 +11,9 @@ using System.Windows.Forms;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 using System.IO;
-using System.Drawing.Drawing2D;
 using System.Threading;
+using System.Drawing.Drawing2D;
+
 namespace kursovoy
 {
     public partial class Authorization : Form
@@ -43,23 +44,20 @@ namespace kursovoy
                     g.Clear(Color.White);
                     Font font = new Font("Arial", 22, FontStyle.Bold);
 
-                    // stringFormat для выравнивания ВСЕЙ строки в области (не отдельных символов!)
                     StringFormat stringFormat = new StringFormat();
                     stringFormat.Alignment = StringAlignment.Center;
                     stringFormat.LineAlignment = StringAlignment.Center;
 
-                    // Рисуем каждый символ, ограничивая его областью
+                    // Рисуем каждый символ
                     for (int i = 0; i < captchaText.Length; i++)
                     {
-                        // Вычисляем ширину ячейки для символа
                         int cellWidth = symbolArea.Width / captchaText.Length;
 
-                        // Генерируем случайные координаты внутри ячейки
+                        // Генерируем случайные координаты
                         int x = symbolArea.X + i * cellWidth + random.Next(cellWidth / 4);
-                        int y = symbolArea.Y + random.Next(0, symbolArea.Height / 2); //Поднимаем символы повыше
+                        int y = symbolArea.Y + random.Next(0, symbolArea.Height / 2); 
 
-                        // Генерируем случайный угол поворота
-                        int rotationAngle = random.Next(-15, 15); // Уменьшил диапазон вращения
+                        int rotationAngle = random.Next(-15, 15); 
 
                         // Создаем матрицу преобразования
                         Matrix matrix = new Matrix();
@@ -73,13 +71,13 @@ namespace kursovoy
                         g.ResetTransform();
                     }
 
-                    // Рисуем линии искажения
+                    // Рисуем линии
                     for (int i = 0; i < 4; i++)
                     {
                         int startX = random.Next(0, width / 4);
-                        int startY = random.Next(0, height); // Расширил диапазон
+                        int startY = random.Next(0, height); 
                         int endX = random.Next(width / 4 * 3, width);
-                        int endY = random.Next(0, height); // Расширил диапазон
+                        int endY = random.Next(0, height); 
                         g.DrawLine(new Pen(Color.Black, 2), startX, startY, endX, endY);
                     }
                 }
@@ -111,42 +109,35 @@ namespace kursovoy
         /// <param name="e"></param>
         private void authorization_Click(object sender, EventArgs e)
         {
-            //Получаем логин и пароль из текстовых полей на форме
             string login = textBoxLogin.Text;
             string password = textBoxPwd.Text;
             string defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
             string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
-            //Проверка на заполненность полей ввода логина и пароля, в случае отсутствия выводим сообщение
+
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            //Логика проверки капчи, если капча не видна или видна и введена правильно запускаем авторизацию
             if (captchaPictureBox.Visible == false || (captchaPictureBox.Visible == true && captchaTextBox.Text == captchaText))
             {
-                //Ищем пользователей по логину и паролю в БД
                 User authorizedUser = AuthorizeUser(login, password);
-                //Если пользователь найден, то проверяем логин и пароль администратора
                 if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
                 {
-                    //Если введены логин и пароль администратора, то открываем форму admin
                     import admin = new import();
                     this.Hide();
                     admin.Show();
                 }
                 else if (authorizedUser != null)
                 {
-                    //Если найден пользователь, то устанавливаем свойства его роли и переключаем
                     SwitchRole(authorizedUser.Role);
                 }
                 else
                 {
-                    //Если пользователь с указанным логином и паролем не найден выводим сообщение об ошибке
                     MessageBox.Show("Неверный логин или пароль", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     failedLoginAttempts++;
-                    //Проверка кол-ва неверных попыток ввода логина/пароля, если кол-во попыток больше или равно допустимому кол-ву - выводим панель CAPTCHA
+                    //Проверка кол-ва неверных попыток ввода логина/пароля
                     if (failedLoginAttempts >= 1)
                     {
                         //Делаем видимыми элементы CAPTCHA
@@ -172,7 +163,6 @@ namespace kursovoy
                 MessageBox.Show("Неверная CAPTCHA!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 if (failedLoginAttempts >= 1)
                 {
-                    //Блокируем кнопку для входа 
                     button1.Enabled = false;
                     MessageBox.Show("Блокировка 10 сек", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     Thread.Sleep(10000);
@@ -248,9 +238,9 @@ namespace kursovoy
                         DataRow row = tb.Rows[0];
                         user = new User
                         {
-                            Role = Convert.ToInt32(row["RoleID"]),// Получаем Роль, используем имя столбца
+                            Role = Convert.ToInt32(row["RoleID"]),
                             UserID = Convert.ToInt32(row["UserID"]),
-                            EmployeeID = Convert.ToInt32(row["UserFIO"]), // Используем внешний ключ UserFIO
+                            EmployeeID = Convert.ToInt32(row["UserFIO"]),
                             RoleName = row["Role"].ToString(),
                             FIO = row["EmployeeF"].ToString() + " " +
                                   row["EmployeeI"].ToString() + " " + row["EmployeeO"].ToString()
@@ -261,7 +251,7 @@ namespace kursovoy
             }
             catch (MySqlException ex)
             {
-                if (ex.Number == 1049) // Error 1049 - Unknown database
+                if (ex.Number == 1049)
                 {
                     string defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
                     string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
@@ -284,7 +274,7 @@ namespace kursovoy
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при авторизации: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                user = null; // Возвращаем null, если произошла ошибка
+                user = null; 
             }
             if (user != null)
             {
@@ -312,7 +302,7 @@ namespace kursovoy
                 {
                     builder.Append(b.ToString("x2")); // Форматируем байты в шестнадцатеричную строку
                 }
-                return builder.ToString(); // Возвращаем хеш как строку
+                return builder.ToString();
             }
         }
         /// <summary>
@@ -399,4 +389,3 @@ namespace kursovoy
         }
     }
 }
-

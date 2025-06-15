@@ -16,8 +16,8 @@ namespace kursovoy
     {
         private int inactivityTimeout = 0; // Время бездействия в миллисекундах.
         private int initialInactivityTimeout = 0; // Сохраняем начальное значение таймаута.
-        private Timer Timer = new Timer(); //Обязательно инициализируйте Timer
-        private bool isTimerTickRunning = false; // Флаг для блокировки повторного входа
+        private Timer Timer = new Timer(); 
+        private bool isTimerTickRunning = false;
         private List<DataGridViewRow> allRows1 = new List<DataGridViewRow>();
         public Staffs()
         {
@@ -56,16 +56,14 @@ namespace kursovoy
             // Блокируем повторный вход
             if (isTimerTickRunning)
             {
-                return; // Если таймер уже работает, выходим
+                return;
             }
-
-            isTimerTickRunning = true; // Устанавливаем флаг, что таймер работает
-
+            isTimerTickRunning = true;
             try
             {
                 if (inactivityTimeout > 0)
                 {
-                    inactivityTimeout -= Timer.Interval; // Уменьшаем тайм-аут на интервал таймера
+                    inactivityTimeout -= Timer.Interval;
                 }
                 else
                 {
@@ -79,7 +77,7 @@ namespace kursovoy
             }
             finally
             {
-                isTimerTickRunning = false; // Снимаем флаг в любом случае (даже если было исключение)
+                isTimerTickRunning = false;
             }
         }
         private void button4_Click(object sender, EventArgs e)
@@ -89,26 +87,19 @@ namespace kursovoy
             ad.Show();
             this.Close();
         }
-
         private void Staffs_Load(object sender, EventArgs e)
         {
-
-
-            // Загрузить интервал времени бездействия из App.config
             if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))
             {
-                inactivityTimeout = timeoutInSeconds * 1000; // Перевод в миллисекунды
+                inactivityTimeout = timeoutInSeconds * 1000; 
             }
             else
             {
-                // Значение по умолчанию (30 секунд), если не удалось считать App.config
-                inactivityTimeout = 30000;
+                inactivityTimeout = 180000;
             }
-
             initialInactivityTimeout = inactivityTimeout; // Сохраняем начальное значение
             ResetInactivityTimer(); // Сброс таймера активности
-            Timer.Start(); // Запуск таймера активностиs
-
+            Timer.Start(); // Запуск таймера активности
             FillDataGrid("SELECT EmployeeID AS 'id', " +
                "EmployeeF AS 'Фамилия'," +
                "EmployeeI AS 'Имя'," +
@@ -118,9 +109,7 @@ namespace kursovoy
                " FROM  employeeee; ");
             label2.Text += " " + dataGridView1.Rows.Count;
             maskedTextBox1.Mask = "+7(000)000-00-00";
-
             role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
-
             comboBoxStatus.Text = "работает";
         }
         public void FillDataGrid(string strCmd)
@@ -141,7 +130,6 @@ namespace kursovoy
                 dataGridView1.Columns.Clear();
                 dataGridView1.AllowUserToAddRows = false;
                 dataGridView1.ReadOnly = true;
-                // Отключение возможности перемещения строк
                 dataGridView1.AllowUserToDeleteRows = false;
                 dataGridView1.AllowUserToOrderColumns = false;
                 dataGridView1.AllowUserToResizeColumns = false;
@@ -159,7 +147,6 @@ namespace kursovoy
                 dataGridView1.Columns.Add("status", "Статус");
                 dataGridView1.Columns["status"].Width = 80;
 
-                
                 DataGridViewButtonColumn buttonEdit = new DataGridViewButtonColumn();
                 buttonEdit.Name = "Выбрать";
                 buttonEdit.HeaderText = "Выбрать";
@@ -172,14 +159,11 @@ namespace kursovoy
                     int rowIndex = dataGridView1.Rows.Add();
                     DataGridViewRow row = dataGridView1.Rows[rowIndex];
                     row.Cells["EmployeeID"].Value = rdr[0];
-                    //row.Cells["EmployeeFIO"].Value = rdr[1];
                     row.Cells["EmployeeF"].Value = rdr[1];
                     row.Cells["EmployeeI"].Value = rdr[2];
                     row.Cells["EmployeeO"].Value = rdr[3];
-                    //row.Cells["telephone"].Value = rdr[2];
                     row.Cells["telephone"].Value = rdr[4];
                     row.Cells["status"].Value = rdr[5];
-
                     allRows1.Add(row);
                 }
                 con.Close();
@@ -189,8 +173,11 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
-
-        //Для кнопки "Выбрать"
+        /// <summary>
+        /// Для кнопки "Выбрать"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
@@ -220,73 +207,67 @@ namespace kursovoy
                "status AS 'Статус'"+
                " FROM  employeeee; ");
         }
-        //Для ввода ФИО, Автоматически первая буква слова заглавная
+        /// <summary>
+        /// Для ввода ФИО, Автоматически первая буква слова заглавная
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxF_TextChanged(object sender, EventArgs e)
         {
-            // Сохраняем текущее положение курсора
             int selectionStart = textBoxF.SelectionStart;
             int selectionLength = textBoxF.SelectionLength;
-
             // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
             string[] words = textBoxF.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < words.Length; i++)
             {
-                if (words[i].Length > 0) // Проверка длины слова
+                if (words[i].Length > 0)
                 {
                     words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
                 }
             }
             textBoxF.Text = string.Join(" ", words);
-
-            // Восстанавливаем положение курсора
             textBoxF.SelectionStart = Math.Min(selectionStart, textBoxF.Text.Length);
             textBoxF.SelectionLength = selectionLength;
         }
-        //Для ввода ФИО, Автоматически первая буква слова заглавная
         private void textBoxI_TextChanged(object sender, EventArgs e)
         {
-            // Сохраняем текущее положение курсора
             int selectionStart = textBoxI.SelectionStart;
             int selectionLength = textBoxI.SelectionLength;
-
             // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
             string[] words = textBoxI.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < words.Length; i++)
             {
-                if (words[i].Length > 0) // Проверка длины слова
+                if (words[i].Length > 0)
                 {
                     words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
                 }
             }
             textBoxI.Text = string.Join(" ", words);
-
-            // Восстанавливаем положение курсора
             textBoxI.SelectionStart = Math.Min(selectionStart, textBoxI.Text.Length);
             textBoxI.SelectionLength = selectionLength;
         }
-        //Для ввода ФИО, Автоматически первая буква слова заглавная
         private void textBoxO_TextChanged(object sender, EventArgs e)
         {
-            // Сохраняем текущее положение курсора
             int selectionStart = textBoxO.SelectionStart;
             int selectionLength = textBoxO.SelectionLength;
-
             // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
             string[] words = textBoxO.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < words.Length; i++)
             {
-                if (words[i].Length > 0) // Проверка длины слова
+                if (words[i].Length > 0) 
                 {
                     words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
                 }
             }
             textBoxO.Text = string.Join(" ", words);
-
-            // Восстанавливаем положение курсора
             textBoxO.SelectionStart = Math.Min(selectionStart, textBoxO.Text.Length);
             textBoxO.SelectionLength = selectionLength;
         }
-        //Для ввода ФИО
+        /// <summary>
+        /// Для ввода ФИО
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxF_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
@@ -297,7 +278,6 @@ namespace kursovoy
                 e.Handled = true; // Отменяем ввод
             }
         }
-        //Для ввода ФИО
         private void textBoxO_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
@@ -307,7 +287,11 @@ namespace kursovoy
                 e.Handled = true; // Отменяем ввод
             }
         }
-        //Для ввода Паспорта
+        /// <summary>
+        /// Для ввода Паспорта
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
@@ -316,7 +300,6 @@ namespace kursovoy
                 e.Handled = true; // Отменяем ввод
             }
         }
-
         /// <summary>
         /// Добавление/Изменение сотрудника
         /// </summary>
@@ -330,9 +313,9 @@ namespace kursovoy
             }
             else
             {
+                // Редактирование записи
                 if (textBox2.Text != "")
                 {
-                    // Редактирование существующей записи
                     DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (dialogResult == DialogResult.Yes)
                     {
@@ -340,14 +323,6 @@ namespace kursovoy
                         using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                         {
                             con.Open();
-
-                            // Проверяем, не занят ли номер телефона другим сотрудником
-                            //if (IsTelephoneAlreadyAssignedToAnotherEmployee(maskedTextBox1.Text, employeeID, con))
-                            //{
-                            //    MessageBox.Show("Этот номер телефона уже используется другим сотрудником.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            //    return;
-                            //}
-
                             MySqlCommand cmd = new MySqlCommand(@"UPDATE employeeee 
                         SET EmployeeF = @employeeF,
                             EmployeeI = @employeeI,
@@ -367,21 +342,15 @@ namespace kursovoy
                             cmd.Parameters.AddWithValue("@telephone", maskedTextBox1.Text);
                             cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);
                             cmd.ExecuteNonQuery();
-
                             MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                             con.Close();
                         }
-
-                        // Очистка полей
                         maskedTextBox1.Text = "";
                         textBoxF.Text = "";
                         textBoxI.Text = "";
                         textBoxO.Text = "";
                         textBox2.Text = "";
                         comboBoxStatus.SelectedItem = null;
-
-                        // Обновление DataGridView
                         FillDataGrid("SELECT EmployeeID AS 'id', " +
                                        "EmployeeF AS 'Фамилия'," +
                                        "EmployeeI AS 'Имя'," +
@@ -403,7 +372,6 @@ namespace kursovoy
                             try
                             {
                                 connection.Open();
-
                                 string query = "INSERT INTO employeeee (EmployeeF, EmployeeI, EmployeeO, telephone, status) VALUES (@value1,@value4,@value5,@value2, @status)";
                                 using (MySqlCommand cmd = new MySqlCommand(query, connection))
                                 {
@@ -417,17 +385,14 @@ namespace kursovoy
                                     cmd.Parameters.AddWithValue("@value5", textBoxO.Text);
                                     cmd.Parameters.AddWithValue("@value2", maskedTextBox1.Text);
                                     cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);
-
                                     cmd.ExecuteNonQuery();
                                     MessageBox.Show("Запись добавлена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                                     maskedTextBox1.Text = "";
                                     textBoxF.Text = "";
                                     textBoxI.Text = "";
                                     textBoxO.Text = "";
                                     textBox2.Text = "";
                                     comboBoxStatus.SelectedItem = null;
-
                                     FillDataGrid("SELECT EmployeeID AS 'id', " +
                                                "EmployeeF AS 'Фамилия'," +
                                                "EmployeeI AS 'Имя'," +
@@ -447,58 +412,56 @@ namespace kursovoy
                 }
             }
         }
-
-        //// Вспомогательный метод для проверки, не занят ли телефон другим сотрудником при редактировании
-        //private bool IsTelephoneAlreadyAssignedToAnotherEmployee(string telephone, int employeeID, MySqlConnection connection)
-        //{
-        //    string checkQuery = "SELECT COUNT(*) FROM employeeee WHERE telephone = @telephone AND EmployeeID != @employeeID";
-        //    using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-        //    {
-        //        checkCmd.Parameters.AddWithValue("@telephone", telephone);
-        //        checkCmd.Parameters.AddWithValue("@employeeID", employeeID);
-        //        return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-        //    }
-        //}
-
-        // Функция для проверки существования пользователя по телефону (используется только при добавлении)
+        /// <summary>
+        /// Функция для проверки существования пользователя по телефону
+        /// Для добавления
+        /// </summary>
+        /// <param name="telephone"></param>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         private bool UserTelephoneExists(string telephone, MySqlConnection connection)
         {
-            // Вызываем версию с employeeID = 0 (или любым другим невалидным ID),
-            // чтобы исключить *всех* сотрудников
             return UserTelephoneExists(telephone, 0, connection);
         }
-
+       /// <summary>
+       /// Функция для проверки существования пользователя по телефону
+       /// Для редактирования
+       /// </summary>
+       /// <param name="telephone"></param>
+       /// <param name="employeeID"></param>
+       /// <param name="connection"></param>
+       /// <returns></returns>
         private bool UserTelephoneExists(string telephone, int employeeID, MySqlConnection connection)
         {
-            string query = "SELECT COUNT(*) FROM employeeee WHERE telephone = @Telephone AND EmployeeID != @EmployeeID"; // Исключаем текущего сотрудника
+            string query = "SELECT COUNT(*) FROM employeeee WHERE telephone = @Telephone AND EmployeeID != @EmployeeID"; 
 
             using (MySqlCommand cmd = new MySqlCommand(query, connection))
             {
                 cmd.Parameters.AddWithValue("@Telephone", telephone);
-                cmd.Parameters.AddWithValue("@EmployeeID", employeeID); // Добавляем employeeID в параметры
+                cmd.Parameters.AddWithValue("@EmployeeID", employeeID); 
                 return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
             }
         }
-
-
-
-        //Очистка всех полей
+        /// <summary>
+        /// Очистка всех полей
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
-            maskedTextBox1.Text = ""; //telephone
-            textBoxF.Text = ""; //FIO
-            textBoxI.Text = ""; //FIO
-            textBoxO.Text = ""; //FIO
-            textBox2.Text = ""; //id
-            comboBoxStatus.SelectedItem = null; //
+            maskedTextBox1.Text = "";
+            textBoxF.Text = "";
+            textBoxI.Text = ""; 
+            textBoxO.Text = ""; 
+            textBox2.Text = ""; 
+            comboBoxStatus.SelectedItem = null;
         }
-
         /// <summary>
-        /// Сбрасывает отслеживание времени бездействия.
+        /// Сбрасывает отслеживание времени бездействия
         /// </summary>
         private void ResetInactivityTimer()
         {
-            inactivityTimeout = initialInactivityTimeout; //сбрасываем значение тайм-аута!
+            inactivityTimeout = initialInactivityTimeout; 
         }
         /// <summary>
         /// Запускает отслеживание активности при загрузке окна.
@@ -507,11 +470,9 @@ namespace kursovoy
         {
             Users_ActivateTracking();
         }
-
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
             dataGridView1.ClearSelection();
         }
     }
 }
-

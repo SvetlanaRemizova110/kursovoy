@@ -13,7 +13,6 @@ using System.Globalization;
 
 namespace kursovoy
 {
-
     public partial class ReferenceBooks : Form
     {
         public ReferenceBooks()
@@ -23,8 +22,11 @@ namespace kursovoy
             textBox5.Visible = false;
             textBox6.Visible = false;
         }
-
-        //Кнопка НАЗАД
+        /// <summary>
+        /// Кнопка НАЗАД
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
             if (Authorization.User2.Role == 1)
@@ -40,12 +42,9 @@ namespace kursovoy
                 this.Close();
             }
         }
-
-        //При загрузке формы
         private void ReferenceBooks_Load(object sender, EventArgs e)
         {
             role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
-
             FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
             FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM `Supplier`");
             FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM `ProductManufactur`");
@@ -53,7 +52,6 @@ namespace kursovoy
             label4.Text += " " + dataGridView2.Rows.Count;
             label6.Text += " " + dataGridView3.Rows.Count;
         }
-
         /// <summary>
         /// Для вывода категории
         /// </summary>
@@ -75,7 +73,6 @@ namespace kursovoy
                 dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dataGridView1.ReadOnly = true;
                 dataGridView1.AllowUserToAddRows = false;
-
                 dataGridView1.AllowUserToDeleteRows = false;
                 dataGridView1.AllowUserToOrderColumns = false;
                 dataGridView1.AllowUserToResizeColumns = false;
@@ -107,7 +104,6 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
-
         /// <summary>
         /// Для вывода поставщика
         /// </summary>
@@ -129,7 +125,6 @@ namespace kursovoy
                 dataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dataGridView2.ReadOnly = true;
                 dataGridView2.AllowUserToAddRows = false;
-
                 dataGridView2.AllowUserToDeleteRows = false;
                 dataGridView2.AllowUserToOrderColumns = false;
                 dataGridView2.AllowUserToResizeColumns = false;
@@ -161,7 +156,6 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
-
         /// <summary>
         /// Для вывода производителя
         /// </summary>
@@ -183,7 +177,6 @@ namespace kursovoy
                 dataGridView3.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
                 dataGridView3.ReadOnly = true;
                 dataGridView3.AllowUserToAddRows = false;
-
                 dataGridView3.AllowUserToDeleteRows = false;
                 dataGridView3.AllowUserToOrderColumns = false;
                 dataGridView3.AllowUserToResizeColumns = false;
@@ -214,7 +207,6 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
-
         /// <summary>
         /// Добавление категории
         /// </summary>
@@ -224,7 +216,6 @@ namespace kursovoy
         {
             AddOrUpdateCategory(false); // false - добавление
         }
-
         /// <summary>
         /// Изменение категории
         /// </summary>
@@ -234,7 +225,6 @@ namespace kursovoy
         {
             AddOrUpdateCategory(true); // true - редактирование
         }
-
         /// <summary>
         /// Общий метод для добавления и редактирования категорий
         /// </summary>
@@ -243,22 +233,19 @@ namespace kursovoy
         {
             string categoryName = textBox1.Text.Trim();
             string categoryId = textBox4.Text.Trim();
-
-            if (string.IsNullOrEmpty(categoryName)) // Проверка на пустоту более современным способом
+            if (string.IsNullOrEmpty(categoryName))
             {
                 MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             if (isUpdate && string.IsNullOrEmpty(categoryId))
             {
                 MessageBox.Show("Необходимо выбрать запись для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             string message = isUpdate ? "Вы уверены, что хотите изменить эту запись ?" : "Вы уверены, что хотите добавить эту запись?";
             string title = isUpdate ? "Подтверждение изменения!" : "Подтверждение добавления!";
-            MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question; // Более подходящие иконки
+            MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question; 
 
             DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
             if (dialogResult == DialogResult.Yes)
@@ -268,8 +255,6 @@ namespace kursovoy
                     try
                     {
                         conn.Open();
-
-                        // Проверка на существование записи (ТОЛЬКО для добавления)
                         if (!isUpdate)
                         {
                             using (MySqlCommand checkcmd = new MySqlCommand("SELECT COUNT(*) FROM Category WHERE CategoryName = @CategoryName", conn))
@@ -283,17 +268,15 @@ namespace kursovoy
                                 }
                             }
                         }
-
                         string query;
                         MySqlCommand cmd;
-
                         if (isUpdate)
                         {
                             // Редактирование записи
                             query = "UPDATE Category SET CategoryName = @CategoryName WHERE CategoryID = @CategoryID";
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@CategoryName", categoryName);
-                            cmd.Parameters.AddWithValue("@CategoryID", categoryId); // Используем ID
+                            cmd.Parameters.AddWithValue("@CategoryID", categoryId);
                         }
                         else
                         {
@@ -302,14 +285,11 @@ namespace kursovoy
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@CategoryName", categoryName);
                         }
-
                         cmd.ExecuteNonQuery();
-
                         MessageBox.Show($"Запись {(isUpdate ? "изменена!" : "добавлена!")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             textBox4.Text = "";
                             textBox1.Text = "";
-                            FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM Category"); // Обновляем DataGridView
-
+                            FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM Category");
                     }
                     catch (MySqlException ex)
                     {
@@ -319,12 +299,14 @@ namespace kursovoy
                     {
                         MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-
                 }
             }
         }
-      
-        //Проверка ввода для категории
+        /// <summary>
+        /// Проверка ввода для категории
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
@@ -338,7 +320,11 @@ namespace kursovoy
                 e.Handled = false;
             }
         }
-        //Проверка ввода для поставщика и производителя
+        /// <summary>
+        /// Проверка ввода для поставщика и производителя
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
@@ -354,14 +340,13 @@ namespace kursovoy
                 e.Handled = false;
             }
         }
-
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                textBox4.Text = row.Cells["CategoryID"].Value.ToString(); //id
-                textBox1.Text = row.Cells["CategoryName"].Value.ToString(); //сategoryName
+                textBox4.Text = row.Cells["CategoryID"].Value.ToString(); 
+                textBox1.Text = row.Cells["CategoryName"].Value.ToString(); 
             }
         }
         private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -369,8 +354,8 @@ namespace kursovoy
             if (e.ColumnIndex == dataGridView2.Columns["Выбрать"].Index && e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView2.Rows[e.RowIndex];
-                textBox5.Text = row.Cells["SupplierID"].Value.ToString(); //id
-                textBox2.Text = row.Cells["SupplierName"].Value.ToString(); //
+                textBox5.Text = row.Cells["SupplierID"].Value.ToString(); 
+                textBox2.Text = row.Cells["SupplierName"].Value.ToString(); 
             }
         }
         private void dataGridView3_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -378,11 +363,10 @@ namespace kursovoy
             if (e.ColumnIndex == dataGridView3.Columns["Выбрать"].Index && e.RowIndex >= 0)
             {
                 DataGridViewRow row = dataGridView3.Rows[e.RowIndex];
-                textBox6.Text = row.Cells["ProductManufacturID"].Value.ToString(); //id
-                textBox3.Text = row.Cells["ProductManufacturName"].Value.ToString(); //сategoryName
+                textBox6.Text = row.Cells["ProductManufacturID"].Value.ToString();
+                textBox3.Text = row.Cells["ProductManufacturName"].Value.ToString(); 
             }
         }
-
         /// <summary>
         /// Добавление поставщика
         /// </summary>
@@ -392,7 +376,6 @@ namespace kursovoy
         {
             AddOrUpdateSupplier(false); // false - добавление
         }
-
         /// <summary>
         /// Изменение поставщика
         /// </summary>
@@ -402,7 +385,6 @@ namespace kursovoy
         {
             AddOrUpdateSupplier(true); // true - редактирование
         }
-
         /// <summary>
         /// Общий метод для добавления и редактирования поставщиков
         /// </summary>
@@ -411,19 +393,16 @@ namespace kursovoy
         {
             string supplierName = textBox2.Text.Trim();
             string supplierId = textBox5.Text.Trim(); 
-
             if (string.IsNullOrEmpty(supplierName))
             {
                 MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             if (isUpdate && string.IsNullOrEmpty(supplierId))
             {
                 MessageBox.Show("Необходимо выбрать запись для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             string message = isUpdate ? "Вы уверены, что хотите изменить эту запись ?" : "Вы уверены, что хотите добавить эту запись?";
             string title = isUpdate ? "Подтверждение изменения!" : "Подтверждение добавления!";
             MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question;
@@ -449,10 +428,8 @@ namespace kursovoy
                                 }
                             }
                         }
-
                         string query;
                         MySqlCommand cmd;
-
                         if (isUpdate)
                         {
                             query = "UPDATE Supplier SET SupplierName = @SupplierName WHERE SupplierID = @SupplierID";
@@ -466,11 +443,10 @@ namespace kursovoy
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@SupplierName", supplierName);
                         }
-
                         MessageBox.Show($"Запись {(isUpdate ? "изменена!" : "добавлена!")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            textBox2.Text = "";
-                            textBox5.Text = "";
-                            FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM Supplier");
+                        textBox2.Text = "";
+                        textBox5.Text = "";
+                        FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM Supplier");
                     }
                     catch (MySqlException ex)
                     {
@@ -480,11 +456,9 @@ namespace kursovoy
                     {
                         MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-
                 }
             }
         }
-
         /// <summary>
         /// Добавление или изменение производителя
         /// </summary>
@@ -493,25 +467,21 @@ namespace kursovoy
         {
             string manufacturerName = textBox3.Text.Trim(); //Trim() - удаляет все пробелы из строки.
             string manufacturerId = textBox5.Text.Trim();   
-
             if (string.IsNullOrEmpty(manufacturerName))
             {
                 MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             if (isUpdate && string.IsNullOrEmpty(manufacturerId))
             {
                 MessageBox.Show("Необходимо выбрать запись для изменения!", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             string message = isUpdate ? "Вы уверены, что хотите изменить эту запись ?" : "Вы уверены, что хотите добавить эту запись?";
             string title = isUpdate ? "Подтверждение изменения!" : "Подтверждение добавления!";
             MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question;
 
             DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
-
             if (dialogResult == DialogResult.Yes)
             {
                 using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
@@ -532,13 +502,10 @@ namespace kursovoy
                                 }
                             }
                         }
-
                         string query;
                         MySqlCommand cmd;
-
                         if (isUpdate)
                         {
-                            // Update existing manufacturer
                             query = "UPDATE ProductManufactur SET ProductManufacturName = @ProductManufacturName WHERE ProductManufacturID = @ProductManufacturID";
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@ProductManufacturName", manufacturerName);
@@ -546,17 +513,14 @@ namespace kursovoy
                         }
                         else
                         {
-                            // Insert new manufacturer
                             query = "INSERT INTO ProductManufactur (ProductManufacturName) VALUES (@ProductManufacturName)";
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@ProductManufacturName", manufacturerName);
                         }
-
                         MessageBox.Show($"Запись {(isUpdate ? "изменена!" : "добавлена!")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            textBox3.Text = "";
-                            textBox5.Text = "";
-                            FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM ProductManufactur"); // Refresh data grid
-
+                        textBox3.Text = "";
+                        textBox5.Text = "";
+                        FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM ProductManufactur"); // Refresh data grid
                     }
                     catch (MySqlException ex)
                     {
@@ -569,35 +533,25 @@ namespace kursovoy
                 }
             }
         }
-        
         private void button4_Click(object sender, EventArgs e)
         {
-            AddOrUpdateManufacturer(false); // False for adding
+            AddOrUpdateManufacturer(false);
         }
-
         private void button7_Click(object sender, EventArgs e)
         {
-            AddOrUpdateManufacturer(true); // True for updating
+            AddOrUpdateManufacturer(true);
         }
-
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
             dataGridView1.ClearSelection();
         }
-
         private void dataGridView2_SelectionChanged(object sender, EventArgs e)
         {
             dataGridView2.ClearSelection();
         }
-
         private void dataGridView3_SelectionChanged(object sender, EventArgs e)
         {
             dataGridView3.ClearSelection();
-        }
-
-        private void tabPage1_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }

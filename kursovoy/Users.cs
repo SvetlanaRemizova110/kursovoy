@@ -19,7 +19,6 @@ namespace kursovoy
         private int initialInactivityTimeout = 0;
         private Timer Timer = new Timer();
         private bool isTimerTickRunning = false;
-
         public Users()
         {
             InitializeComponent();
@@ -28,7 +27,6 @@ namespace kursovoy
             Timer.Tick += inactivityTimer_Tick;
             Timer.Interval = 1000;
         }
-
         private void Users_ActivateTracking()
         {
             this.MouseMove += Users_ActivityDetected;
@@ -41,21 +39,17 @@ namespace kursovoy
                 control.MouseClick += Users_ActivityDetected;
             }
         }
-
         private void Users_ActivityDetected(object sender, EventArgs e)
         {
             ResetInactivityTimer();
         }
-
         private void inactivityTimer_Tick(object sender, EventArgs e)
         {
             if (isTimerTickRunning)
             {
                 return;
             }
-
             isTimerTickRunning = true;
-
             try
             {
                 if (inactivityTimeout > 0)
@@ -77,7 +71,6 @@ namespace kursovoy
                 isTimerTickRunning = false;
             }
         }
-
         private void button4_Click(object sender, EventArgs e)
         {
             Timer.Stop();
@@ -85,7 +78,6 @@ namespace kursovoy
             ad.Show();
             this.Close();
         }
-
         private void LoadDataIntoComboBox()
         {
             string queryEmployee = "SELECT EmployeeF,EmployeeI,EmployeeO FROM employeeee";
@@ -104,7 +96,6 @@ namespace kursovoy
                         }
                     }
                 }
-
                 using (MySqlCommand cmd = new MySqlCommand(queryRole, connection))
                 {
                     using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -117,7 +108,6 @@ namespace kursovoy
                 }
             }
         }
-
         private void Users_Load(object sender, EventArgs e)
         {
             if (int.TryParse(ConfigurationManager.AppSettings["InactivityTimeout"], out int timeoutInSeconds))

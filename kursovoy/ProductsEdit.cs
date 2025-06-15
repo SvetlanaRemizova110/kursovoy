@@ -29,16 +29,16 @@ namespace kursovoy
         }
         private void ProductsEdit_Load(object sender, EventArgs e)
         {
-            LoadDataIntoComboBox();// Для загрузки данных в comboBox
-            LoadProductData(); // Загрузка данных в поля по артикулу
-            LoadImage(); // Загрузка фото товара из Базы данных
+            LoadDataIntoComboBox();
+            LoadProductData(); 
+            LoadImage(); 
         }
-
-        // Загрузка дефолтной картинки
+        /// <summary>
+        /// Загрузка стандартной картинки
+        /// </summary>
         private void LoadDefaultImage()
         {
             string defaultImagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "photo", DefaultImageName);
-
             if (!File.Exists(defaultImagePath))
             {
                 MessageBox.Show($"Файл заглушки {DefaultImageName} не найден. Пожалуйста, поместите его в папку photo.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -47,7 +47,6 @@ namespace kursovoy
                 _currentPhotoPath = null;
                 return;
             }
-
             try
             {
                 pictureBox1.Image = Image.FromFile(defaultImagePath);
@@ -60,7 +59,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка загрузки дефолтной картинки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Загрузка фото товара из Базы данных
         /// </summary>
@@ -68,7 +66,6 @@ namespace kursovoy
         {
             string fileName = label12.Text;
             string fullPath = Path.Combine(imageDirectory, fileName);
-
             if (File.Exists(fullPath))
             {
                 try
@@ -123,7 +120,6 @@ namespace kursovoy
                     }
                 }
                 connection.Close();
-
             }
         }
         /// <summary>
@@ -141,7 +137,7 @@ namespace kursovoy
                  INNER JOIN ProductManufactur ON ProductManufactur = ProductManufacturID
                  INNER JOIN Supplier ON ProductSupplier = SupplierID
                  INNER JOIN Category ON ProductCategory = CategoryID WHERE ProductArticul = @ProductArticul", con);
-                cmd.Parameters.AddWithValue("@ProductArticul", productArticul_); // Используем productArticul_
+                cmd.Parameters.AddWithValue("@ProductArticul", productArticul_);
                 using (MySqlDataReader rdr = cmd.ExecuteReader())
                 {
                     if (rdr.Read())
@@ -180,13 +176,15 @@ namespace kursovoy
         {
             this.Close();
         }
-
-        // Кнопка "Удалить фото"
+        /// <summary>
+        /// Кнопка "Удалить фото"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
             LoadDefaultImage();
         }
-
         /// <summary>
         /// Редактирование товара
         /// </summary>
@@ -199,37 +197,28 @@ namespace kursovoy
                 MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (dialogResult == DialogResult.Yes)
             {
                 using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
                     con.Open();
-
                     int newArticul = Convert.ToInt32(textBox6.Text);
-
-                    //Проверяем изменился ли артикль
                     if (newArticul != productArticul_)
                     {
-                        //Проверяем, не занят ли новый артикль
+                        // Проверка на дублирование данных(по артикулу)
                         if (!IsArticulUnique(newArticul, con))
                         {
                             MessageBox.Show("Товар с таким артикулом уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return; // Прерываем выполнение, если артикул не уникален
+                            return; 
                         }
-
-                        // Обновляем артикль в отдельном запросе
                         MySqlCommand cmdUpdateArticul = new MySqlCommand("UPDATE Product SET ProductArticul = @newArticul WHERE ProductArticul = @oldArticul", con);
                         cmdUpdateArticul.Parameters.AddWithValue("@newArticul", newArticul);
                         cmdUpdateArticul.Parameters.AddWithValue("@oldArticul", productArticul_); // Используем старый артикль для WHERE
                         cmdUpdateArticul.ExecuteNonQuery();
 
-                        // Обновляем переменную productArticul_
                         productArticul_ = newArticul;
                     }
-
-                    // Обновляем остальные данные
                     MySqlCommand cmd = new MySqlCommand(@"UPDATE Product 
                     SET Name = @name,
                     Description = @description,
@@ -240,8 +229,7 @@ namespace kursovoy
                     ProductSupplier = @ProductSupplier,
                     ProductQuantityInStock = @ProductQuantityInStock,
                     ProductPhoto = @ProductPhoto
-                    WHERE ProductArticul = @productArticul", con); // Используем productArticul_ для WHERE
-
+                    WHERE ProductArticul = @productArticul", con);
                     cmd.Parameters.AddWithValue("@name", textBoxName.Text);
                     cmd.Parameters.AddWithValue("@description", textBox5.Text);
                     cmd.Parameters.AddWithValue("@cost", int.Parse(textBox7.Text));
@@ -259,16 +247,12 @@ namespace kursovoy
                     cmd.Parameters.AddWithValue("@ProductPhoto", label12.Text);
                     cmd.Parameters.AddWithValue("@productArticul", productArticul_); // Используем productArticul_
                     cmd.ExecuteNonQuery();
-
                     MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     con.Close();
                 }
                 this.Close();
             }
         }
-
-
-
         /// <summary>
         /// Для получения ID категории
         /// </summary>
@@ -292,11 +276,9 @@ namespace kursovoy
                     }
                 }
                 connection.Close();
-
             }
             return categoryId;
         }
-
         /// <summary>
         /// Для получения ID производителя
         /// </summary>
@@ -320,11 +302,9 @@ namespace kursovoy
                     }
                 }
                 connection.Close();
-
             }
             return Manufacturid;
         }
-
         /// <summary>
         /// Для получения ID поставщика
         /// </summary>
@@ -348,11 +328,9 @@ namespace kursovoy
                     }
                 }
                 connection.Close();
-
             }
             return Supplierid;
         }
-
         /// <summary>
         /// Изменение фото товара
         /// </summary>
@@ -363,26 +341,22 @@ namespace kursovoy
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png";
             openFileDialog.Title = "Выберите фотографию";
-
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string selectedFilePath = openFileDialog.FileName;
                 FileInfo fileInfo = new FileInfo(selectedFilePath);
-
                 // Проверка типа файла
                 if (fileInfo.Extension.ToLower() != ".jpg" && fileInfo.Extension.ToLower() != ".jpeg" && fileInfo.Extension.ToLower() != ".png") // Добавил jpeg
                 {
                     MessageBox.Show("Ошибка: Выберите файл с расширением .jpg, .jpeg или .png.", "Ошибка выбора файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
                 // Проверка размера файла
-                if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб в байтах
+                if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб
                 {
                     MessageBox.Show("Ошибка: Размер файла должен быть не более 3 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
                 // Получаем артикул товара, чтобы использовать его в качестве имени файла
                 string productArticul = textBox6.Text;
                 if (string.IsNullOrEmpty(productArticul))
@@ -390,7 +364,6 @@ namespace kursovoy
                     MessageBox.Show("Пожалуйста, укажите артикул товара перед добавлением фотографии.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
                 // Путь к папке для хранения изображений
                 string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "photo");
 
@@ -410,9 +383,8 @@ namespace kursovoy
                     // Проверяем, существует ли файл с таким именем
                     if (File.Exists(targetPath))
                     {
-                        // Если файл существует, просто обновляем информацию в PictureBox и Label
                         pictureBox1.Image = Image.FromFile(targetPath);
-                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage; // или StretchImage
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
                         _currentPhotoPath = targetPath;
                         label12.Text = newFileName;
                         MessageBox.Show("Фотография уже существует. Использована существующая.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -422,7 +394,6 @@ namespace kursovoy
                         // Если файл не существует, копируем его
                         File.Copy(selectedFilePath, targetPath, true);
 
-                        // Отображаем фото в PictureBox
                         pictureBox1.Image = Image.FromFile(targetPath);
                         pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
@@ -437,17 +408,23 @@ namespace kursovoy
                 }
             }
         }
-
-        //Cost, count, Art
+        /// <summary>
+        /// Проверка на ввод только чисел для Cost, count, Art
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Проверка на ввод только чисел
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true; // Отменить ввод, если символ не является цифрой
             }
         }
-        //Unit
+        /// <summary>
+        ///  Проверка на ввод для Unit
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
 
@@ -456,7 +433,7 @@ namespace kursovoy
             (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
             (e.KeyChar < '0' || e.KeyChar > '9'))
             {
-                e.Handled = true; // Отменяем ввод
+                e.Handled = true;
             }
             if (e.KeyChar == ' ')
             {

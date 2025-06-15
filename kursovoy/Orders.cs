@@ -18,7 +18,6 @@ namespace kursovoy
     {
         private FormWindowState _previousWindowState; // Сохраняем предыдущее состояние окна
         private FormBorderStyle _previousBorderStyle; // Сохраняем стиль границы
-
         private int currentPage1 = 0;
         private int rowsPerPage1 = 20;
         private int totalRows1 = 0;
@@ -31,7 +30,6 @@ namespace kursovoy
             dateTimePickerStart.Value = DateTime.Now;
             dateTimePickerEnd.Value = DateTime.Now;
         }
-
         /// <summary>
         /// Класс для хранения данных о заказе
         /// </summary>
@@ -44,7 +42,6 @@ namespace kursovoy
             // Хранение количества товаров в заказе
             public Dictionary<string, int> OrderItems { get; set; } = new Dictionary<string, int>();
         }
-
         // Список для хранения данных о заказах
         private List<OrderData> orderDataList = new List<OrderData>();
 
@@ -132,7 +129,6 @@ namespace kursovoy
                             row.Cells["OrderDate"].Value = rdr[1];
                             row.Cells["OrderUser"].Value = string.Format("{0} {1} {2}", rdr[3], rdr[4], rdr[5]);
                             row.Cells["OrderPrice"].Value = rdr[6];
-                            // Устанавливаем выбранное значение в ComboBoxColumn
                             row.Cells["OrderStatus"].Value = rdr[2];
                             allRows1.Add(row);
                             orderDataList.Add(orderData);
@@ -147,7 +143,6 @@ namespace kursovoy
                 throw new Exception($"Ошибка: {ex}");
             }
         }
-
         /// <summary>
         /// Загрузка информации о товарах в заказе
         /// </summary>
@@ -180,7 +175,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при загрузке товаров для заказа {orderID}: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Кнопка "Назад"
         /// </summary>
@@ -201,7 +195,6 @@ namespace kursovoy
                 this.Close();
             }
         }
-
         /// <summary>
         /// Событие при загрузке формы
         /// </summary>
@@ -209,6 +202,7 @@ namespace kursovoy
         /// <param name="e"></param>
         private void Orders_Load(object sender, EventArgs e)
         {
+            // Масштабирование для роли Продавец
             if (Authorization.User2.Role == 3)
             {
                 this.Size = new Size(905, 608);
@@ -235,7 +229,6 @@ namespace kursovoy
         {
             dataGridView1.ClearSelection();
             dataGridView1.CurrentCell = null;
-
             // узнаём какая страница выбрана
             LinkLabel l = sender as LinkLabel;
             if (l != null)
@@ -251,41 +244,36 @@ namespace kursovoy
         /// </summary>
         private void UpdatePag()
         {
-            // Очищаем только строки, не трогая столбцы
             dataGridView1.Rows.Clear();
-
             int startIndex = currentPage1 * rowsPerPage1;
             int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
-
             // Добавляем строки для текущей страницы
             for (int i = startIndex; i < endIndex; i++)
             {
                 dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
             }
-
             // Удаляем старые LinkLabel страниц
             foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
             {
                 this.Controls.Remove(control);
             }
-
             // Рассчитываем общее количество страниц
             int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
             int step = 15;
-
             int x = labelCount.Location.X + 68;
             int y = labelCount.Location.Y + 38;
-
             // Создаем новые LinkLabel для страниц
             for (int i = 0; i < totalPages; i++)
             {
                 var linkLabel = new LinkLabel();
                 linkLabel.Text = (i + 1).ToString();
                 linkLabel.Name = "page" + i;
+
                 // Устанавливаем цвет ссылки
-                linkLabel.LinkColor = Color.Black;      // Цвет ссылки до посещения
-                linkLabel.VisitedLinkColor = Color.Black; // Цвет ссылки после посещения
-                linkLabel.ActiveLinkColor = Color.Black;  // Цвет ссылки при нажатии
+                linkLabel.LinkColor = Color.Black;      
+                linkLabel.VisitedLinkColor = Color.Black; 
+                linkLabel.ActiveLinkColor = Color.Black; 
+
                 linkLabel.Font = new System.Drawing.Font(linkLabel.Font.FontFamily, 14);
                 linkLabel.AutoSize = true;
                 linkLabel.Location = new System.Drawing.Point(x, y);
@@ -304,35 +292,28 @@ namespace kursovoy
                 this.Controls.Add(linkLabel);
                 x += step;
             }
-
             // Обновляем состояние кнопок
             buttonPag1.Enabled = currentPage1 > 0;
             buttonPag2.Enabled = currentPage1 < totalPages - 1;
 
-            // Обновляем счетчик записей
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
-
         /// <summary>
         /// Количество строк всего
         /// </summary>
         public void FillCount()
         {
-            string connectionString = Authorization.Program.ConnectionString;
-
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            string conStr = Authorization.Program.ConnectionString;
+            using (MySqlConnection con = new MySqlConnection(conStr))
             {
-                connection.Open();
-
-                using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM `order`", connection))
+                con.Open();
+                using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM `order`", con))
                 {
                     totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
                 }
-
                 labelVSE.Text = $"/{totalRecords}";
             }
         }
-
         /// <summary>
         /// Поиск, сортировка, фильтрация
         /// </summary>
@@ -341,23 +322,19 @@ namespace kursovoy
             string searchStr = SearchText.Text;
             string sortOrder = comboBox1.SelectedItem?.ToString();
             string orderDirection = (sortOrder == "сначало новые") ? "DESC" : "ASC";
-
             string strCmd = "SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
                 " OrderStatus AS 'Статус заказа', e.EmployeeF AS 'Фамилия', e.EmployeeI AS 'Имя', e.EmployeeO AS 'Отчеcтво', OrderPrice AS 'Сумма заказа'" +
                 " FROM `order`" +
                 "INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID WHERE 1=1";
-
             if (!string.IsNullOrWhiteSpace(searchStr))
             {
                 strCmd += $" AND OrderID LIKE '%{searchStr}%'";
             }
             strCmd += $" ORDER BY `OrderDate` {orderDirection}";
             FillDataGrid(strCmd);
-
             currentPage1 = 0; // Сбрасываем на первую страницу
             UpdatePag(); // Обновляем пагинацию
         }
-
         /// <summary>
         /// Обработчик события изменения текста в поле поиска.
         /// </summary>
@@ -370,7 +347,6 @@ namespace kursovoy
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
-
         /// <summary>
         /// Обработчик события изменения выбранного элемента в ComboBox
         /// </summary>
@@ -383,7 +359,6 @@ namespace kursovoy
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
             FillCount();
         }
-
         /// <summary>
         /// Формирование отчета
         /// </summary>
@@ -393,22 +368,18 @@ namespace kursovoy
         {
             DateTime startDate = dateTimePickerStart.Value;
             DateTime endDate = dateTimePickerEnd.Value;
-
             string startDate2 = dateTimePickerStart.Value.ToString("yyyy-MM-dd");
             string endDate2 = dateTimePickerEnd.Value.ToString("yyyy-MM-dd");
-
             // Проверка дат
             if (startDate > endDate)
             {
                 MessageBox.Show("Дата начала периода не может быть больше даты окончания периода.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
-                    // Сохранение файла
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
                     saveFileDialog.FileName = $"Отчет по заказам_{startDate2}_{endDate2}.xlsx";
                     saveFileDialog.DefaultExt = "xlsx";
@@ -416,9 +387,7 @@ namespace kursovoy
 
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
-                        connection.Open();
-
-                        // Запрос для получения данных о заказах за указанный период
+                        con.Open();
                         string query = @"SELECT
                                         OrderID AS 'Номер заказа',
                                         OrderDate AS 'Дата заказа',
@@ -430,13 +399,11 @@ namespace kursovoy
                                     FROM `order`
                                     INNER JOIN employeeee e ON `order`.OrderUser = e.EmployeeID
                                     WHERE OrderDate BETWEEN @startDate AND @endDate AND OrderStatus = 'Завершен'";
-
-                        using (MySqlCommand command = new MySqlCommand(query, connection))
+                        using (MySqlCommand cmd = new MySqlCommand(query, con))
                         {
-                            command.Parameters.AddWithValue("@startDate", startDate);
-                            command.Parameters.AddWithValue("@endDate", endDate);
-
-                            using (MySqlDataAdapter adapter = new MySqlDataAdapter(command))
+                            cmd.Parameters.AddWithValue("@startDate", startDate);
+                            cmd.Parameters.AddWithValue("@endDate", endDate);
+                            using (MySqlDataAdapter adapter = new MySqlDataAdapter(cmd))
                             {
                                 System.Data.DataTable dataTable = new System.Data.DataTable();
                                 adapter.Fill(dataTable);
@@ -449,24 +416,20 @@ namespace kursovoy
                                 // Создание Excel-приложения и книги
                                 Excel.Application excelApp = new Excel.Application();
                                 Excel.Workbook workbook = excelApp.Workbooks.Add();
-                                Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1]; // Explicit cast
+                                Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1]; 
 
-                                // **Добавляем вывод текущей даты в первую строку**
-                                // Заголовок на весь лист
                                 var periodHeader = $"Отчет за период: {startDate.ToShortDateString()} - {endDate.ToShortDateString()}";
-                                worksheet.Range["A1:G1"].Merge(); // Объединяем ячейки для заголовка
+                                worksheet.Range["A1:G1"].Merge(); 
                                 worksheet.Cells[1, 1] = periodHeader;
                                 worksheet.Cells[1, 1].Font.Bold = true;
-                                worksheet.Cells[1, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter; // Центрируем заголовок
-                                worksheet.Cells[1, 1].Font.Size = 14; // Увеличиваем размер шрифта
+                                worksheet.Cells[1, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                                worksheet.Cells[1, 1].Font.Size = 14;
 
-                                // Сдвигаем заголовки столбцов на строку вниз
                                 for (int i = 0; i < dataTable.Columns.Count; i++)
                                 {
                                     worksheet.Cells[2, i + 1] = dataTable.Columns[i].ColumnName;
                                 }
 
-                                // Данные
                                 for (int i = 0; i < dataTable.Rows.Count; i++)
                                 {
                                     for (int j = 0; j < dataTable.Columns.Count; j++)
@@ -474,14 +437,12 @@ namespace kursovoy
                                         worksheet.Cells[i + 3, j + 1] = dataTable.Rows[i][j].ToString();
                                     }
                                 }
-
                                 // Итоговая информация
                                 int lastRow = dataTable.Rows.Count + 3;
                                 worksheet.Cells[lastRow, 1] = "Общий доход:";
                                 worksheet.Cells[lastRow, 2] = totalRevenue.ToString("F2");
                                 worksheet.Cells[lastRow + 1, 1] = "Количество заказов:";
                                 worksheet.Cells[lastRow + 1, 2] = totalOrders.ToString();
-
                                 // Распределение по сотрудникам
                                 var employeeDistribution = dataTable.AsEnumerable()
                                     .GroupBy(row => $"{row.Field<string>("Фамилия")} {row.Field<string>("Имя")} {row.Field<string>("Отчество")}")
@@ -491,8 +452,6 @@ namespace kursovoy
                                         Count = g.Count(),
                                         TotalPrice = g.Sum(row => Convert.ToDecimal(row["Сумма заказа"]))
                                     });
-
-                                //worksheet.Cells[lastRow + 4, 1] = "Распределение по сотрудникам:";
                                 worksheet.Cells[lastRow + 3, 1] = "Сотрудник";
                                 worksheet.Cells[lastRow + 3, 2] = "Количество заказов";
                                 worksheet.Cells[lastRow + 3, 3] = "Сумма заказов";
@@ -505,17 +464,13 @@ namespace kursovoy
                                     worksheet.Cells[currentRow, 3] = employee.TotalPrice.ToString("F2");
                                     currentRow++;
                                 }
-
-                                // Авторазмер столбцов
                                 worksheet.Columns.AutoFit();
-
                                 workbook.SaveAs(saveFileDialog.FileName);
                                 MessageBox.Show("Отчет успешно сформирован и сохранен.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                                 // Закрытие Excel
                                 workbook.Close();
                                 excelApp.Quit();
-
                                 // Очистка COM-объектов
                                 System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);
                                 System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
@@ -524,7 +479,7 @@ namespace kursovoy
                                 workbook = null;
                                 worksheet = null;
                                 GC.Collect();
-                                connection.Close();
+                                con.Close();
                             }
                         }
                     }
@@ -535,7 +490,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при формировании отчета: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Устанавливаем минимальную дату для dateTimePickerEnd.
         /// Предотвращает выбор даты окончания раньше даты начала.
@@ -546,7 +500,6 @@ namespace kursovoy
         {
             dateTimePickerEnd.MinDate = dateTimePickerStart.Value;
         }
-
         /// <summary>
         /// Устанавливаем максимальную дату для dateTimePickerStart.
         /// Предотвращает выбор даты начала позже даты окончания.
@@ -557,7 +510,6 @@ namespace kursovoy
         {
             dateTimePickerStart.MaxDate = dateTimePickerEnd.Value;
         }
-
         /// <summary>
         /// Изменение статуса
         /// </summary>
@@ -582,7 +534,7 @@ namespace kursovoy
                     if (oldStatus == "Отменён" && newStatus == "Завершен")
                     {
                         MessageBox.Show("Изменение статуса заказа с 'Отменён' на 'Завершен' запрещено.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus; // Возвращаем старый статус
+                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus; 
                         return;
                     }
 
@@ -590,21 +542,18 @@ namespace kursovoy
                     if (DateTime.Now > orderData.OrderDate.AddDays(14) && newStatus == "Отменён")
                     {
                         MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = orderData.OrderStatus; // Возвращаем старый статус
+                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = orderData.OrderStatus; 
                         return;
                     }
                     // Проверяем, что статус изменился
                     if (oldStatus != newStatus)
                     {
-                        // Обновляем статус заказа
                         UpdateOrderStatus(orderID, newStatus);
-
-                        // Если статус изменился с "Выполнен" на "Отменён", возвращаем товар на склад
+                        // возвращаем товар на склад
                         if (oldStatus == "Завершен" && newStatus == "Отменён")
                         {
                             ReturnProductsToStock(orderID);
                         }
-                        // Обновляем статус заказа
                         orderData.OrderStatus = newStatus;
 
                         UpdateDataGrid();
@@ -613,7 +562,6 @@ namespace kursovoy
                 }
             }
         }
-
         /// <summary>
         /// Проверка наличия товара на складе перед выполнением заказа
         /// </summary>
@@ -622,13 +570,11 @@ namespace kursovoy
         private bool CheckStockAvailability(int orderID)
         {
             OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
-
             if (orderData == null)
             {
                 MessageBox.Show($"Не найден заказ с ID {orderID}.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-
             try
             {
                 using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
@@ -638,7 +584,6 @@ namespace kursovoy
                     {
                         string productArticleNumber = item.Key;
                         int quantity = item.Value;
-                        // Проверяем, достаточно ли товара на складе
                         string query = "SELECT ProductQuantityInStock FROM Product WHERE ProductArticul = @ProductArticul";
                         MySqlCommand command = new MySqlCommand(query, con);
                         command.Parameters.AddWithValue("@ProductArticul", productArticleNumber);
@@ -667,7 +612,6 @@ namespace kursovoy
                 return false;
             }
         }
-
         /// <summary>
         /// Обновление статуса заказа в базе данных
         /// </summary>
@@ -693,7 +637,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при обновлении статуса заказа: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Возврат товара на склад
         /// </summary>
@@ -713,7 +656,6 @@ namespace kursovoy
                         {
                             string productArticleNumber = item.Key;
                             int quantity = item.Value;
-                            // Увеличиваем количество товара на складе
                             string query = "UPDATE Product SET ProductQuantityInStock = ProductQuantityInStock + @Quantity WHERE ProductArticul = @ProductArticul"; 
                             MySqlCommand command = new MySqlCommand(query, con);
                             command.Parameters.AddWithValue("@ProductArticul", productArticleNumber);
@@ -729,7 +671,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка при возврате товара на склад: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Проверка на ввод только чисел в поиске
         /// </summary>
@@ -742,7 +683,6 @@ namespace kursovoy
                 e.Handled = true;
             }
         }
-
         /// <summary>
         /// Кнопка перехода на предыдущую страницу
         /// </summary>
@@ -757,7 +697,6 @@ namespace kursovoy
                 FillCount();
             }
         }
-
         /// <summary>
         /// Кнопка перехода на следующую страницу
         /// </summary>
@@ -769,11 +708,10 @@ namespace kursovoy
             if (currentPage1 < totalPages - 1)
             {
                 currentPage1++;
-                UpdatePag(); // Обновляем пагинацию
+                UpdatePag();
                 FillCount();
             }
         }
-
         /// <summary>
         /// Обновляет навигацию по страницам при изменении размера формы.
         /// </summary>
@@ -783,7 +721,6 @@ namespace kursovoy
         {
             UpdatePag();
         }
-
         /// <summary>
         /// Просмотр состава заказа
         /// </summary>
@@ -799,7 +736,6 @@ namespace kursovoy
             UpdatePag();
             labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
         }
-
         /// <summary>
         /// Условное форматирование данных
         /// </summary>
@@ -821,7 +757,6 @@ namespace kursovoy
                 }
             }
         }
-
         /// <summary>
         /// Масштабирование формы
         /// </summary>
@@ -831,7 +766,7 @@ namespace kursovoy
         {
             if (this.WindowState == FormWindowState.Maximized)
             {
-                // Восстанавливаем предыдущее состояние (нормальное)
+                // Восстанавливаем предыдущее состояние
                 this.WindowState = _previousWindowState;
             }
             else
@@ -842,7 +777,6 @@ namespace kursovoy
                 this.WindowState = FormWindowState.Maximized;
             }
         }
-
         /// <summary>
         /// Событие для выделение всей строки при нажатие ПКМ для просмотра состава заказа
         /// </summary>
@@ -857,13 +791,10 @@ namespace kursovoy
                 {
                     dataGridView1.ClearSelection();
                     dataGridView1.Rows[hit.RowIndex].Selected = true;
-
                     dataGridView1.CurrentCell = dataGridView1.Rows[hit.RowIndex].Cells[0];
-
                     contextMenuStrip1.Show(dataGridView1, e.Location);
                 }
             }
         }
     }
 }
-

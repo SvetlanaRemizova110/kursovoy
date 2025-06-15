@@ -14,7 +14,7 @@ namespace kursovoy
 {
     public partial class ProductsAdd : Form
     {
-        private string _currentPhotoPath = null; // Храним текущий путь к фотографии
+        private string _currentPhotoPath = null; // текущий путь к фотографии
         private const string DefaultImageName = "picture.png"; // Имя файла-заглушки
         public ProductsAdd()
         {
@@ -60,7 +60,6 @@ namespace kursovoy
                 connection.Close();
             }
         }
-        
         /// <summary>
         /// Расчет кол-ва записей для проверки на дублирование
         /// </summary>
@@ -76,7 +75,6 @@ namespace kursovoy
                 return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
             }
         }
-
         /// <summary>
         /// Добавление товара
         /// </summary>
@@ -131,7 +129,6 @@ namespace kursovoy
                                 object result = categoryCmd.ExecuteScalar();
                                 categoryID = result != null ? Convert.ToInt32(result) : 0;
                             }
-                            // Запрос добавления
                             string query2 = "INSERT INTO Product (" +
                                 "ProductArticul," +
                                "Name," +
@@ -173,17 +170,16 @@ namespace kursovoy
                 }
             }
         }
-
         private void ProductsAdd_Load(object sender, EventArgs e)
         {
             LoadDefaultImage();
         }
-
-        // Загрузка дефолтной картинки
+        /// <summary>
+        /// Загрузка стандартной картинки
+        /// </summary>
         private void LoadDefaultImage()
         {
             string defaultImagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "photo", DefaultImageName);
-
             if (!File.Exists(defaultImagePath))
             {
                 MessageBox.Show($"Файл заглушки {DefaultImageName} не найден. Пожалуйста, поместите его в папку photo.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -192,7 +188,6 @@ namespace kursovoy
                 _currentPhotoPath = null;
                 return;
             }
-
             try
             {
                 pictureBox1.Image = Image.FromFile(defaultImagePath);
@@ -205,7 +200,6 @@ namespace kursovoy
                 MessageBox.Show($"Ошибка загрузки дефолтной картинки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         /// <summary>
         /// Добавление фото товара
         /// </summary>
@@ -216,26 +210,22 @@ namespace kursovoy
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png";
             openFileDialog.Title = "Выберите фотографию";
-
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string selectedFilePath = openFileDialog.FileName;
                 FileInfo fileInfo = new FileInfo(selectedFilePath);
-
                 // Проверка типа файла
                 if (fileInfo.Extension.ToLower() != ".jpg" && fileInfo.Extension.ToLower() != ".jpeg" && fileInfo.Extension.ToLower() != ".png") // Добавил jpeg
                 {
                     MessageBox.Show("Ошибка: Выберите файл с расширением .jpg, .jpeg или .png.", "Ошибка выбора файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
                 // Проверка размера файла
-                if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб в байтах
+                if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб 
                 {
                     MessageBox.Show("Ошибка: Размер файла должен быть не более 3 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
                 // Получаем артикул товара, чтобы использовать его в качестве имени файла
                 string productArticul = textBox6.Text;
                 if (string.IsNullOrEmpty(productArticul))
@@ -243,7 +233,6 @@ namespace kursovoy
                     MessageBox.Show("Пожалуйста, укажите артикул товара перед добавлением фотографии.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
                 // Путь к папке для хранения изображений
                 string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "photo");
 
@@ -263,7 +252,6 @@ namespace kursovoy
                     // Копируем файл в папку с новым именем
                     File.Copy(selectedFilePath, targetPath, true);
 
-                    // Отображаем фото в PictureBox
                     pictureBox1.Image = Image.FromFile(targetPath);
                     pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
@@ -277,25 +265,34 @@ namespace kursovoy
                 }
             }
         }
-        // Кнопка "Удалить фото"
+        /// <summary>
+        /// Кнопка "Удалить фото"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button4_Click(object sender, EventArgs e)
         {
             LoadDefaultImage();
         }
-        
-        //Cost, count, Art
+       /// <summary>
+       /// Проверка на ввод только чисел для Cost, count, Art
+       /// </summary>
+       /// <param name="sender"></param>
+       /// <param name="e"></param>
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            // Проверка на ввод только чисел
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
             {
                 e.Handled = true;
             }
         }
-        //Unit
+        /// <summary>
+        ///  Проверка на ввод для Unit
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
-
             if (!char.IsControl(e.KeyChar) &&
             (e.KeyChar < 'а' || e.KeyChar > 'я') &&
             (e.KeyChar < 'А' || e.KeyChar > 'Я') &&
@@ -308,11 +305,9 @@ namespace kursovoy
                 e.Handled = false;
             }
         }
-
         private void button2_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-
     }
 }

@@ -159,6 +159,7 @@ namespace kursovoy
             this.captchaTextBox.Size = new System.Drawing.Size(212, 34);
             this.captchaTextBox.TabIndex = 5;
             this.captchaTextBox.TabStop = false;
+            this.captchaTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBoxLogin_KeyPress);
             // 
             // captchaPictureBox
             // 
