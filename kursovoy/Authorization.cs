@@ -22,8 +22,6 @@ namespace kursovoy
             //Общее подключение к бд
             public static string ConnectionString { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};database={ConfigurationManager.AppSettings["db"]};";
             public static string ConnectionStringNotDB { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};";
-            //public static string ConnectionString { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;database=db45;";
-            //public static string ConnectionStringNotDB { get; } = "host=10.207.106.12;uid=user45;pwd=lj45;";
         }
         public class CaptchaGenerator
         {

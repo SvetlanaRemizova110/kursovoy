@@ -17,45 +17,44 @@ namespace kursovoy
         {
             InitializeComponent();
         }
-
         private void Admin_Load(object sender, EventArgs e)
         {
-            label2.Text = Authorization.User2.FIO;
+            label2.Text = Authorization.User2.FIO; //ФИО текущего сотрудника
         }
-
+        /// <summary>
+        /// Переход на форму товаров
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void product_Click(object sender, EventArgs e)
         {
             Products pr = new Products();
             pr.Show();
             this.Close();
         }
-
         private void users_Click(object sender, EventArgs e)
         {
             Users us = new Users();
             us.Show();
             this.Close();
         }
-
         private void employee_Click(object sender, EventArgs e)
         {
             Staffs st = new Staffs();
             st.Show();
             this.Close();
         }
-
         private void books_Click(object sender, EventArgs e)
         {
             ReferenceBooks rb = new ReferenceBooks();
             rb.Show();
             this.Hide();
         }
-
         private void back_Click(object sender, EventArgs e)
         {
             this.Close();
-            Authorization authorization = new Authorization();
-            authorization.Show();
+            Authorization au = new Authorization();
+            au.Show();
         }
     }
 }
