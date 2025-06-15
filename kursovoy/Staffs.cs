@@ -70,7 +70,7 @@ namespace kursovoy
                 else
                 {
                     Timer.Stop();
-                    MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы", MessageBoxButtons.OK,MessageBoxIcon.Stop);
+                    MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы", MessageBoxButtons.OK,MessageBoxIcon.Information);
                     import.AutomaticBackup();
                     this.Close();
                     Authorization authorization = new Authorization();
@@ -204,7 +204,6 @@ namespace kursovoy
                "FROM employeeee; ");
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
                 textBox2.Text = row.Cells["EmployeeID"].Value.ToString(); //id
-                //textBox4.Text = row.Cells["EmployeeFIO"].Value.ToString(); //FIO
                 textBoxF.Text = row.Cells["EmployeeF"].Value.ToString(); //FIO
                 textBoxI.Text = row.Cells["EmployeeI"].Value.ToString(); //FIO
                 textBoxO.Text = row.Cells["EmployeeO"].Value.ToString(); //FIO
@@ -343,11 +342,11 @@ namespace kursovoy
                             con.Open();
 
                             // Проверяем, не занят ли номер телефона другим сотрудником
-                            if (IsTelephoneAlreadyAssignedToAnotherEmployee(maskedTextBox1.Text, employeeID, con))
-                            {
-                                MessageBox.Show("Этот номер телефона уже используется другим сотрудником.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
-                            }
+                            //if (IsTelephoneAlreadyAssignedToAnotherEmployee(maskedTextBox1.Text, employeeID, con))
+                            //{
+                            //    MessageBox.Show("Этот номер телефона уже используется другим сотрудником.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            //    return;
+                            //}
 
                             MySqlCommand cmd = new MySqlCommand(@"UPDATE employeeee 
                         SET EmployeeF = @employeeF,
@@ -356,9 +355,9 @@ namespace kursovoy
                             telephone = @telephone,
                             status = @status
                         WHERE EmployeeID = @employeeID", con);
-                            if (UserTelephoneExists(maskedTextBox1.Text, con))
+                            if (UserTelephoneExists(maskedTextBox1.Text, employeeID, con))
                             {
-                                MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show("Пользователь с таким телефоном уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 return;
                             }
                             cmd.Parameters.AddWithValue("@employeeID", employeeID);
@@ -410,7 +409,7 @@ namespace kursovoy
                                 {
                                     if (UserTelephoneExists(maskedTextBox1.Text, connection))
                                     {
-                                        MessageBox.Show("Пользователь с таким телефоном уже существует.", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        MessageBox.Show("Пользователь с таким телефоном уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                         return;
                                     }
                                     cmd.Parameters.AddWithValue("@value1", textBoxF.Text);
@@ -449,28 +448,39 @@ namespace kursovoy
             }
         }
 
-        // Вспомогательный метод для проверки, не занят ли телефон другим сотрудником при редактировании
-        private bool IsTelephoneAlreadyAssignedToAnotherEmployee(string telephone, int employeeID, MySqlConnection connection)
-        {
-            string checkQuery = "SELECT COUNT(*) FROM employeeee WHERE telephone = @telephone AND EmployeeID != @employeeID";
-            using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
-            {
-                checkCmd.Parameters.AddWithValue("@telephone", telephone);
-                checkCmd.Parameters.AddWithValue("@employeeID", employeeID);
-                return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
-            }
-        }
+        //// Вспомогательный метод для проверки, не занят ли телефон другим сотрудником при редактировании
+        //private bool IsTelephoneAlreadyAssignedToAnotherEmployee(string telephone, int employeeID, MySqlConnection connection)
+        //{
+        //    string checkQuery = "SELECT COUNT(*) FROM employeeee WHERE telephone = @telephone AND EmployeeID != @employeeID";
+        //    using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
+        //    {
+        //        checkCmd.Parameters.AddWithValue("@telephone", telephone);
+        //        checkCmd.Parameters.AddWithValue("@employeeID", employeeID);
+        //        return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
+        //    }
+        //}
 
         // Функция для проверки существования пользователя по телефону (используется только при добавлении)
         private bool UserTelephoneExists(string telephone, MySqlConnection connection)
         {
-            string checkQuery = "SELECT COUNT(*) FROM employeeee WHERE telephone = @telephone";
-            using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, connection))
+            // Вызываем версию с employeeID = 0 (или любым другим невалидным ID),
+            // чтобы исключить *всех* сотрудников
+            return UserTelephoneExists(telephone, 0, connection);
+        }
+
+        private bool UserTelephoneExists(string telephone, int employeeID, MySqlConnection connection)
+        {
+            string query = "SELECT COUNT(*) FROM employeeee WHERE telephone = @Telephone AND EmployeeID != @EmployeeID"; // Исключаем текущего сотрудника
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
             {
-                checkCmd.Parameters.AddWithValue("@telephone", telephone);
-                return Convert.ToInt32(checkCmd.ExecuteScalar()) > 0;
+                cmd.Parameters.AddWithValue("@Telephone", telephone);
+                cmd.Parameters.AddWithValue("@EmployeeID", employeeID); // Добавляем employeeID в параметры
+                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
             }
         }
+
+
 
         //Очистка всех полей
         private void button2_Click(object sender, EventArgs e)

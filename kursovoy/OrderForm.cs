@@ -719,7 +719,7 @@ namespace kursovoy
             if (e.ColumnIndex == dataGridOrder.Columns["Удалить"].Index)
             {
                 // Подтверждение удаления
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
                 {
                     if (order.ContainsKey(productId))
@@ -743,7 +743,7 @@ namespace kursovoy
                     }
                     else
                     {
-                        MessageBox.Show("На складе недостаточно товара.","Ошибка",MessageBoxButtons.OK,MessageBoxIcon.Stop);
+                        MessageBox.Show("Невозможно добавить больше товара, чем есть на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
             }
@@ -760,7 +760,7 @@ namespace kursovoy
                     else
                     {
                         //Если количество товара 1, то при нажатии на "-" товар удаляется
-                        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+                        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo);
                         if (dialogResult == DialogResult.Yes)
                         {
                             if (order.ContainsKey(productId))

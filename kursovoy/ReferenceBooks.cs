@@ -45,7 +45,6 @@ namespace kursovoy
         private void ReferenceBooks_Load(object sender, EventArgs e)
         {
             role.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
-            //empl.Text = "Сотрудник: " + ;
 
             FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM `Category`");
             FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM `Supplier`");
@@ -257,8 +256,8 @@ namespace kursovoy
                 return;
             }
 
-            string message = isUpdate ? "Вы уверены, что хотите изменить эту категорию?" : "Вы уверены, что хотите добавить категорию?";
-            string title = isUpdate ? "Подтверждение изменения" : "Подтверждение добавления";
+            string message = isUpdate ? "Вы уверены, что хотите изменить эту запись ?" : "Вы уверены, что хотите добавить эту запись?";
+            string title = isUpdate ? "Подтверждение изменения!" : "Подтверждение добавления!";
             MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question; // Более подходящие иконки
 
             DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
@@ -306,7 +305,7 @@ namespace kursovoy
 
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show($"Категория {(isUpdate ? "успешно изменена" : "успешно добавлена")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show($"Запись {(isUpdate ? "изменена!" : "добавлена!")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             textBox4.Text = "";
                             textBox1.Text = "";
                             FillDataGridCategory("SELECT CategoryID AS 'Идентификатор', CategoryName AS 'Категории' FROM Category"); // Обновляем DataGridView
@@ -318,7 +317,7 @@ namespace kursovoy
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Произошла непредвиденная ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Ошибка: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
 
                 }
@@ -425,8 +424,8 @@ namespace kursovoy
                 return;
             }
 
-            string message = isUpdate ? "Вы уверены, что хотите изменить этого поставщика?" : "Вы уверены, что хотите добавить поставщика?";
-            string title = isUpdate ? "Подтверждение изменения" : "Подтверждение добавления";
+            string message = isUpdate ? "Вы уверены, что хотите изменить эту запись ?" : "Вы уверены, что хотите добавить эту запись?";
+            string title = isUpdate ? "Подтверждение изменения!" : "Подтверждение добавления!";
             MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question;
 
             DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
@@ -456,7 +455,6 @@ namespace kursovoy
 
                         if (isUpdate)
                         {
-                            // Update supplier
                             query = "UPDATE Supplier SET SupplierName = @SupplierName WHERE SupplierID = @SupplierID";
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@SupplierName", supplierName);
@@ -464,13 +462,12 @@ namespace kursovoy
                         }
                         else
                         {
-                            // Add supplier
                             query = "INSERT INTO Supplier(SupplierName) VALUES (@SupplierName)";
                             cmd = new MySqlCommand(query, conn);
                             cmd.Parameters.AddWithValue("@SupplierName", supplierName);
                         }
 
-                            MessageBox.Show($"Поставщик {(isUpdate ? "успешно изменен" : "успешно добавлен")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show($"Запись {(isUpdate ? "изменена!" : "добавлена!")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             textBox2.Text = "";
                             textBox5.Text = "";
                             FillDataGridSupplier("SELECT SupplierID AS 'Идентификатор', SupplierName AS 'Поставщики' FROM Supplier");
@@ -509,8 +506,8 @@ namespace kursovoy
                 return;
             }
 
-            string message = isUpdate ? "Вы уверены, что хотите изменить этого производителя?" : "Вы уверены, что хотите добавить производителя?";
-            string title = isUpdate ? "Подтверждение" : "Подтверждение добавления";
+            string message = isUpdate ? "Вы уверены, что хотите изменить эту запись ?" : "Вы уверены, что хотите добавить эту запись?";
+            string title = isUpdate ? "Подтверждение изменения!" : "Подтверждение добавления!";
             MessageBoxIcon icon = isUpdate ? MessageBoxIcon.Warning : MessageBoxIcon.Question;
 
             DialogResult dialogResult = MessageBox.Show(message, title, MessageBoxButtons.YesNo, icon);
@@ -522,8 +519,6 @@ namespace kursovoy
                     try
                     {
                         conn.Open();
-
-                        // Check for duplicate name (only on insert)
                         if (!isUpdate)
                         {
                             using (MySqlCommand checkCmd = new MySqlCommand("SELECT COUNT(*) FROM ProductManufactur WHERE ProductManufacturName = @ProductManufacturName", conn))
@@ -557,7 +552,7 @@ namespace kursovoy
                             cmd.Parameters.AddWithValue("@ProductManufacturName", manufacturerName);
                         }
 
-                            MessageBox.Show($"Производитель {(isUpdate ? "успешно изменен" : "успешно добавлен")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show($"Запись {(isUpdate ? "изменена!" : "добавлена!")}.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             textBox3.Text = "";
                             textBox5.Text = "";
                             FillDataGridManufactur("SELECT ProductManufacturID AS 'Идентификатор', ProductManufacturName AS 'Производители' FROM ProductManufactur"); // Refresh data grid

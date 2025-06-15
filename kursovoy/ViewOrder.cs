@@ -237,7 +237,7 @@ namespace kursovoy
                     }
                     else
                     {
-                        MessageBox.Show("Нельзя увеличить количество больше изначального.");
+                        MessageBox.Show("Нельзя увеличить количество больше изначального.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
                 else if (e.ColumnIndex == dataGridView1.Columns["Убрать"].Index)
@@ -267,7 +267,7 @@ namespace kursovoy
         {
             if ((DateTime.Now - orderDate).TotalDays > 14)
             {
-                MessageBox.Show("Нельзя изменить заказ, сделанный более 14 дней назад.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -281,10 +281,10 @@ namespace kursovoy
             if (dataGridView1.Rows.Count == 1)
             {
                 CancelOrder(rowIndex); // Отменяем заказ и возвращаем товар
-                return; // Выходим из метода, чтобы не удалять товар
+                return; 
             }
 
-            if (MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 try
                 {
@@ -313,7 +313,7 @@ namespace kursovoy
                     initialQuantities.Remove(productID);
                     maxAvailableQuantities.Remove(productID);
 
-                    MessageBox.Show("Товар успешно удален из заказа.");
+                    MessageBox.Show("Товар успешно удален из заказа.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
@@ -327,7 +327,7 @@ namespace kursovoy
             // Проверяем, прошло ли более 14 дней с даты заказа
             if ((DateTime.Now - orderDate).TotalDays > 14)
             {
-                MessageBox.Show("Нельзя изменить заказ, сделанный более 14 дней назад.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (isOrderCancelled)
@@ -344,7 +344,7 @@ namespace kursovoy
 
             try
             {
-                if (MessageBox.Show("Отменить одну единицу товара в заказе?", "Подтверждение", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show("Отменить одну единицу товара в заказе?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                 {
                     MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
                     con.Open();
@@ -450,7 +450,7 @@ namespace kursovoy
         {
             try
             {
-                if (MessageBox.Show("Отменить заказ?", "Подтверждение", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show("Отменить заказ?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                 {
                     using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                     {
@@ -477,7 +477,7 @@ namespace kursovoy
                         isOrderCancelled = true; // Устанавливаем флаг отмены заказа
                         label4.Text = "Статус заказа: Отменён";
                         label4.BackColor = Color.LightCoral;
-                        MessageBox.Show("Заказ успешно отменен. Товар возвращен на склад.");
+                        MessageBox.Show("Заказ успешно отменен. Товар возвращен на склад.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         // Обновляем отображение заказа
                         FillDataGriOrder();
