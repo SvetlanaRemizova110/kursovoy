@@ -193,7 +193,7 @@ namespace kursovoy
         {
             Dictionary<string, string> companyInfo = new Dictionary<string, string>();
 
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 try
                 {
@@ -230,7 +230,7 @@ namespace kursovoy
         private string GetProductImageStringFromDB(string productART)
         {
             string imageString = null;
-            string connectionString = Authorization.Program.ConnectionString;
+            string connectionString = Program1.ConnectionString;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
@@ -459,7 +459,7 @@ namespace kursovoy
         private int SaveOrderToDB()
         {
             int newOrderId; 
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 MySqlTransaction transaction = connection.BeginTransaction();
@@ -596,7 +596,7 @@ namespace kursovoy
         private string GetProductIdByName(string productName)
         {
             string productId = "";
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 try
                 {
@@ -628,7 +628,7 @@ namespace kursovoy
         private string GetProductNameFromDB(string productId)
         {
             string productName = string.Empty;
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 try
                 {
@@ -660,7 +660,7 @@ namespace kursovoy
         private decimal GetProductCostFromDB(string productId)
         {
             decimal productCost = 0;
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 try
                 {
@@ -692,7 +692,7 @@ namespace kursovoy
         private int GetProductQuantityInStock(string productId)
         {
             int quantityInStock = 0;
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 try
                 {
@@ -874,7 +874,7 @@ namespace kursovoy
         {
             int nextOrderId = 1; // Значение по умолчанию, если нет заказов в базе
             string query = "SELECT MAX(OrderId) FROM `Order`";
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {

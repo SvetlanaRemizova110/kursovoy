@@ -41,7 +41,7 @@ namespace kursovoy
         {
             try
             {
-                MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+                MySqlConnection con = new MySqlConnection(Program1.ConnectionString);
                 con.Open();
                 MySqlCommand cmd = new MySqlCommand("SELECT productorder.ProductID AS 'Артикул товара', product.Name AS 'Название товара'," +
                     "product.Cost AS 'Стоимость(одной)', product.Unit AS 'Единица измерения', productorder.ProductCount AS 'Количество'," +
@@ -149,7 +149,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     using (MySqlCommand command = new MySqlCommand("SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
@@ -281,7 +281,7 @@ namespace kursovoy
             {
                 try
                 {
-                    MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+                    MySqlConnection con = new MySqlConnection(Program1.ConnectionString);
                     con.Open();
                     string productID = dataGridView1.Rows[rowIndex].Cells["ProductID"].Value.ToString();
                     string orderID = OrderID.ToString();
@@ -338,7 +338,7 @@ namespace kursovoy
             {
                 if (MessageBox.Show("Отменить одну единицу товара в заказе?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                 {
-                    MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+                    MySqlConnection con = new MySqlConnection(Program1.ConnectionString);
                     con.Open();
                     int oldQuantity = Convert.ToInt32(dataGridView1.Rows[rowIndex].Cells["ProductCount"].Value);
                     string query = "UPDATE productorder SET ProductCount = @NewQuantity WHERE ProductID = @ProductID AND OrderID = @OrderID";
@@ -419,7 +419,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     string query = "UPDATE `order` SET OrderPrice = @NewPrice WHERE OrderID = @OrderID";
@@ -447,7 +447,7 @@ namespace kursovoy
             {
                 if (MessageBox.Show("Отменить заказ?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                 {
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                    using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                     {
                         con.Open();
                         // Возвращаем товар на склад

@@ -94,7 +94,7 @@ namespace kursovoy
                 string query1 = "SELECT ProductManufacturName FROM ProductManufactur";
                 string query2 = "SELECT SupplierName FROM Supplier";
                 string query3 = "SELECT CategoryName FROM Category";
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     MySqlCommand command1 = new MySqlCommand(query1, connection);
@@ -136,7 +136,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     MySqlCommand cmd = new MySqlCommand(@"SELECT ProductArticul,Name,Description,
@@ -216,7 +216,7 @@ namespace kursovoy
                 DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите изменить эту запись?", "Подтверждение изменения!", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (dialogResult == DialogResult.Yes)
                 {
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                    using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                     {
                         con.Open();
                         int newArticul = Convert.ToInt32(textBox6.Text);
@@ -284,7 +284,7 @@ namespace kursovoy
         {
             int categoryId = -1;
             string query = "SELECT CategoryID FROM Category WHERE CategoryName = @categoryName";
-            using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (var connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 using (var command = new MySqlCommand(query, connection))
@@ -310,7 +310,7 @@ namespace kursovoy
         {
             int Manufacturid = -1;
             string query = "SELECT ProductManufacturID FROM productmanufactur WHERE ProductManufacturName = @productManufacturName";
-            using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (var connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 using (var command = new MySqlCommand(query, connection))
@@ -336,7 +336,7 @@ namespace kursovoy
         {
             int Supplierid = -1;
             string query = "SELECT SupplierID FROM Supplier WHERE SupplierName = @SupplierName";
-            using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (var connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 using (var command = new MySqlCommand(query, connection))

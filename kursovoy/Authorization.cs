@@ -18,12 +18,11 @@ namespace kursovoy
 {
     public partial class Authorization : Form
     {
-        public static class Program
-        {
-            //Общее подключение к бд
-            public static string ConnectionString { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};database={ConfigurationManager.AppSettings["db"]};";
-            public static string ConnectionStringNotDB { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};";
-        }
+        //Общее подключение к бд
+        //public static string ConnectionString { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};database={ConfigurationManager.AppSettings["db"]};";
+        //public static string ConnectionStringNotDB { get; } = $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};";
+
+
         public class CaptchaGenerator
         {
             private static Random random = new Random();
@@ -55,9 +54,9 @@ namespace kursovoy
 
                         // Генерируем случайные координаты
                         int x = symbolArea.X + i * cellWidth + random.Next(cellWidth / 4);
-                        int y = symbolArea.Y + random.Next(0, symbolArea.Height / 2); 
+                        int y = symbolArea.Y + random.Next(0, symbolArea.Height / 2);
 
-                        int rotationAngle = random.Next(-15, 15); 
+                        int rotationAngle = random.Next(-15, 15);
 
                         // Создаем матрицу преобразования
                         Matrix matrix = new Matrix();
@@ -75,9 +74,9 @@ namespace kursovoy
                     for (int i = 0; i < 4; i++)
                     {
                         int startX = random.Next(0, width / 4);
-                        int startY = random.Next(0, height); 
+                        int startY = random.Next(0, height);
                         int endX = random.Next(width / 4 * 3, width);
-                        int endY = random.Next(0, height); 
+                        int endY = random.Next(0, height);
                         g.DrawLine(new Pen(Color.Black, 2), startX, startY, endX, endY);
                     }
                 }
@@ -91,6 +90,7 @@ namespace kursovoy
             InitializeComponent();
             LoadCaptcha();
         }
+
         /// <summary>
         /// Функция загрузки капчи
         /// </summary>
@@ -102,6 +102,41 @@ namespace kursovoy
             label4.Visible = false;
             captchaTextBox.Visible = false;
         }
+        private bool IsDatabaseExists()
+        {
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch (MySqlException ex)
+            {
+                if (ex.Number == 1049) // Unknown database
+                {
+                    return false;
+                }
+                throw;
+            }
+        }
+        private bool IsServerAvailable()
+        {
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionStringNotDB))
+                {
+                    connection.Open();
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Авторизация пользователя
         /// </summary>
@@ -109,6 +144,53 @@ namespace kursovoy
         /// <param name="e"></param>
         private void authorization_Click(object sender, EventArgs e)
         {
+            string enteredLogin = textBoxLogin.Text;
+            string enteredPassword = textBoxPwd.Text;
+
+            // Проверяем подключение к серверу
+            if (!IsServerAvailable())
+            {
+                using (var connSettingsForm = new ConnectionSettingsForm())
+                {
+                    if (connSettingsForm.ShowDialog() == DialogResult.OK)
+                    {
+                        if (!IsServerAvailable())
+                        {
+                            MessageBox.Show("Не удалось подключиться к серверу.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        return; // Пользователь нажал "Назад"
+                    }
+                }
+            }
+
+            // После успешного подключения к серверу — проверяем наличие БД
+            if (!IsDatabaseExists())
+            {
+                // Проверяем, является ли пользователь администратором по конфигурации
+                if (ConfigurationManager.AppSettings["DefaultUser"] == enteredLogin &&
+                    ConfigurationManager.AppSettings["DefaultPassword"] == enteredPassword)
+                {
+                    // Разрешаем вход под admin/admin при отсутствии базы данных
+                    import admin = new import();
+                    this.Hide();
+                    admin.Show();
+                    return;
+                }
+                else
+                {
+                    // Не admin/admin → нельзя работать без БД
+                    MessageBox.Show("База данных не найдена. Только admin может войти для её восстановления.",
+                                    "Ошибка",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
             string login = textBoxLogin.Text;
             string password = textBoxPwd.Text;
             string defaultUser = null;
@@ -159,7 +241,7 @@ namespace kursovoy
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Ошибка переключения роли: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return; 
+                        return;
                     }
                 }
                 else
@@ -259,7 +341,7 @@ namespace kursovoy
             {
                 // Хешируем введённый пароль
                 string hashedPassword = HashPassword(password);
-                using (MySqlConnection con = new MySqlConnection(Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     MySqlCommand cmd = new MySqlCommand($"SELECT u.*, e.EmployeeF, e.EmployeeI, e.EmployeeO, r.Role" +
@@ -312,7 +394,7 @@ namespace kursovoy
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка при авторизации: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                user = null; 
+                user = null;
             }
             if (user != null)
             {
@@ -323,6 +405,7 @@ namespace kursovoy
             }
             return user;
         }
+
         /// <summary>
         /// Метод для хеширования пароля
         /// </summary>
@@ -380,6 +463,7 @@ namespace kursovoy
         /// <param name="e"></param>
         private void Authorization_Load(object sender, EventArgs e)
         {
+            Program1.ReloadConnectionStrings();
             if (textBoxPwd.Text == "")
             {
                 button1.Enabled = false;
@@ -414,7 +498,7 @@ namespace kursovoy
         /// <param name="e"></param>
         private void textBoxLogin_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if((e.KeyChar >= 'А' && e.KeyChar <= 'Я') || 
+            if ((e.KeyChar >= 'А' && e.KeyChar <= 'Я') ||
                 (e.KeyChar >= 'а' && e.KeyChar <= 'я'))
             {
                 e.Handled = true;
@@ -423,6 +507,83 @@ namespace kursovoy
             {
                 e.Handled = false;
             }
+        }
+    }
+    public partial class ConnectionSettingsForm : Form
+    {
+        public ConnectionSettingsForm()
+        {
+            InitializeComponent();
+        }
+
+        private void InitializeComponent()
+        {
+            this.Text = "Настройка подключения к серверу";
+            this.Size = new Size(450, 250);
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.ControlBox = false;
+            this.BackColor = Color.FromArgb(255, 224, 192);
+
+            Font font = new Font("Comic Sans MS", 15.75f);
+            this.Font = font;
+
+            Label labelServer = new Label() { Text = "Сервер:", Location = new Point(30, 30), AutoSize = true, BackColor = Color.FromArgb(255, 192, 128) };
+            Label labelUid = new Label() { Text = "Пользователь:", Location = new Point(30, 80), AutoSize = true, BackColor = Color.FromArgb(255, 192, 128) };
+            Label labelPwd = new Label() { Text = "Пароль:", Location = new Point(30, 130), AutoSize = true, BackColor = Color.FromArgb(255, 192, 128) };
+
+            TextBox txtServer = new TextBox() { Text = ConfigurationManager.AppSettings["host"], Location = new Point(200, 30), Width = 200 };
+            TextBox txtUid = new TextBox() { Text = ConfigurationManager.AppSettings["uid"], Location = new Point(200, 80), Width = 200 };
+            TextBox txtPwd = new TextBox()
+            {
+                Text = ConfigurationManager.AppSettings["password"],
+                Location = new Point(200, 130),
+                Width = 200,
+                PasswordChar = '*'
+            };
+
+            Button btnSave = new Button() { Text = "Применить", Location = new Point(90, 180), Width = 150, Height = 50, BackColor = Color.FromArgb(255, 192, 128) };
+            Button btnBack = new Button() { Text = "Назад", Location = new Point(250, 180), Width = 100, Height = 50, BackColor = Color.FromArgb(255, 192, 128) };
+
+            btnSave.Click += (sender, e) =>
+            {
+                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["host"].Value = txtServer.Text;
+                config.AppSettings.Settings["uid"].Value = txtUid.Text;
+                config.AppSettings.Settings["password"].Value = txtPwd.Text;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+
+                Program1.ReloadConnectionStrings();
+
+                DialogResult = DialogResult.OK;
+                this.Close();
+            };
+
+
+            // Добавляем элементы на форму
+            Controls.Add(labelServer); Controls.Add(txtServer);
+            Controls.Add(labelUid); Controls.Add(txtUid);
+            Controls.Add(labelPwd); Controls.Add(txtPwd);
+            // Controls.Add(labelDatabase); Controls.Add(txtDatabase);
+            Controls.Add(btnSave);
+            Controls.Add(btnBack);
+        }
+    }
+    public static class Program1
+    {
+        public static string ConnectionString { get; set; }
+        public static string ConnectionStringNotDB { get; set; }
+
+        public static void ReloadConnectionStrings()
+        {
+            ConnectionString =
+                $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};database={ConfigurationManager.AppSettings["db"]};";
+
+            ConnectionStringNotDB =
+                $"host={ConfigurationManager.AppSettings["host"]};uid={ConfigurationManager.AppSettings["uid"]};pwd={ConfigurationManager.AppSettings["password"]};";
         }
     }
 }

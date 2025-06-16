@@ -114,7 +114,7 @@ namespace kursovoy
             {
                 string queryEmployee = "SELECT EmployeeF,EmployeeI,EmployeeO FROM employeeee";
                 string queryRole = "SELECT Role FROM `role`";
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     using (MySqlCommand cmd = new MySqlCommand(queryEmployee, connection))
@@ -178,7 +178,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection conn = new MySqlConnection(Program1.ConnectionString))
                 {
                     conn.Open();
                     using (MySqlCommand cmd = new MySqlCommand(strCmd, conn))
@@ -307,7 +307,7 @@ namespace kursovoy
         private int GetEmployeeIDByName(string userName, MySqlConnection con)
         {
             string userFIOQuery = " SELECT EmployeeID FROM employeeee WHERE CONCAT(EmployeeF, ' ', EmployeeI, ' ', EmployeeO) = @userName;";
-            using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (var connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 using (var command = new MySqlCommand(userFIOQuery, connection))
@@ -334,7 +334,7 @@ namespace kursovoy
         private int GetRoleidByName(string roleName, MySqlConnection con)
         {
             string query = "SELECT RoleID FROM Role WHERE Role = @role";
-            using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (var connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 using (var command = new MySqlCommand(query, connection))
@@ -359,7 +359,7 @@ namespace kursovoy
         private void DeleteRecord(int id)
         {
             string query = "DELETE FROM user WHERE UserID = @UserID";
-            using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
             {
                 con.Open();
                 using (MySqlCommand command = new MySqlCommand(query, con))
@@ -419,7 +419,7 @@ namespace kursovoy
                     MessageBox.Show("Пожалуйста, заполните все поля", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     int employeeId = GetEmployeeIDByName(comboBox2.Text, connection);

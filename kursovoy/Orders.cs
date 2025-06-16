@@ -53,7 +53,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     using (MySqlCommand command = new MySqlCommand(strCmd, con))
@@ -152,7 +152,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     string query = "SELECT ProductID, ProductCount FROM ProductOrder WHERE OrderID = @OrderID";
@@ -334,7 +334,7 @@ namespace kursovoy
         {
             try
             {
-                string conStr = Authorization.Program.ConnectionString;
+                string conStr = Program1.ConnectionString;
                 using (MySqlConnection con = new MySqlConnection(conStr))
                 {
                     con.Open();
@@ -421,7 +421,7 @@ namespace kursovoy
             }
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
                     saveFileDialog.FileName = $"Отчет по заказам_{startDate2}_{endDate2}.xlsx";
@@ -627,7 +627,7 @@ namespace kursovoy
             }
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     foreach (var item in orderData.OrderItems)
@@ -671,7 +671,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     string query = "UPDATE `Order` SET OrderStatus = @OrderStatus WHERE OrderID = @OrderID";
@@ -698,7 +698,7 @@ namespace kursovoy
                 OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
                 if (orderData != null)
                 {
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                    using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                     {
                         con.Open();
                         // Перебираем товары в заказе и возвращаем их на склад

@@ -26,17 +26,17 @@ namespace kursovoy
         {
                 string dbName = $"db45";
 
-                if (DatabaseExists(Authorization.Program.ConnectionStringNotDB, dbName))
+                if (DatabaseExists(Program1.ConnectionStringNotDB, dbName))
                 {
                     var result = MessageBox.Show("База данных уже существует. Хотите удалить и восстановить её заново?", "Восстановление БД", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                     if (result == DialogResult.Yes)
                     {
                         // Удаляем базу
-                        DropDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                        DropDatabase(Program1.ConnectionStringNotDB, dbName);
                         // Создаём новую
-                        CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-                        CreateTables(Authorization.Program.ConnectionString, dbName);
+                        CreateDatabase(Program1.ConnectionStringNotDB, dbName);
+                        CreateTables(Program1.ConnectionString, dbName);
                     }
                     else
                     {
@@ -45,8 +45,8 @@ namespace kursovoy
                 }
                 else
                 {
-                    CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-                    CreateTables(Authorization.Program.ConnectionString, dbName);
+                    CreateDatabase(Program1.ConnectionStringNotDB, dbName);
+                    CreateTables(Program1.ConnectionString, dbName);
                 }
         }
 
@@ -360,7 +360,7 @@ namespace kursovoy
             }
             try
             {
-                using (var con = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (var con = new MySqlConnection(Program1.ConnectionString))
                 {
                     con.Open();
                     using (var transaction = con.BeginTransaction())
@@ -517,7 +517,7 @@ namespace kursovoy
         /// <param name="filePath"></param>
         public static void BackupDatabaseToSql(string filePath)
         {
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
 
@@ -681,7 +681,7 @@ namespace kursovoy
                 try
                 {
                     string sqlScript = File.ReadAllText(dumpFilePath);
-                    using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                    using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                     {
                         con.Open();
                         MySqlScript script = new MySqlScript(con, sqlScript);
@@ -807,7 +807,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     return true;
@@ -827,7 +827,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     string query = $"SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = '{tableName}' LIMIT 1;";
@@ -849,7 +849,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     string query = $"SELECT EXISTS (SELECT 1 FROM `{tableName}` LIMIT 1);";
@@ -870,7 +870,7 @@ namespace kursovoy
         {
             try
             {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     string query = $"SELECT * FROM `{tableName}`";

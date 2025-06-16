@@ -47,7 +47,7 @@ namespace kursovoy
             {
                 string query3 = "SELECT CategoryName FROM Category";
             comboBox2.Items.Add("Все категории");
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 MySqlCommand command3 = new MySqlCommand(query3, connection);
@@ -111,7 +111,7 @@ namespace kursovoy
         {
             try
             {
-                MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+                MySqlConnection con = new MySqlConnection(Program1.ConnectionString);
                 con.Open();
                 MySqlCommand command = new MySqlCommand(strCmd, con);
 
@@ -323,7 +323,7 @@ namespace kursovoy
         {
             try
             {
-                string conStr = Authorization.Program.ConnectionString;
+                string conStr = Program1.ConnectionString;
                 using (MySqlConnection connection = new MySqlConnection(conStr))
                 {
                     connection.Open();
@@ -348,7 +348,7 @@ namespace kursovoy
         {
             int categoryId = -1;
             string query = "SELECT CategoryID FROM Category WHERE CategoryName = @categoryName";
-            using (var connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            using (var connection = new MySqlConnection(Program1.ConnectionString))
             {
                 connection.Open();
                 using (var command = new MySqlCommand(query, connection))
@@ -623,7 +623,7 @@ namespace kursovoy
         private void DeleteRecord(int id)
         {
             string query = "DELETE FROM Product WHERE ProductArticul = @ProductArticul";
-            MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+            MySqlConnection con = new MySqlConnection(Program1.ConnectionString);
             con.Open();
             MySqlCommand command = new MySqlCommand(query, con);
             command.Parameters.AddWithValue("@ProductArticul", id);

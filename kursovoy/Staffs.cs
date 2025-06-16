@@ -130,7 +130,7 @@ namespace kursovoy
         {
             try
             {
-                MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+                MySqlConnection con = new MySqlConnection(Program1.ConnectionString);
                 con.Open();
                 MySqlCommand command = new MySqlCommand(strCmd, con);
                 MySqlDataReader rdr = command.ExecuteReader();
@@ -355,7 +355,7 @@ namespace kursovoy
                     if (dialogResult == DialogResult.Yes)
                     {
                         int employeeID = Convert.ToInt32(textBox2.Text);
-                        using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
+                        using (MySqlConnection con = new MySqlConnection(Program1.ConnectionString))
                         {
                             try
                             {
@@ -410,7 +410,7 @@ namespace kursovoy
                     DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите добавить эту запись?", "Подтверждение добавления", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (dialogResult == DialogResult.Yes)
                     {
-                        using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                        using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                         {
                             try
                             {

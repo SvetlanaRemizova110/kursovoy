@@ -32,7 +32,7 @@ namespace kursovoy
                 string query1 = "SELECT ProductManufacturName FROM ProductManufactur";
                 string query2 = "SELECT SupplierName FROM Supplier";
                 string query3 = "SELECT CategoryName FROM Category";
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     connection.Open();
                     MySqlCommand command1 = new MySqlCommand(query1, connection);
@@ -95,7 +95,7 @@ namespace kursovoy
             }
             else
             {
-                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+                using (MySqlConnection connection = new MySqlConnection(Program1.ConnectionString))
                 {
                     try
                     {
