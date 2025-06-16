@@ -140,7 +140,7 @@ namespace kursovoy
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ошибка: {ex}");
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>

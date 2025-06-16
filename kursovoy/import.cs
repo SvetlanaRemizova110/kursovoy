@@ -946,6 +946,11 @@ namespace kursovoy
             }
             return field;
         }
+
+        private void import_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 

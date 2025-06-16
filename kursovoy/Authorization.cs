@@ -111,8 +111,19 @@ namespace kursovoy
         {
             string login = textBoxLogin.Text;
             string password = textBoxPwd.Text;
-            string defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
-            string defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
+            string defaultUser = null;
+            string defaultPassword = null;
+
+            try
+            {
+                defaultUser = ConfigurationManager.AppSettings["DefaultUser"];
+                defaultPassword = ConfigurationManager.AppSettings["DefaultPassword"];
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                MessageBox.Show($"Ошибка чтения конфигурации: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             if (string.IsNullOrEmpty(login) || string.IsNullOrEmpty(password))
             {
@@ -122,7 +133,17 @@ namespace kursovoy
 
             if (captchaPictureBox.Visible == false || (captchaPictureBox.Visible == true && captchaTextBox.Text == captchaText))
             {
-                User authorizedUser = AuthorizeUser(login, password);
+                User authorizedUser = null;
+                try
+                {
+                    authorizedUser = AuthorizeUser(login, password);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка авторизации: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 if (textBoxLogin.Text == defaultUser && textBoxPwd.Text == defaultPassword)
                 {
                     import admin = new import();
@@ -131,7 +152,15 @@ namespace kursovoy
                 }
                 else if (authorizedUser != null)
                 {
-                    SwitchRole(authorizedUser.Role);
+                    try
+                    {
+                        SwitchRole(authorizedUser.Role);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка переключения роли: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return; 
+                    }
                 }
                 else
                 {
@@ -141,14 +170,22 @@ namespace kursovoy
                     if (failedLoginAttempts >= 1)
                     {
                         //Делаем видимыми элементы CAPTCHA
-                        LoadCaptcha();
+                        try
+                        {
+                            LoadCaptcha();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"Ошибка загрузки CAPTCHA: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
                         captchaPictureBox.Visible = true;
                         button3.Visible = true;
                         label4.Visible = true;
                         captchaTextBox.Visible = true;
                         if (failedLoginAttempts >= 2)
                         {
-                            //Блокируем кнопку для входа 
+                            //Блокируем кнопку для входа
                             button1.Enabled = false;
                             MessageBox.Show("Блокировка 10 сек", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             Thread.Sleep(10000);
@@ -171,6 +208,7 @@ namespace kursovoy
                 }
             }
         }
+
         /// <summary>
         /// Класс User - получение информации о пользователе
         /// </summary>

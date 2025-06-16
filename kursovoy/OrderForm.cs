@@ -508,7 +508,8 @@ namespace kursovoy
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    throw new Exception($"Ошибка при сохранении заказа: {ex.Message}");
+                    MessageBox.Show($"Ошибка при получении информации о компании: {ex.Message}");
+                    return -1;
                 }
                 connection.Close();
                 return newOrderId;
@@ -521,40 +522,47 @@ namespace kursovoy
         /// <param name="e"></param>
         private void dataGridViewOrder_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridView dataGridOrder = sender as DataGridView;
-
-            // При изменении количества пересчет значения в таблице
-            if (e.ColumnIndex == dataGridOrder.Columns["ProductQuantityInStock"].Index && e.RowIndex >= 0)
+            try
             {
-                string productName = dataGridOrder.Rows[e.RowIndex].Cells["Name"].Value.ToString();
-                string productId = GetProductIdByName(productName);
-                if (!int.TryParse(dataGridViewOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value?.ToString(), out int newQuantity))
-                {
-                    PopulateOrderDetails();
-                    return;
-                }
-                int maxQuantity = GetProductQuantityInStock(productId);
+                DataGridView dataGridOrder = sender as DataGridView;
 
-                // Проверка, что введенное количество не превышает количество на складе
-                if (newQuantity > 0 && newQuantity <= maxQuantity && order.ContainsKey(productId))
+                // При изменении количества пересчет значения в таблице
+                if (e.ColumnIndex == dataGridOrder.Columns["ProductQuantityInStock"].Index && e.RowIndex >= 0)
                 {
-                    order[productId] = newQuantity;
-                    UpdatedOrder[productId] = newQuantity;
-                }
-                else
-                {
-                    if (newQuantity <= 0)
+                    string productName = dataGridOrder.Rows[e.RowIndex].Cells["Name"].Value.ToString();
+                    string productId = GetProductIdByName(productName);
+                    if (!int.TryParse(dataGridViewOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value?.ToString(), out int newQuantity))
                     {
-                        MessageBox.Show("Количество должно быть больше нуля!");
-                        dataGridOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value = order[productId];
+                        PopulateOrderDetails();
+                        return;
+                    }
+                    int maxQuantity = GetProductQuantityInStock(productId);
+
+                    // Проверка, что введенное количество не превышает количество на складе
+                    if (newQuantity > 0 && newQuantity <= maxQuantity && order.ContainsKey(productId))
+                    {
+                        order[productId] = newQuantity;
+                        UpdatedOrder[productId] = newQuantity;
                     }
                     else
                     {
-                        MessageBox.Show($"Количество товара не может превышать {maxQuantity}!", "",MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        dataGridOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value = order[productId];
+                        if (newQuantity <= 0)
+                        {
+                            MessageBox.Show("Количество должно быть больше нуля!");
+                            dataGridOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value = order[productId];
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Количество товара не может превышать {maxQuantity}!", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                            dataGridOrder.Rows[e.RowIndex].Cells["ProductQuantityInStock"].Value = order[productId];
+                        }
                     }
+                    PopulateOrderDetails();
                 }
-                PopulateOrderDetails(); 
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
@@ -568,7 +576,9 @@ namespace kursovoy
             string productId = "";
             using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
-                connection.Open();
+                try
+                {
+                    connection.Open();
                 string query = "SELECT ProductArticul FROM product WHERE Name = @Name";
                 MySqlCommand cmd = new MySqlCommand(query, connection);
                 cmd.Parameters.AddWithValue("@Name", productName);
@@ -579,6 +589,11 @@ namespace kursovoy
                     productId = result.ToString();
                 }
                 connection.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при получении информации: {ex.Message}");
+                }
             }
             return productId;
         }
@@ -751,6 +766,8 @@ namespace kursovoy
                     PopulateOrderDetails(); 
                 }
             }
+            label5.Text = "Количество записей: ";
+            label5.Text += " " + dataGridViewOrder.Rows.Count;
         }
         /// <summary>
         /// Очистка корзины
