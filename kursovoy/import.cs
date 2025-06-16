@@ -24,8 +24,6 @@ namespace kursovoy
         /// <param name="e"></param>
         private void btnRestoreDatabase_Click(object sender, EventArgs e)
         {
-            try
-            {
                 string dbName = $"db45";
 
                 if (DatabaseExists(Authorization.Program.ConnectionStringNotDB, dbName))
@@ -50,11 +48,6 @@ namespace kursovoy
                     CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
                     CreateTables(Authorization.Program.ConnectionString, dbName);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка: {ex.Message}");
-            }
         }
 
         /// <summary>
@@ -207,7 +200,7 @@ namespace kursovoy
                       `Password` varchar(100) NOT NULL,
                       PRIMARY KEY (`UserID`),
                       FOREIGN KEY (`RoleID`) REFERENCES `Role` (`RoleID`),
-                      FOREIGN KEY (`UserFIO`) REFERENCES `employeeee` (`EmployeeID`);";
+                      FOREIGN KEY (`UserFIO`) REFERENCES `employeeee` (`EmployeeID`));";
                         MySqlCommand userCommand = new MySqlCommand(createUserTable, con);
                         userCommand.ExecuteNonQuery();
                     }
@@ -232,7 +225,7 @@ namespace kursovoy
                       PRIMARY KEY (`ProductArticul`),
                       FOREIGN KEY (`ProductCategory`) REFERENCES `Category` (`CategoryID`),
                       FOREIGN KEY (`ProductManufactur`) REFERENCES `ProductManufactur` (`ProductManufacturID`),
-                      FOREIGN KEY (`ProductSupplier`) REFERENCES `Supplier` (`SupplierID`);";
+                      FOREIGN KEY (`ProductSupplier`) REFERENCES `Supplier` (`SupplierID`));";
                         MySqlCommand prodCommand = new MySqlCommand(createProductTable, con);
                         prodCommand.ExecuteNonQuery();
                     }
@@ -267,7 +260,7 @@ namespace kursovoy
                       `OrderID` int NOT NULL,
                       PRIMARY KEY (`ProductID`,`OrderID`),
                       FOREIGN KEY (`OrderID`) REFERENCES `Order` (`OrderID`),
-                      FOREIGN KEY (`ProductID`) REFERENCES `Product` (`ProductArticul`);";
+                      FOREIGN KEY (`ProductID`) REFERENCES `Product` (`ProductArticul`));";
                         MySqlCommand orderproductCommand = new MySqlCommand(createOrderProductTable, con);
                         orderproductCommand.ExecuteNonQuery();
                     }
