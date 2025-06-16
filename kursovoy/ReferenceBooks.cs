@@ -29,17 +29,24 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button2_Click(object sender, EventArgs e)
         {
-            if (Authorization.User2.Role == 1)
+            try
             {
-                Admin ad = new Admin();
-                ad.Show();
-                this.Close();
+                if (Authorization.User2.Role == 1)
+                {
+                    Admin ad = new Admin();
+                    ad.Show();
+                    this.Close();
+                }
+                else if (Authorization.User2.Role == 2)
+                {
+                    СommoditySpecialist CS = new СommoditySpecialist();
+                    CS.Show();
+                    this.Close();
+                }
             }
-            else if (Authorization.User2.Role == 2)
+            catch (Exception ex)
             {
-                СommoditySpecialist CS = new СommoditySpecialist();
-                CS.Show();
-                this.Close();
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         private void ReferenceBooks_Load(object sender, EventArgs e)

@@ -39,101 +39,108 @@ namespace kursovoy
         }
         void FillDataGrid()
         {
-            MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
-            con.Open();
-            MySqlCommand cmd = new MySqlCommand("SELECT productorder.ProductID AS 'Артикул товара', product.Name AS 'Название товара'," +
-                "product.Cost AS 'Стоимость(одной)', product.Unit AS 'Единица измерения', productorder.ProductCount AS 'Количество'," +
-                "productorder.OrderID 'ID', product.ProductPhoto AS 'Фото'" +
-                " FROM productorder" +
-                " INNER JOIN product ON product.ProductArticul = productorder.ProductID" +
-                $" WHERE OrderID = {OrderID}; ", con);
-
-            dataGridView1.Rows.Clear();
-            dataGridView1.Columns.Clear();
-            dataGridView1.AutoResizeColumns();
-            dataGridView1.AutoResizeRows();
-            dataGridView1.AllowUserToDeleteRows = false;
-            dataGridView1.AllowUserToOrderColumns = false;
-            dataGridView1.AllowUserToResizeColumns = false;
-            dataGridView1.AllowUserToResizeRows = false;
-            dataGridView1.RowTemplate.Height = 80;
-            dataGridView1.ReadOnly = true;
-            dataGridView1.AllowUserToAddRows = false;
-
-            DataGridViewImageColumn imageColumn = new DataGridViewImageColumn();
-            imageColumn.Name = "ProductPhoto";
-            imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            imageColumn.HeaderText = "Фото";
-            dataGridView1.Columns.Add(imageColumn);
-            dataGridView1.Columns["ProductPhoto"].Visible = true;
-
-            dataGridView1.Columns.Add("ProductID", "Артикул товара");
-            dataGridView1.Columns.Add("product.Name", "Название товара");
-            dataGridView1.Columns.Add("product.Cost", "Стоимость");
-            dataGridView1.Columns.Add("DiscountedCost", "Стоимость со скидкой"); // Новая колонка
-            dataGridView1.Columns.Add("product.Unit", "Единица измерения");
-            dataGridView1.Columns.Add("ProductCount", "Количество");
-            dataGridView1.Columns["ProductCount"].Width = 88;
-            dataGridView1.Columns.Add("OrderID", "Заказ");
-            dataGridView1.Columns["OrderID"].Visible = false;
-            dataGridView1.Columns["product.Name"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-
-            isOrderCancelled = false;
-
-            if (!isOrderCancelled)
+            try
             {
-                DataGridViewButtonColumn plusButtonColumn = new DataGridViewButtonColumn();
-                plusButtonColumn.Name = "Добавить";
-                plusButtonColumn.Text = "+";
-                plusButtonColumn.UseColumnTextForButtonValue = true;
-                dataGridView1.Columns.Add(plusButtonColumn);
-                dataGridView1.Columns["Добавить"].Width = 68;
+                MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString);
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT productorder.ProductID AS 'Артикул товара', product.Name AS 'Название товара'," +
+                    "product.Cost AS 'Стоимость(одной)', product.Unit AS 'Единица измерения', productorder.ProductCount AS 'Количество'," +
+                    "productorder.OrderID 'ID', product.ProductPhoto AS 'Фото'" +
+                    " FROM productorder" +
+                    " INNER JOIN product ON product.ProductArticul = productorder.ProductID" +
+                    $" WHERE OrderID = {OrderID}; ", con);
 
-                DataGridViewButtonColumn minusButtonColumn = new DataGridViewButtonColumn();
-                minusButtonColumn.Name = "Убрать";
-                minusButtonColumn.Text = "-";
-                minusButtonColumn.UseColumnTextForButtonValue = true;
-                dataGridView1.Columns.Add(minusButtonColumn);
-                dataGridView1.Columns["Убрать"].Width = 68;
+                dataGridView1.Rows.Clear();
+                dataGridView1.Columns.Clear();
+                dataGridView1.AutoResizeColumns();
+                dataGridView1.AutoResizeRows();
+                dataGridView1.AllowUserToDeleteRows = false;
+                dataGridView1.AllowUserToOrderColumns = false;
+                dataGridView1.AllowUserToResizeColumns = false;
+                dataGridView1.AllowUserToResizeRows = false;
+                dataGridView1.RowTemplate.Height = 80;
+                dataGridView1.ReadOnly = true;
+                dataGridView1.AllowUserToAddRows = false;
 
-                DataGridViewButtonColumn deleteButtonColumn = new DataGridViewButtonColumn();
-                deleteButtonColumn.Name = "Удалить";
-                deleteButtonColumn.Text = "x";
-                deleteButtonColumn.UseColumnTextForButtonValue = true;
-                dataGridView1.Columns.Add(deleteButtonColumn);
-                dataGridView1.Columns["Удалить"].Width = 68;
-            }
-            MySqlDataReader rdr = cmd.ExecuteReader();
-            initialQuantities.Clear();
-            maxAvailableQuantities.Clear();
-            while (rdr.Read())
-            {
-                string productID = rdr[0].ToString();
-                int productCount = Convert.ToInt32(rdr[4]);
-                decimal productCost = Convert.ToDecimal(rdr[2]);
-                int rowIndex = dataGridView1.Rows.Add();
-                DataGridViewRow row = dataGridView1.Rows[rowIndex];
-                row.Cells["ProductID"].Value = productID;
-                string imsName = rdr[6].ToString();
-                if (string.IsNullOrEmpty(imsName))
+                DataGridViewImageColumn imageColumn = new DataGridViewImageColumn();
+                imageColumn.Name = "ProductPhoto";
+                imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
+                imageColumn.HeaderText = "Фото";
+                dataGridView1.Columns.Add(imageColumn);
+                dataGridView1.Columns["ProductPhoto"].Visible = true;
+
+                dataGridView1.Columns.Add("ProductID", "Артикул товара");
+                dataGridView1.Columns.Add("product.Name", "Название товара");
+                dataGridView1.Columns.Add("product.Cost", "Стоимость");
+                dataGridView1.Columns.Add("DiscountedCost", "Стоимость со скидкой"); // Новая колонка
+                dataGridView1.Columns.Add("product.Unit", "Единица измерения");
+                dataGridView1.Columns.Add("ProductCount", "Количество");
+                dataGridView1.Columns["ProductCount"].Width = 88;
+                dataGridView1.Columns.Add("OrderID", "Заказ");
+                dataGridView1.Columns["OrderID"].Visible = false;
+                dataGridView1.Columns["product.Name"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+
+                isOrderCancelled = false;
+
+                if (!isOrderCancelled)
                 {
-                    imsName = "picture.png";
+                    DataGridViewButtonColumn plusButtonColumn = new DataGridViewButtonColumn();
+                    plusButtonColumn.Name = "Добавить";
+                    plusButtonColumn.Text = "+";
+                    plusButtonColumn.UseColumnTextForButtonValue = true;
+                    dataGridView1.Columns.Add(plusButtonColumn);
+                    dataGridView1.Columns["Добавить"].Width = 68;
+
+                    DataGridViewButtonColumn minusButtonColumn = new DataGridViewButtonColumn();
+                    minusButtonColumn.Name = "Убрать";
+                    minusButtonColumn.Text = "-";
+                    minusButtonColumn.UseColumnTextForButtonValue = true;
+                    dataGridView1.Columns.Add(minusButtonColumn);
+                    dataGridView1.Columns["Убрать"].Width = 68;
+
+                    DataGridViewButtonColumn deleteButtonColumn = new DataGridViewButtonColumn();
+                    deleteButtonColumn.Name = "Удалить";
+                    deleteButtonColumn.Text = "x";
+                    deleteButtonColumn.UseColumnTextForButtonValue = true;
+                    dataGridView1.Columns.Add(deleteButtonColumn);
+                    dataGridView1.Columns["Удалить"].Width = 68;
                 }
-                Image img = Image.FromFile(@"./photo/" + imsName);
-                row.Cells["ProductPhoto"].Value = img;
-                row.Cells["product.Name"].Value = rdr[1].ToString();
-                row.Cells["product.Cost"].Value = productCost.ToString("F2"); 
-                row.Cells["product.Unit"].Value = rdr[3].ToString();
-                row.Cells["ProductCount"].Value = productCount.ToString();
-                row.Cells["OrderID"].Value = rdr[5].ToString();
-                row.Cells["DiscountedCost"].Value = productCost.ToString("F2"); 
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                initialQuantities.Clear();
+                maxAvailableQuantities.Clear();
+                while (rdr.Read())
+                {
+                    string productID = rdr[0].ToString();
+                    int productCount = Convert.ToInt32(rdr[4]);
+                    decimal productCost = Convert.ToDecimal(rdr[2]);
+                    int rowIndex = dataGridView1.Rows.Add();
+                    DataGridViewRow row = dataGridView1.Rows[rowIndex];
+                    row.Cells["ProductID"].Value = productID;
+                    string imsName = rdr[6].ToString();
+                    if (string.IsNullOrEmpty(imsName))
+                    {
+                        imsName = "picture.png";
+                    }
+                    Image img = Image.FromFile(@"./photo/" + imsName);
+                    row.Cells["ProductPhoto"].Value = img;
+                    row.Cells["product.Name"].Value = rdr[1].ToString();
+                    row.Cells["product.Cost"].Value = productCost.ToString("F2");
+                    row.Cells["product.Unit"].Value = rdr[3].ToString();
+                    row.Cells["ProductCount"].Value = productCount.ToString();
+                    row.Cells["OrderID"].Value = rdr[5].ToString();
+                    row.Cells["DiscountedCost"].Value = productCost.ToString("F2");
 
-                initialQuantities[productID] = productCount;
-                maxAvailableQuantities[productID] = productCount;
+                    initialQuantities[productID] = productCount;
+                    maxAvailableQuantities[productID] = productCount;
+                }
+                con.Close();
+
+                UpdateOrderPrice();
             }
-            con.Close();
-
-            UpdateOrderPrice();
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Заполняет информацию о заказе
@@ -192,53 +199,60 @@ namespace kursovoy
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            try
             {
-                if (Authorization.User2.Role == 3)
+                if (e.RowIndex >= 0)
                 {
-                    MessageBox.Show("Продавец не может отменять заказ!","Информация",MessageBoxButtons.OK,MessageBoxIcon.Information);
-                    return;
-                }
-                if (isOrderCancelled)
-                {
-                    MessageBox.Show("Заказ отменен. Редактирование запрещено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-                string productID = dataGridView1.Rows[e.RowIndex].Cells["ProductID"].Value.ToString();
-                int currentQuantity = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["ProductCount"].Value);
-
-                if (e.ColumnIndex == dataGridView1.Columns["Добавить"].Index)
-                {
-
-                    if (maxAvailableQuantities.ContainsKey(productID) && currentQuantity < maxAvailableQuantities[productID])
+                    if (Authorization.User2.Role == 3)
                     {
-                        ChangeProductQuantity(productID, e.RowIndex, currentQuantity + 1);
+                        MessageBox.Show("Продавец не может отменять заказ!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
                     }
-                    else
+                    if (isOrderCancelled)
                     {
-                        MessageBox.Show("Нельзя увеличить количество больше изначального.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show("Заказ отменен. Редактирование запрещено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
                     }
-                }
-                else if (e.ColumnIndex == dataGridView1.Columns["Убрать"].Index)
-                {
-                    int newQuantity = currentQuantity - 1;
-                    if (newQuantity == 0)
+                    string productID = dataGridView1.Rows[e.RowIndex].Cells["ProductID"].Value.ToString();
+                    int currentQuantity = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["ProductCount"].Value);
+
+                    if (e.ColumnIndex == dataGridView1.Columns["Добавить"].Index)
+                    {
+
+                        if (maxAvailableQuantities.ContainsKey(productID) && currentQuantity < maxAvailableQuantities[productID])
+                        {
+                            ChangeProductQuantity(productID, e.RowIndex, currentQuantity + 1);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Нельзя увеличить количество больше изначального.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                    else if (e.ColumnIndex == dataGridView1.Columns["Убрать"].Index)
+                    {
+                        int newQuantity = currentQuantity - 1;
+                        if (newQuantity == 0)
+                        {
+                            DeleteProductFromOrder(e.RowIndex);
+                            FillDataGrid();
+                            FillDataGriOrder();
+                        }
+                        else
+                        {
+                            ChangeProductQuantity(productID, e.RowIndex, newQuantity);
+                        }
+                    }
+                    else if (e.ColumnIndex == dataGridView1.Columns["Удалить"].Index)
                     {
                         DeleteProductFromOrder(e.RowIndex);
                         FillDataGrid();
                         FillDataGriOrder();
                     }
-                    else
-                    {
-                        ChangeProductQuantity(productID, e.RowIndex, newQuantity);
-                    }
                 }
-                else if (e.ColumnIndex == dataGridView1.Columns["Удалить"].Index)
-                {
-                    DeleteProductFromOrder(e.RowIndex);
-                    FillDataGrid();
-                    FillDataGriOrder();
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -357,38 +371,45 @@ namespace kursovoy
         /// </summary>
         private void UpdateOrderPrice()
         {
-            decimal totalOrderPriceWithoutDiscount = 0;
-            decimal totalOrderPriceWithDiscount = 0;
+            try
+            {
+                decimal totalOrderPriceWithoutDiscount = 0;
+                decimal totalOrderPriceWithDiscount = 0;
 
-            foreach (DataGridViewRow row in dataGridView1.Rows)
-            {
-                decimal productCost = Convert.ToDecimal(row.Cells["product.Cost"].Value); // Цена БЕЗ скидки
-                int quantity = Convert.ToInt32(row.Cells["ProductCount"].Value);
-                totalOrderPriceWithoutDiscount += productCost * quantity;
-            }
-            // Проверяем, должна ли применяться скидка
-            bool applyDiscount = totalOrderPriceWithoutDiscount >= discountThreshold;
-            if (applyDiscount)
-            {
                 foreach (DataGridViewRow row in dataGridView1.Rows)
                 {
                     decimal productCost = Convert.ToDecimal(row.Cells["product.Cost"].Value); // Цена БЕЗ скидки
-                    decimal discountedCost = productCost * (1 - discountRate); // Применяем скидку
                     int quantity = Convert.ToInt32(row.Cells["ProductCount"].Value);
-                    totalOrderPriceWithDiscount += discountedCost * quantity;
-                    row.Cells["DiscountedCost"].Value = discountedCost.ToString("F2"); // Обновляем отображаемую цену со скидкой
+                    totalOrderPriceWithoutDiscount += productCost * quantity;
                 }
-            }
-            else
-            {
-                totalOrderPriceWithDiscount = totalOrderPriceWithoutDiscount;
-                foreach (DataGridViewRow row in dataGridView1.Rows)
+                // Проверяем, должна ли применяться скидка
+                bool applyDiscount = totalOrderPriceWithoutDiscount >= discountThreshold;
+                if (applyDiscount)
                 {
-                    row.Cells["DiscountedCost"].Value = row.Cells["product.Cost"].Value; // Показываем цену без скидки
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    {
+                        decimal productCost = Convert.ToDecimal(row.Cells["product.Cost"].Value); // Цена БЕЗ скидки
+                        decimal discountedCost = productCost * (1 - discountRate); // Применяем скидку
+                        int quantity = Convert.ToInt32(row.Cells["ProductCount"].Value);
+                        totalOrderPriceWithDiscount += discountedCost * quantity;
+                        row.Cells["DiscountedCost"].Value = discountedCost.ToString("F2"); // Обновляем отображаемую цену со скидкой
+                    }
                 }
+                else
+                {
+                    totalOrderPriceWithDiscount = totalOrderPriceWithoutDiscount;
+                    foreach (DataGridViewRow row in dataGridView1.Rows)
+                    {
+                        row.Cells["DiscountedCost"].Value = row.Cells["product.Cost"].Value; // Показываем цену без скидки
+                    }
+                }
+                label5.Text = $"Сумма заказа: {totalOrderPriceWithDiscount:F2} руб.";
+                UpdateOrderPriceInDatabase(totalOrderPriceWithDiscount);
             }
-            label5.Text = $"Сумма заказа: {totalOrderPriceWithDiscount:F2} руб.";
-            UpdateOrderPriceInDatabase(totalOrderPriceWithDiscount);
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Метод для обновления суммы заказа в базе данных

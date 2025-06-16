@@ -24,29 +24,36 @@ namespace kursovoy
         /// <param name="e"></param>
         private void btnRestoreDatabase_Click(object sender, EventArgs e)
         {
-            string dbName = $"db45";
-
-            if (DatabaseExists(Authorization.Program.ConnectionStringNotDB, dbName))
+            try
             {
-                var result = MessageBox.Show("База данных уже существует. Хотите удалить и восстановить её заново?","Восстановление БД", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                string dbName = $"db45";
 
-                if (result == DialogResult.Yes)
+                if (DatabaseExists(Authorization.Program.ConnectionStringNotDB, dbName))
                 {
-                    // Удаляем базу
-                    DropDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-                    // Создаём новую
-                    CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-                    CreateTables(Authorization.Program.ConnectionString, dbName);
+                    var result = MessageBox.Show("База данных уже существует. Хотите удалить и восстановить её заново?", "Восстановление БД", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        // Удаляем базу
+                        DropDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                        // Создаём новую
+                        CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                        CreateTables(Authorization.Program.ConnectionString, dbName);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Восстановление базы данных отменено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Восстановление базы данных отменено.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
+                    CreateTables(Authorization.Program.ConnectionString, dbName);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                CreateDatabase(Authorization.Program.ConnectionStringNotDB, dbName);
-                CreateTables(Authorization.Program.ConnectionString, dbName);
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
@@ -199,8 +206,8 @@ namespace kursovoy
                       `Login` varchar(10) NOT NULL,
                       `Password` varchar(100) NOT NULL,
                       PRIMARY KEY (`UserID`),
-                      FOREIGN KEY (`RoleID`) REFERENCES `Role` (`RoleID`) ON DELETE CASCADE ON UPDATE CASCADE,
-                      FOREIGN KEY (`UserFIO`) REFERENCES `employeeee` (`EmployeeID`) ON DELETE CASCADE ON UPDATE CASCADE);";
+                      FOREIGN KEY (`RoleID`) REFERENCES `Role` (`RoleID`),
+                      FOREIGN KEY (`UserFIO`) REFERENCES `employeeee` (`EmployeeID`);";
                         MySqlCommand userCommand = new MySqlCommand(createUserTable, con);
                         userCommand.ExecuteNonQuery();
                     }
@@ -223,9 +230,9 @@ namespace kursovoy
                       `ProductSupplier` int NOT NULL,
                       `ProductPhoto` varchar(145) DEFAULT NULL,
                       PRIMARY KEY (`ProductArticul`),
-                      FOREIGN KEY (`ProductCategory`) REFERENCES `Category` (`CategoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
-                      FOREIGN KEY (`ProductManufactur`) REFERENCES `ProductManufactur` (`ProductManufacturID`) ON DELETE CASCADE ON UPDATE CASCADE,
-                      FOREIGN KEY (`ProductSupplier`) REFERENCES `Supplier` (`SupplierID`) ON DELETE CASCADE ON UPDATE CASCADE);";
+                      FOREIGN KEY (`ProductCategory`) REFERENCES `Category` (`CategoryID`),
+                      FOREIGN KEY (`ProductManufactur`) REFERENCES `ProductManufactur` (`ProductManufacturID`),
+                      FOREIGN KEY (`ProductSupplier`) REFERENCES `Supplier` (`SupplierID`);";
                         MySqlCommand prodCommand = new MySqlCommand(createProductTable, con);
                         prodCommand.ExecuteNonQuery();
                     }
@@ -259,8 +266,8 @@ namespace kursovoy
                       `ProductCount` int(2) NOT NULL,
                       `OrderID` int NOT NULL,
                       PRIMARY KEY (`ProductID`,`OrderID`),
-                      FOREIGN KEY (`OrderID`) REFERENCES `Order` (`OrderID`) ON DELETE CASCADE ON UPDATE CASCADE,
-                      FOREIGN KEY (`ProductID`) REFERENCES `Product` (`ProductArticul`) ON DELETE CASCADE ON UPDATE CASCADE);";
+                      FOREIGN KEY (`OrderID`) REFERENCES `Order` (`OrderID`),
+                      FOREIGN KEY (`ProductID`) REFERENCES `Product` (`ProductArticul`);";
                         MySqlCommand orderproductCommand = new MySqlCommand(createOrderProductTable, con);
                         orderproductCommand.ExecuteNonQuery();
                     }
@@ -674,6 +681,7 @@ namespace kursovoy
                 Filter = "SQL файлы (*.sql)|*.sql",
                 Title = "Выберите дамп для восстановления"
             };
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string dumpFilePath = openFileDialog.FileName;
@@ -739,14 +747,16 @@ namespace kursovoy
         /// </summary>
         private void BackupAllTables()
         {
-            // Проверяем существование базы данных
-            if (!DatabaseExists())
+            try
             {
-                MessageBox.Show("База данных не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            string[] tables = new string[]
-            {
+                // Проверяем существование базы данных
+                if (!DatabaseExists())
+                {
+                    MessageBox.Show("База данных не существует!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                string[] tables = new string[]
+                {
                 "category",
                 "companyinfo",
                 "employeeee",
@@ -757,38 +767,43 @@ namespace kursovoy
                 "role",
                 "supplier",
                 "user"
-            };
-            bool allTablesEmpty = true;
-            bool hasErrors = false;
+                };
+                bool allTablesEmpty = true;
+                bool hasErrors = false;
 
-            foreach (var table in tables)
-            {
-                // Проверяем существование и заполненность таблицы
-                if (TableExists(table))
+                foreach (var table in tables)
                 {
-                    if (TableHasData(table))
+                    // Проверяем существование и заполненность таблицы
+                    if (TableExists(table))
                     {
-                        allTablesEmpty = false;
-                        BackupTable(table);
+                        if (TableHasData(table))
+                        {
+                            allTablesEmpty = false;
+                            BackupTable(table);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Таблица '{table}' пуста и не будет экспортирована", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                     else
                     {
-                        MessageBox.Show($"Таблица '{table}' пуста и не будет экспортирована", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show($"Таблица '{table}' не существует и не будет экспортирована", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        hasErrors = true;
                     }
                 }
-                else
+                if (allTablesEmpty)
                 {
-                    MessageBox.Show($"Таблица '{table}' не существует и не будет экспортирована", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    hasErrors = true;
+                    MessageBox.Show("Все таблицы пусты, резервная копия не создана", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else if (!hasErrors)
+                {
+                    MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
-            if (allTablesEmpty)
+            catch (Exception ex)
             {
-                MessageBox.Show("Все таблицы пусты, резервная копия не создана", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            else if (!hasErrors)
-            {
-                MessageBox.Show($"Резервная копия всех таблиц успешно создана", "Резервное копирование", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>

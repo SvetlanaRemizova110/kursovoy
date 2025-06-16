@@ -39,69 +39,84 @@ namespace kursovoy
         /// </summary>
         private void UpdateOrderLabels()
         {
-            orderDateLabel.Text = $"Дата: {DateTime.Now.ToShortDateString()}";
-            if (orderId == -1)
+            try
             {
-                orderNumberLabel.Text = $"Номер заказа: {GetNextOrderId()}";
+                orderDateLabel.Text = $"Дата: {DateTime.Now.ToShortDateString()}";
+                if (orderId == -1)
+                {
+                    orderNumberLabel.Text = $"Номер заказа: {GetNextOrderId()}";
+                }
+                else
+                {
+                    orderNumberLabel.Text = $"Номер заказа: {orderId}";
+                }
             }
-            else
+            catch (Exception ex)
             {
-                orderNumberLabel.Text = $"Номер заказа: {orderId}";
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
+
         /// <summary>
         /// Вывод товаров, добавленных в корзину
         /// </summary>
         private void InitializeOrderFormUI()
         {
-            DataGridViewImageColumn imageColumn = new DataGridViewImageColumn();
-            imageColumn.Name = "CartProductPhoto";
-            imageColumn.HeaderText = "Фото";
-            imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
-            dataGridViewOrder.Columns.Add(imageColumn); 
+            try
+            {
+                DataGridViewImageColumn imageColumn = new DataGridViewImageColumn();
+                imageColumn.Name = "CartProductPhoto";
+                imageColumn.HeaderText = "Фото";
+                imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom;
+                dataGridViewOrder.Columns.Add(imageColumn);
 
-            dataGridViewOrder.Columns.Add("Name", "Товар");
-            dataGridViewOrder.Columns["Name"].Width = 150;
-            dataGridViewOrder.Columns["Name"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-            dataGridViewOrder.Columns.Add("ProductQuantityInStock", "Количество");
-            dataGridViewOrder.Columns.Add("Cost", "Цена на ед.");
-            dataGridViewOrder.Columns.Add("Total", "Итоговая стоимость");
+                dataGridViewOrder.Columns.Add("Name", "Товар");
+                dataGridViewOrder.Columns["Name"].Width = 150;
+                dataGridViewOrder.Columns["Name"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                dataGridViewOrder.Columns.Add("ProductQuantityInStock", "Количество");
+                dataGridViewOrder.Columns.Add("Cost", "Цена на ед.");
+                dataGridViewOrder.Columns.Add("Total", "Итоговая стоимость");
 
-            dataGridViewOrder.AutoResizeColumns();
-            dataGridViewOrder.AutoResizeRows();
-            dataGridViewOrder.AllowUserToDeleteRows = false;
-            dataGridViewOrder.AllowUserToOrderColumns = false;
-            dataGridViewOrder.AllowUserToResizeColumns = false;
-            dataGridViewOrder.AllowUserToResizeRows = false;
-            dataGridViewOrder.RowTemplate.Height = 80;
-            dataGridViewOrder.ReadOnly = true;
-            dataGridViewOrder.AllowUserToAddRows = false;
+                dataGridViewOrder.AutoResizeColumns();
+                dataGridViewOrder.AutoResizeRows();
+                dataGridViewOrder.AllowUserToDeleteRows = false;
+                dataGridViewOrder.AllowUserToOrderColumns = false;
+                dataGridViewOrder.AllowUserToResizeColumns = false;
+                dataGridViewOrder.AllowUserToResizeRows = false;
+                dataGridViewOrder.RowTemplate.Height = 80;
+                dataGridViewOrder.ReadOnly = true;
+                dataGridViewOrder.AllowUserToAddRows = false;
 
-            // Кнопка удаления товара из корзины
-            DataGridViewButtonColumn buttonDel = new DataGridViewButtonColumn();
-            buttonDel.Name = "Удалить";
-            buttonDel.HeaderText = "Удалить";
-            buttonDel.Text = "Удалить";
-            buttonDel.UseColumnTextForButtonValue = true;
-            dataGridViewOrder.Columns.Add(buttonDel);
+                // Кнопка удаления товара из корзины
+                DataGridViewButtonColumn buttonDel = new DataGridViewButtonColumn();
+                buttonDel.Name = "Удалить";
+                buttonDel.HeaderText = "Удалить";
+                buttonDel.Text = "Удалить";
+                buttonDel.UseColumnTextForButtonValue = true;
+                dataGridViewOrder.Columns.Add(buttonDel);
 
-            // Кнопка увеличения количества
-            DataGridViewButtonColumn buttonIncrease = new DataGridViewButtonColumn();
-            buttonIncrease.Name = "IncreaseButton";
-            buttonIncrease.HeaderText = "+";
-            buttonIncrease.Text = "+";
-            buttonIncrease.UseColumnTextForButtonValue = true;
-            dataGridViewOrder.Columns.Add(buttonIncrease);
-            dataGridViewOrder.Columns["IncreaseButton"].Width = 50;
+                // Кнопка увеличения количества
+                DataGridViewButtonColumn buttonIncrease = new DataGridViewButtonColumn();
+                buttonIncrease.Name = "IncreaseButton";
+                buttonIncrease.HeaderText = "+";
+                buttonIncrease.Text = "+";
+                buttonIncrease.UseColumnTextForButtonValue = true;
+                dataGridViewOrder.Columns.Add(buttonIncrease);
+                dataGridViewOrder.Columns["IncreaseButton"].Width = 50;
 
-            // Кнопка уменьшения количества
-            DataGridViewButtonColumn buttonDecrease = new DataGridViewButtonColumn();
-            buttonDecrease.Name = "DecreaseButton";
-            buttonDecrease.HeaderText = "-";
-            buttonDecrease.Text = "-";
-            buttonDecrease.UseColumnTextForButtonValue = true;
-            dataGridViewOrder.Columns.Add(buttonDecrease);
-            dataGridViewOrder.Columns["DecreaseButton"].Width = 50;
+                // Кнопка уменьшения количества
+                DataGridViewButtonColumn buttonDecrease = new DataGridViewButtonColumn();
+                buttonDecrease.Name = "DecreaseButton";
+                buttonDecrease.HeaderText = "-";
+                buttonDecrease.Text = "-";
+                buttonDecrease.UseColumnTextForButtonValue = true;
+                dataGridViewOrder.Columns.Add(buttonDecrease);
+                dataGridViewOrder.Columns["DecreaseButton"].Width = 50;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -109,52 +124,59 @@ namespace kursovoy
         /// </summary>
         private void PopulateOrderDetails()
         {
-            dataGridViewOrder.Rows.Clear();
-            decimal totalOrderPrice = 0;
-            foreach (var product in order)
+            try
             {
-                string productART = product.Key;
-                string productName = GetProductNameFromDB(productART);
-                decimal productCost = GetProductCostFromDB(productART);
-                decimal finalPrice = productCost * product.Value;
-
-                // Получаем имя файла изображения из базы
-                string imageFileName = GetProductImageStringFromDB(productART);
-                if (string.IsNullOrEmpty(imageFileName))
+                dataGridViewOrder.Rows.Clear();
+                decimal totalOrderPrice = 0;
+                foreach (var product in order)
                 {
-                    imageFileName = "picture.png"; // фото-заглушка
-                }
+                    string productART = product.Key;
+                    string productName = GetProductNameFromDB(productART);
+                    decimal productCost = GetProductCostFromDB(productART);
+                    decimal finalPrice = productCost * product.Value;
 
-                // Формируем путь к изображению
-                string imagePath = Path.Combine(System.Windows.Forms.Application.StartupPath, "photo", imageFileName);
-                Image productImage = null;
+                    // Получаем имя файла изображения из базы
+                    string imageFileName = GetProductImageStringFromDB(productART);
+                    if (string.IsNullOrEmpty(imageFileName))
+                    {
+                        imageFileName = "picture.png"; // фото-заглушка
+                    }
 
-                if (File.Exists(imagePath))
-                {
-                    productImage = Image.FromFile(imagePath);
+                    // Формируем путь к изображению
+                    string imagePath = Path.Combine(System.Windows.Forms.Application.StartupPath, "photo", imageFileName);
+                    Image productImage = null;
+
+                    if (File.Exists(imagePath))
+                    {
+                        productImage = Image.FromFile(imagePath);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Файл изображения не найден: {imagePath}");
+                    }
+                    dataGridViewOrder.Rows.Add(productImage, productName, product.Value, productCost, finalPrice);
+                    totalOrderPrice += finalPrice;
                 }
-                else
+                label1.Text = $"Итоговая сумма: {totalOrderPrice:F2} руб.";
+                label3.Visible = false;
+                label4.Visible = false;
+
+                if (totalOrderPrice >= 2000)
                 {
-                    MessageBox.Show($"Файл изображения не найден: {imagePath}");
+                    label4.Visible = true;
+                    label4.Text = $"Cумма без скидки: {totalOrderPrice}";
+                    label3.Visible = true;
+                    decimal discount = 0.15m;
+                    label3.Text = $"Скидка 15% от 2000р: {(totalOrderPrice * discount):F2} руб.";
+                    decimal discountedPrice = totalOrderPrice * (1 - discount);
+                    label1.Text = $"Итоговая сумма: {discountedPrice:F2} руб.";
                 }
-                dataGridViewOrder.Rows.Add(productImage, productName, product.Value, productCost, finalPrice);
-                totalOrderPrice += finalPrice;
+                UpdateConfirmButtonState();
             }
-            label1.Text = $"Итоговая сумма: {totalOrderPrice:F2} руб.";
-            label3.Visible = false;
-            label4.Visible = false;
-
-            if (totalOrderPrice >= 2000)
+            catch (Exception ex)
             {
-                label4.Visible = true;
-                label4.Text = $"Cумма без скидки: {totalOrderPrice}";
-                label3.Visible = true;
-                decimal discount = 0.15m;
-                label3.Text = $"Скидка 15% от 2000р: {(totalOrderPrice * discount):F2} руб.";
-                decimal discountedPrice = totalOrderPrice * (1 - discount);
-                label1.Text = $"Итоговая сумма: {discountedPrice:F2} руб.";
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
-            UpdateConfirmButtonState();
         }
         /// <summary>
         /// Проверка состояния заказа
@@ -701,73 +723,80 @@ namespace kursovoy
         /// <param name="e"></param>
         private void dataGridViewOrder_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            DataGridView dataGridOrder = sender as DataGridView;
-
-            if (e.RowIndex < 0)
-                return;
-
-            string productName = dataGridOrder.Rows[e.RowIndex].Cells["Name"].Value.ToString();
-            string productId = GetProductIdByName(productName);
-            int quantityInStock = GetProductQuantityInStock(productId); // Получение количества товаров на складе
-
-            // Кнопка "Удалить"
-            if (e.ColumnIndex == dataGridOrder.Columns["Удалить"].Index)
+            try
             {
-                DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
+                DataGridView dataGridOrder = sender as DataGridView;
+
+                if (e.RowIndex < 0)
+                    return;
+
+                string productName = dataGridOrder.Rows[e.RowIndex].Cells["Name"].Value.ToString();
+                string productId = GetProductIdByName(productName);
+                int quantityInStock = GetProductQuantityInStock(productId); // Получение количества товаров на складе
+
+                // Кнопка "Удалить"
+                if (e.ColumnIndex == dataGridOrder.Columns["Удалить"].Index)
+                {
+                    DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        if (order.ContainsKey(productId))
+                        {
+                            order.Remove(productId);
+                            UpdatedOrder.Remove(productId);
+                        }
+                        PopulateOrderDetails();
+                    }
+                }
+                // Кнопка "+"
+                else if (e.ColumnIndex == dataGridOrder.Columns["IncreaseButton"].Index)
                 {
                     if (order.ContainsKey(productId))
                     {
-                        order.Remove(productId);
-                        UpdatedOrder.Remove(productId);
-                    }
-                    PopulateOrderDetails(); 
-                }
-            }
-            // Кнопка "+"
-            else if (e.ColumnIndex == dataGridOrder.Columns["IncreaseButton"].Index)
-            {
-                if (order.ContainsKey(productId))
-                {
-                    if (order[productId] < quantityInStock)
-                    {
-                        order[productId]++;
-                        UpdatedOrder[productId]++;
-                        PopulateOrderDetails();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Невозможно добавить больше товара, чем есть на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                }
-            }
-            // Кнопка "-"
-            else if (e.ColumnIndex == dataGridOrder.Columns["DecreaseButton"].Index)
-            {
-                if (order.ContainsKey(productId))
-                {
-                    if (order[productId] > 1)
-                    {
-                        order[productId]--;
-                        UpdatedOrder[productId]--;
-                    }
-                    else
-                    {
-                        DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo);
-                        if (dialogResult == DialogResult.Yes)
+                        if (order[productId] < quantityInStock)
                         {
-                            if (order.ContainsKey(productId))
-                            {
-                                order.Remove(productId);
-                                UpdatedOrder.Remove(productId);
-                            }
+                            order[productId]++;
+                            UpdatedOrder[productId]++;
+                            PopulateOrderDetails();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Невозможно добавить больше товара, чем есть на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                     }
-                    PopulateOrderDetails(); 
                 }
+                // Кнопка "-"
+                else if (e.ColumnIndex == dataGridOrder.Columns["DecreaseButton"].Index)
+                {
+                    if (order.ContainsKey(productId))
+                    {
+                        if (order[productId] > 1)
+                        {
+                            order[productId]--;
+                            UpdatedOrder[productId]--;
+                        }
+                        else
+                        {
+                            DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этот товар из заказа?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+                            if (dialogResult == DialogResult.Yes)
+                            {
+                                if (order.ContainsKey(productId))
+                                {
+                                    order.Remove(productId);
+                                    UpdatedOrder.Remove(productId);
+                                }
+                            }
+                        }
+                        PopulateOrderDetails();
+                    }
+                }
+                label5.Text = "Количество записей: ";
+                label5.Text += " " + dataGridViewOrder.Rows.Count;
             }
-            label5.Text = "Количество записей: ";
-            label5.Text += " " + dataGridViewOrder.Rows.Count;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Очистка корзины

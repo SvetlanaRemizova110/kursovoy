@@ -27,37 +27,44 @@ namespace kursovoy
         /// </summary>
         private void LoadDataIntoComboBox()
         {
-            string query1 = "SELECT ProductManufacturName FROM ProductManufactur";
-            string query2 = "SELECT SupplierName FROM Supplier";
-            string query3 = "SELECT CategoryName FROM Category";
-            using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
+            try
             {
-                connection.Open();
-                MySqlCommand command1 = new MySqlCommand(query1, connection);
-                using (MySqlDataReader reader1 = command1.ExecuteReader())
+                string query1 = "SELECT ProductManufacturName FROM ProductManufactur";
+                string query2 = "SELECT SupplierName FROM Supplier";
+                string query3 = "SELECT CategoryName FROM Category";
+                using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
                 {
-                    while (reader1.Read())
+                    connection.Open();
+                    MySqlCommand command1 = new MySqlCommand(query1, connection);
+                    using (MySqlDataReader reader1 = command1.ExecuteReader())
                     {
-                        comboBox3.Items.Add(reader1["ProductManufacturName"].ToString());
+                        while (reader1.Read())
+                        {
+                            comboBox3.Items.Add(reader1["ProductManufacturName"].ToString());
+                        }
                     }
-                }
-                MySqlCommand command2 = new MySqlCommand(query2, connection);
-                using (MySqlDataReader reader2 = command2.ExecuteReader())
-                {
-                    while (reader2.Read())
+                    MySqlCommand command2 = new MySqlCommand(query2, connection);
+                    using (MySqlDataReader reader2 = command2.ExecuteReader())
                     {
-                        comboBox2.Items.Add(reader2["SupplierName"].ToString());
+                        while (reader2.Read())
+                        {
+                            comboBox2.Items.Add(reader2["SupplierName"].ToString());
+                        }
                     }
-                }
-                MySqlCommand command3 = new MySqlCommand(query3, connection);
-                using (MySqlDataReader reader3 = command3.ExecuteReader())
-                {
-                    while (reader3.Read())
+                    MySqlCommand command3 = new MySqlCommand(query3, connection);
+                    using (MySqlDataReader reader3 = command3.ExecuteReader())
                     {
-                        comboBox1.Items.Add(reader3["CategoryName"].ToString());
+                        while (reader3.Read())
+                        {
+                            comboBox1.Items.Add(reader3["CategoryName"].ToString());
+                        }
                     }
+                    connection.Close();
                 }
-                connection.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -207,62 +214,69 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button3_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png";
-            openFileDialog.Title = "Выберите фотографию";
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            try
             {
-                string selectedFilePath = openFileDialog.FileName;
-                FileInfo fileInfo = new FileInfo(selectedFilePath);
-                // Проверка типа файла
-                if (fileInfo.Extension.ToLower() != ".jpg" && fileInfo.Extension.ToLower() != ".jpeg" && fileInfo.Extension.ToLower() != ".png") // Добавил jpeg
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png";
+                openFileDialog.Title = "Выберите фотографию";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    MessageBox.Show("Ошибка: Выберите файл с расширением .jpg, .jpeg или .png.", "Ошибка выбора файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                // Проверка размера файла
-                if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб 
-                {
-                    MessageBox.Show("Ошибка: Размер файла должен быть не более 3 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                // Получаем артикул товара, чтобы использовать его в качестве имени файла
-                string productArticul = textBox6.Text;
-                if (string.IsNullOrEmpty(productArticul))
-                {
-                    MessageBox.Show("Пожалуйста, укажите артикул товара перед добавлением фотографии.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                // Путь к папке для хранения изображений
-                string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "photo");
+                    string selectedFilePath = openFileDialog.FileName;
+                    FileInfo fileInfo = new FileInfo(selectedFilePath);
+                    // Проверка типа файла
+                    if (fileInfo.Extension.ToLower() != ".jpg" && fileInfo.Extension.ToLower() != ".jpeg" && fileInfo.Extension.ToLower() != ".png") // Добавил jpeg
+                    {
+                        MessageBox.Show("Ошибка: Выберите файл с расширением .jpg, .jpeg или .png.", "Ошибка выбора файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    // Проверка размера файла
+                    if (fileInfo.Length > 3 * 1024 * 1024) // 3 Мб 
+                    {
+                        MessageBox.Show("Ошибка: Размер файла должен быть не более 3 Мб.", "Ошибка размера файла", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    // Получаем артикул товара, чтобы использовать его в качестве имени файла
+                    string productArticul = textBox6.Text;
+                    if (string.IsNullOrEmpty(productArticul))
+                    {
+                        MessageBox.Show("Пожалуйста, укажите артикул товара перед добавлением фотографии.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    // Путь к папке для хранения изображений
+                    string folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "photo");
 
-                // Создаем папку, если она не существует
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
+                    // Создаем папку, если она не существует
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // Формируем новое имя файла на основе артикула
+                    string fileExtension = Path.GetExtension(selectedFilePath);
+                    string newFileName = productArticul + fileExtension;
+                    string targetPath = Path.Combine(folderPath, newFileName);
+
+                    try
+                    {
+                        // Копируем файл в папку с новым именем
+                        File.Copy(selectedFilePath, targetPath, true);
+
+                        pictureBox1.Image = Image.FromFile(targetPath);
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+
+                        // Сохраняем путь к новой фотографии и имя файла
+                        _currentPhotoPath = targetPath;
+                        label12.Text = newFileName;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
-
-                // Формируем новое имя файла на основе артикула
-                string fileExtension = Path.GetExtension(selectedFilePath);
-                string newFileName = productArticul + fileExtension;
-                string targetPath = Path.Combine(folderPath, newFileName);
-
-                try
-                {
-                    // Копируем файл в папку с новым именем
-                    File.Copy(selectedFilePath, targetPath, true);
-
-                    pictureBox1.Image = Image.FromFile(targetPath);
-                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-
-                    // Сохраняем путь к новой фотографии и имя файла
-                    _currentPhotoPath = targetPath;
-                    label12.Text = newFileName;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>

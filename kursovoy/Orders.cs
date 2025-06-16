@@ -182,17 +182,24 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            if (Authorization.User2.Role == 2)
+            try
             {
-                СommoditySpecialist CS = new СommoditySpecialist();
-                CS.Show();
-                this.Close();
+                if (Authorization.User2.Role == 2)
+                {
+                    СommoditySpecialist CS = new СommoditySpecialist();
+                    CS.Show();
+                    this.Close();
+                }
+                else if (Authorization.User2.Role == 3)
+                {
+                    Seller sl = new Seller();
+                    sl.Show();
+                    this.Close();
+                }
             }
-            else if (Authorization.User2.Role == 3)
+            catch (Exception ex)
             {
-                Seller sl = new Seller();
-                sl.Show();
-                this.Close();
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -202,40 +209,55 @@ namespace kursovoy
         /// <param name="e"></param>
         private void Orders_Load(object sender, EventArgs e)
         {
-            // Масштабирование для роли Продавец
-            if (Authorization.User2.Role == 3)
+            try
             {
-                this.Size = new Size(905, 608);
-                buttonPag1.Location = new System.Drawing.Point(75, 524);
-                buttonPag2.Location = new System.Drawing.Point(106, 524);
-                labelCount.Location = new System.Drawing.Point(75, 491);
-                labelVSE.Location = new System.Drawing.Point(301, 491);
-                label4.Location = new System.Drawing.Point(628, 492);
-                button5.Location = new System.Drawing.Point(768, 495);
-                dataGridView1.Size = new Size(740, 375);
+                // Масштабирование для роли Продавец
+                if (Authorization.User2.Role == 3)
+                {
+                    this.Size = new Size(905, 608);
+                    buttonPag1.Location = new System.Drawing.Point(75, 524);
+                    buttonPag2.Location = new System.Drawing.Point(106, 524);
+                    labelCount.Location = new System.Drawing.Point(75, 491);
+                    labelVSE.Location = new System.Drawing.Point(301, 491);
+                    label4.Location = new System.Drawing.Point(628, 492);
+                    button5.Location = new System.Drawing.Point(768, 495);
+                    dataGridView1.Size = new Size(740, 375);
+                }
+                UpdateDataGrid();
+                UpdatePag();
+                FillCount();
+                labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+                labelVSE.Visible = false;
+                label7.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
             }
-            UpdateDataGrid();
-            UpdatePag();
-            FillCount();
-            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
-            labelVSE.Visible = false;
-            label7.Text = Authorization.User2.RoleName + ": " + Authorization.User2.FIO;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
+
 
         /// <summary>
         /// Выбор страницы пагинации, скрытие ненужных строк
         /// </summary>
         private void LinkLabel_Click(object sender, EventArgs e)
         {
-            dataGridView1.ClearSelection();
-            dataGridView1.CurrentCell = null;
-            // узнаём какая страница выбрана
-            LinkLabel l = sender as LinkLabel;
-            if (l != null)
+            try
             {
-                currentPage1 = Convert.ToInt32(l.Text) - 1;
-                UpdatePag();
-                FillCount();
+                dataGridView1.ClearSelection();
+                dataGridView1.CurrentCell = null;
+                // узнаём какая страница выбрана
+                LinkLabel l = sender as LinkLabel;
+                if (l != null)
+                {
+                    currentPage1 = Convert.ToInt32(l.Text) - 1;
+                    UpdatePag();
+                    FillCount();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
 
@@ -244,74 +266,88 @@ namespace kursovoy
         /// </summary>
         private void UpdatePag()
         {
-            dataGridView1.Rows.Clear();
-            int startIndex = currentPage1 * rowsPerPage1;
-            int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
-            // Добавляем строки для текущей страницы
-            for (int i = startIndex; i < endIndex; i++)
+            try
             {
-                dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
-            }
-            // Удаляем старые LinkLabel страниц
-            foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
-            {
-                this.Controls.Remove(control);
-            }
-            // Рассчитываем общее количество страниц
-            int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
-            int step = 15;
-            int x = labelCount.Location.X + 68;
-            int y = labelCount.Location.Y + 38;
-            // Создаем новые LinkLabel для страниц
-            for (int i = 0; i < totalPages; i++)
-            {
-                var linkLabel = new LinkLabel();
-                linkLabel.Text = (i + 1).ToString();
-                linkLabel.Name = "page" + i;
-
-                // Устанавливаем цвет ссылки
-                linkLabel.LinkColor = Color.Black;      
-                linkLabel.VisitedLinkColor = Color.Black; 
-                linkLabel.ActiveLinkColor = Color.Black; 
-
-                linkLabel.Font = new System.Drawing.Font(linkLabel.Font.FontFamily, 14);
-                linkLabel.AutoSize = true;
-                linkLabel.Location = new System.Drawing.Point(x, y);
-                linkLabel.Click += LinkLabel_Click;
-                linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;// Убираем подчеркивание
-
-                // Добавляем фон только у текущей страницы
-                if (i == currentPage1)
+                dataGridView1.Rows.Clear();
+                int startIndex = currentPage1 * rowsPerPage1;
+                int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
+                // Добавляем строки для текущей страницы
+                for (int i = startIndex; i < endIndex; i++)
                 {
-                    linkLabel.BackColor = Color.LightGreen;
+                    dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
                 }
-                else
+                // Удаляем старые LinkLabel страниц
+                foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
                 {
-                    linkLabel.BackColor = Color.Honeydew;
+                    this.Controls.Remove(control);
                 }
-                this.Controls.Add(linkLabel);
-                x += step;
-            }
-            // Обновляем состояние кнопок
-            buttonPag1.Enabled = currentPage1 > 0;
-            buttonPag2.Enabled = currentPage1 < totalPages - 1;
+                // Рассчитываем общее количество страниц
+                int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
+                int step = 15;
+                int x = labelCount.Location.X + 68;
+                int y = labelCount.Location.Y + 38;
+                // Создаем новые LinkLabel для страниц
+                for (int i = 0; i < totalPages; i++)
+                {
+                    var linkLabel = new LinkLabel();
+                    linkLabel.Text = (i + 1).ToString();
+                    linkLabel.Name = "page" + i;
 
-            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+                    // Устанавливаем цвет ссылки
+                    linkLabel.LinkColor = Color.Black;
+                    linkLabel.VisitedLinkColor = Color.Black;
+                    linkLabel.ActiveLinkColor = Color.Black;
+
+                    linkLabel.Font = new System.Drawing.Font(linkLabel.Font.FontFamily, 14);
+                    linkLabel.AutoSize = true;
+                    linkLabel.Location = new System.Drawing.Point(x, y);
+                    linkLabel.Click += LinkLabel_Click;
+                    linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;// Убираем подчеркивание
+
+                    // Добавляем фон только у текущей страницы
+                    if (i == currentPage1)
+                    {
+                        linkLabel.BackColor = Color.LightGreen;
+                    }
+                    else
+                    {
+                        linkLabel.BackColor = Color.Honeydew;
+                    }
+                    this.Controls.Add(linkLabel);
+                    x += step;
+                }
+                // Обновляем состояние кнопок
+                buttonPag1.Enabled = currentPage1 > 0;
+                buttonPag2.Enabled = currentPage1 < totalPages - 1;
+
+                labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Количество строк всего
         /// </summary>
         public void FillCount()
         {
-            string conStr = Authorization.Program.ConnectionString;
-            using (MySqlConnection con = new MySqlConnection(conStr))
+            try
             {
-                con.Open();
-                using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM `order`", con))
+                string conStr = Authorization.Program.ConnectionString;
+                using (MySqlConnection con = new MySqlConnection(conStr))
                 {
-                    totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
+                    con.Open();
+                    using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM `order`", con))
+                    {
+                        totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
+                    }
+                    labelVSE.Text = $"/{totalRecords}";
                 }
-                labelVSE.Text = $"/{totalRecords}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -319,21 +355,28 @@ namespace kursovoy
         /// </summary>
         private void UpdateDataGrid()
         {
-            string searchStr = SearchText.Text;
-            string sortOrder = comboBox1.SelectedItem?.ToString();
-            string orderDirection = (sortOrder == "сначало новые") ? "DESC" : "ASC";
-            string strCmd = "SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
-                " OrderStatus AS 'Статус заказа', e.EmployeeF AS 'Фамилия', e.EmployeeI AS 'Имя', e.EmployeeO AS 'Отчеcтво', OrderPrice AS 'Сумма заказа'" +
-                " FROM `order`" +
-                "INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID WHERE 1=1";
-            if (!string.IsNullOrWhiteSpace(searchStr))
+            try
             {
-                strCmd += $" AND OrderID LIKE '%{searchStr}%'";
+                string searchStr = SearchText.Text;
+                string sortOrder = comboBox1.SelectedItem?.ToString();
+                string orderDirection = (sortOrder == "сначало новые") ? "DESC" : "ASC";
+                string strCmd = "SELECT OrderID AS 'Номер заказа',OrderDate AS 'Дата заказа'," +
+                    " OrderStatus AS 'Статус заказа', e.EmployeeF AS 'Фамилия', e.EmployeeI AS 'Имя', e.EmployeeO AS 'Отчеcтво', OrderPrice AS 'Сумма заказа'" +
+                    " FROM `order`" +
+                    "INNER JOIN `employeeee` e ON `order`.OrderUser = e.EmployeeID WHERE 1=1";
+                if (!string.IsNullOrWhiteSpace(searchStr))
+                {
+                    strCmd += $" AND OrderID LIKE '%{searchStr}%'";
+                }
+                strCmd += $" ORDER BY `OrderDate` {orderDirection}";
+                FillDataGrid(strCmd);
+                currentPage1 = 0; // Сбрасываем на первую страницу
+                UpdatePag(); // Обновляем пагинацию
             }
-            strCmd += $" ORDER BY `OrderDate` {orderDirection}";
-            FillDataGrid(strCmd);
-            currentPage1 = 0; // Сбрасываем на первую страницу
-            UpdatePag(); // Обновляем пагинацию
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Обработчик события изменения текста в поле поиска.
@@ -517,49 +560,56 @@ namespace kursovoy
         /// <param name="e"></param>
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridView1.Columns[e.ColumnIndex].Name == "OrderStatus")
+            try
             {
-                int orderID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["OrderID"].Value);
-                string newStatus = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-
-                // Находим данные заказа в списке
-                OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
-
-                if (orderData != null)
+                if (dataGridView1.Columns[e.ColumnIndex].Name == "OrderStatus")
                 {
-                    // Получаем статус заказа
-                    string oldStatus = orderData.OrderStatus;
+                    int orderID = Convert.ToInt32(dataGridView1.Rows[e.RowIndex].Cells["OrderID"].Value);
+                    string newStatus = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
 
-                    // Попытка изменения статуса с "Отменён" на "Завершен"
-                    if (oldStatus == "Отменён" && newStatus == "Завершен")
-                    {
-                        MessageBox.Show("Изменение статуса заказа с 'Отменён' на 'Завершен' запрещено.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus; 
-                        return;
-                    }
+                    // Находим данные заказа в списке
+                    OrderData orderData = orderDataList.FirstOrDefault(o => o.OrderID == orderID);
 
-                    // Проверяем, прошло ли больше 14 дней с даты заказа
-                    if (DateTime.Now > orderData.OrderDate.AddDays(14) && newStatus == "Отменён")
+                    if (orderData != null)
                     {
-                        MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = orderData.OrderStatus; 
-                        return;
-                    }
-                    // Проверяем, что статус изменился
-                    if (oldStatus != newStatus)
-                    {
-                        UpdateOrderStatus(orderID, newStatus);
-                        // возвращаем товар на склад
-                        if (oldStatus == "Завершен" && newStatus == "Отменён")
+                        // Получаем статус заказа
+                        string oldStatus = orderData.OrderStatus;
+
+                        // Попытка изменения статуса с "Отменён" на "Завершен"
+                        if (oldStatus == "Отменён" && newStatus == "Завершен")
                         {
-                            ReturnProductsToStock(orderID);
+                            MessageBox.Show("Изменение статуса заказа с 'Отменён' на 'Завершен' запрещено.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = oldStatus;
+                            return;
                         }
-                        orderData.OrderStatus = newStatus;
 
-                        UpdateDataGrid();
-                        UpdatePag();
+                        // Проверяем, прошло ли больше 14 дней с даты заказа
+                        if (DateTime.Now > orderData.OrderDate.AddDays(14) && newStatus == "Отменён")
+                        {
+                            MessageBox.Show("Нельзя отменить заказ, так как прошло больше 14 дней с даты заказа.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            dataGridView1.Rows[e.RowIndex].Cells["OrderStatus"].Value = orderData.OrderStatus;
+                            return;
+                        }
+                        // Проверяем, что статус изменился
+                        if (oldStatus != newStatus)
+                        {
+                            UpdateOrderStatus(orderID, newStatus);
+                            // возвращаем товар на склад
+                            if (oldStatus == "Завершен" && newStatus == "Отменён")
+                            {
+                                ReturnProductsToStock(orderID);
+                            }
+                            orderData.OrderStatus = newStatus;
+
+                            UpdateDataGrid();
+                            UpdatePag();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -728,13 +778,20 @@ namespace kursovoy
         /// <param name="e"></param>
         private void ViewOrder_Click(object sender, EventArgs e)
         {
-            int ed = dataGridView1.CurrentCell.RowIndex;
-            int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
-            ViewOrder vo = new ViewOrder(id);
-            vo.ShowDialog();
-            UpdateDataGrid();
-            UpdatePag();
-            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            try
+            {
+                int ed = dataGridView1.CurrentCell.RowIndex;
+                int id = Convert.ToInt32(dataGridView1.Rows[ed].Cells["OrderID"].Value);
+                ViewOrder vo = new ViewOrder(id);
+                vo.ShowDialog();
+                UpdateDataGrid();
+                UpdatePag();
+                labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Условное форматирование данных

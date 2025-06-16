@@ -370,7 +370,6 @@ namespace kursovoy
                     this.Hide();
                     break;
                 default:
-                    //MessageBox.Show("Ваша роль в системе не определена. Обратитесь к администратору.");
                     break;
             }
         }

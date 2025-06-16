@@ -31,16 +31,23 @@ namespace kursovoy
         /// </summary>
         private void Users_ActivateTracking()
         {
-            // Назначаем обработчики событий для всей формы
-            this.MouseMove += Users_ActivityDetected;
-            this.KeyPress += Users_ActivityDetected;
-            this.MouseClick += Users_ActivityDetected;
-
-            // Если есть встроенные контролы, следим за их активностью
-            foreach (Control control in this.Controls)
+            try
             {
-                control.MouseMove += Users_ActivityDetected;
-                control.MouseClick += Users_ActivityDetected;
+                // Назначаем обработчики событий для всей формы
+                this.MouseMove += Users_ActivityDetected;
+                this.KeyPress += Users_ActivityDetected;
+                this.MouseClick += Users_ActivityDetected;
+
+                // Если есть встроенные контролы, следим за их активностью
+                foreach (Control control in this.Controls)
+                {
+                    control.MouseMove += Users_ActivityDetected;
+                    control.MouseClick += Users_ActivityDetected;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -53,31 +60,38 @@ namespace kursovoy
         }
         private void inactivityTimer_Tick(object sender, EventArgs e)
         {
-            // Блокируем повторный вход
-            if (isTimerTickRunning)
-            {
-                return;
-            }
-            isTimerTickRunning = true;
             try
             {
-                if (inactivityTimeout > 0)
+                // Блокируем повторный вход
+                if (isTimerTickRunning)
                 {
-                    inactivityTimeout -= Timer.Interval;
+                    return;
                 }
-                else
+                isTimerTickRunning = true;
+                try
                 {
-                    Timer.Stop();
-                    MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы", MessageBoxButtons.OK,MessageBoxIcon.Information);
-                    import.AutomaticBackup();
-                    this.Close();
-                    Authorization authorization = new Authorization();
-                    authorization.Show();
+                    if (inactivityTimeout > 0)
+                    {
+                        inactivityTimeout -= Timer.Interval;
+                    }
+                    else
+                    {
+                        Timer.Stop();
+                        MessageBox.Show("Вы были перенаправлены на страницу авторизации из-за бездействия.", "Блокировка системы", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        import.AutomaticBackup();
+                        this.Close();
+                        Authorization authorization = new Authorization();
+                        authorization.Show();
+                    }
+                }
+                finally
+                {
+                    isTimerTickRunning = false;
                 }
             }
-            finally
+            catch (Exception ex)
             {
-                isTimerTickRunning = false;
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         private void button4_Click(object sender, EventArgs e)
@@ -180,32 +194,39 @@ namespace kursovoy
         /// <param name="e"></param>
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
+            try
             {
+                if (e.ColumnIndex == dataGridView1.Columns["Выбрать"].Index && e.RowIndex >= 0)
+                {
+                    FillDataGrid("SELECT EmployeeID AS 'id', " +
+                   "EmployeeF AS 'Фамилия'," +
+                   "EmployeeI AS 'Имя'," +
+                   "EmployeeO AS 'Отчетство'," +
+                   "telephone AS 'Номер телефона'," +
+                   "status AS 'Статус'" +
+                   "FROM employeeee; ");
+                    DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+                    textBox2.Text = row.Cells["EmployeeID"].Value.ToString(); //id
+                    textBoxF.Text = row.Cells["EmployeeF"].Value.ToString(); //FIO
+                    textBoxI.Text = row.Cells["EmployeeI"].Value.ToString(); //FIO
+                    textBoxO.Text = row.Cells["EmployeeO"].Value.ToString(); //FIO
+                    string cleanNumber = new string(maskedTextBox1.Text.Where(char.IsDigit).ToArray());
+                    Console.WriteLine(cleanNumber);
+                    maskedTextBox1.Text = row.Cells["telephone"].Value.ToString(); //telephone
+                    comboBoxStatus.Text = row.Cells["status"].Value.ToString(); //status 
+                }
                 FillDataGrid("SELECT EmployeeID AS 'id', " +
-               "EmployeeF AS 'Фамилия'," +
-               "EmployeeI AS 'Имя'," +
-               "EmployeeO AS 'Отчетство'," +
-               "telephone AS 'Номер телефона'," +
-               "status AS 'Статус'" +
-               "FROM employeeee; ");
-                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-                textBox2.Text = row.Cells["EmployeeID"].Value.ToString(); //id
-                textBoxF.Text = row.Cells["EmployeeF"].Value.ToString(); //FIO
-                textBoxI.Text = row.Cells["EmployeeI"].Value.ToString(); //FIO
-                textBoxO.Text = row.Cells["EmployeeO"].Value.ToString(); //FIO
-                string cleanNumber = new string(maskedTextBox1.Text.Where(char.IsDigit).ToArray());
-                Console.WriteLine(cleanNumber);
-                maskedTextBox1.Text = row.Cells["telephone"].Value.ToString(); //telephone
-                comboBoxStatus.Text = row.Cells["status"].Value.ToString(); //status 
+                   "EmployeeF AS 'Фамилия'," +
+                   "EmployeeI AS 'Имя'," +
+                   "EmployeeO AS 'Отчетство'," +
+                   "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
+                   "status AS 'Статус'" +
+                   " FROM  employeeee; ");
             }
-            FillDataGrid("SELECT EmployeeID AS 'id', " +
-               "EmployeeF AS 'Фамилия'," +
-               "EmployeeI AS 'Имя'," +
-               "EmployeeO AS 'Отчетство'," +
-               "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона',"+
-               "status AS 'Статус'"+
-               " FROM  employeeee; ");
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Для ввода ФИО, Автоматически первая буква слова заглавная
@@ -231,37 +252,51 @@ namespace kursovoy
         }
         private void textBoxI_TextChanged(object sender, EventArgs e)
         {
-            int selectionStart = textBoxI.SelectionStart;
-            int selectionLength = textBoxI.SelectionLength;
-            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-            string[] words = textBoxI.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
+            try
             {
-                if (words[i].Length > 0)
+                int selectionStart = textBoxI.SelectionStart;
+                int selectionLength = textBoxI.SelectionLength;
+                // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+                string[] words = textBoxI.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < words.Length; i++)
                 {
-                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                    if (words[i].Length > 0)
+                    {
+                        words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                    }
                 }
+                textBoxI.Text = string.Join(" ", words);
+                textBoxI.SelectionStart = Math.Min(selectionStart, textBoxI.Text.Length);
+                textBoxI.SelectionLength = selectionLength;
             }
-            textBoxI.Text = string.Join(" ", words);
-            textBoxI.SelectionStart = Math.Min(selectionStart, textBoxI.Text.Length);
-            textBoxI.SelectionLength = selectionLength;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         private void textBoxO_TextChanged(object sender, EventArgs e)
         {
-            int selectionStart = textBoxO.SelectionStart;
-            int selectionLength = textBoxO.SelectionLength;
-            // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
-            string[] words = textBoxO.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < words.Length; i++)
+            try
             {
-                if (words[i].Length > 0) 
+                int selectionStart = textBoxO.SelectionStart;
+                int selectionLength = textBoxO.SelectionLength;
+                // Преобразуем текст так, чтобы каждое слово начиналось с заглавной буквы
+                string[] words = textBoxO.Text.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < words.Length; i++)
                 {
-                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                    if (words[i].Length > 0)
+                    {
+                        words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
+                    }
                 }
+                textBoxO.Text = string.Join(" ", words);
+                textBoxO.SelectionStart = Math.Min(selectionStart, textBoxO.Text.Length);
+                textBoxO.SelectionLength = selectionLength;
             }
-            textBoxO.Text = string.Join(" ", words);
-            textBoxO.SelectionStart = Math.Min(selectionStart, textBoxO.Text.Length);
-            textBoxO.SelectionLength = selectionLength;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Для ввода ФИО
@@ -322,42 +357,50 @@ namespace kursovoy
                         int employeeID = Convert.ToInt32(textBox2.Text);
                         using (MySqlConnection con = new MySqlConnection(Authorization.Program.ConnectionString))
                         {
-                            con.Open();
-                            MySqlCommand cmd = new MySqlCommand(@"UPDATE employeeee 
+                            try
+                            {
+                                con.Open();
+                                MySqlCommand cmd = new MySqlCommand(@"UPDATE employeeee 
                         SET EmployeeF = @employeeF,
                             EmployeeI = @employeeI,
                             EmployeeO = @employeeO,
                             telephone = @telephone,
                             status = @status
                         WHERE EmployeeID = @employeeID", con);
-                            if (UserTelephoneExists(maskedTextBox1.Text, employeeID, con))
-                            {
-                                MessageBox.Show("Пользователь с таким телефоном уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                return;
+                                if (UserTelephoneExists(maskedTextBox1.Text, employeeID, con))
+                                {
+                                    MessageBox.Show("Пользователь с таким телефоном уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return;
+                                }
+                                cmd.Parameters.AddWithValue("@employeeID", employeeID);
+                                cmd.Parameters.AddWithValue("@employeeF", textBoxF.Text);
+                                cmd.Parameters.AddWithValue("@employeeI", textBoxI.Text);
+                                cmd.Parameters.AddWithValue("@employeeO", textBoxO.Text);
+                                cmd.Parameters.AddWithValue("@telephone", maskedTextBox1.Text);
+                                cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);
+                                cmd.ExecuteNonQuery();
+                                MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                con.Close();
+
                             }
-                            cmd.Parameters.AddWithValue("@employeeID", employeeID);
-                            cmd.Parameters.AddWithValue("@employeeF", textBoxF.Text);
-                            cmd.Parameters.AddWithValue("@employeeI", textBoxI.Text);
-                            cmd.Parameters.AddWithValue("@employeeO", textBoxO.Text);
-                            cmd.Parameters.AddWithValue("@telephone", maskedTextBox1.Text);
-                            cmd.Parameters.AddWithValue("@status", comboBoxStatus.Text);
-                            cmd.ExecuteNonQuery();
-                            MessageBox.Show("Запись изменена!", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            con.Close();
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка: {ex.Message}");
+                            }
+                            maskedTextBox1.Text = "";
+                            textBoxF.Text = "";
+                            textBoxI.Text = "";
+                            textBoxO.Text = "";
+                            textBox2.Text = "";
+                            comboBoxStatus.SelectedItem = null;
+                            FillDataGrid("SELECT EmployeeID AS 'id', " +
+                                           "EmployeeF AS 'Фамилия'," +
+                                           "EmployeeI AS 'Имя'," +
+                                           "EmployeeO AS 'Отчество'," +
+                                           "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
+                                           "status AS 'Статус'" +
+                                           " FROM  employeeee; ");
                         }
-                        maskedTextBox1.Text = "";
-                        textBoxF.Text = "";
-                        textBoxI.Text = "";
-                        textBoxO.Text = "";
-                        textBox2.Text = "";
-                        comboBoxStatus.SelectedItem = null;
-                        FillDataGrid("SELECT EmployeeID AS 'id', " +
-                                       "EmployeeF AS 'Фамилия'," +
-                                       "EmployeeI AS 'Имя'," +
-                                       "EmployeeO AS 'Отчество'," +
-                                       "concat(left(telephone, 7), ' * **', right(telephone, 5)) AS 'Номер телефона'," +
-                                       "status AS 'Статус'" +
-                                       " FROM  employeeee; ");
                     }
                 }
                 else

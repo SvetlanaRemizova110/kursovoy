@@ -43,7 +43,9 @@ namespace kursovoy
         /// </summary>
         private void LoadDataIntoComboBox()
         {
-            string query3 = "SELECT CategoryName FROM Category";
+            try
+            {
+                string query3 = "SELECT CategoryName FROM Category";
             comboBox2.Items.Add("Все категории");
             using (MySqlConnection connection = new MySqlConnection(Authorization.Program.ConnectionString))
             {
@@ -57,6 +59,11 @@ namespace kursovoy
                     }
                 }
                 connection.Close();
+            }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -227,15 +234,22 @@ namespace kursovoy
         /// <param name="e"></param>
         private void LinkLabel_Click(object sender, EventArgs e)
         {
-            dataGridView1.ClearSelection();
-            dataGridView1.CurrentCell = null;
-            // узнаём какая страница выбрана
-            LinkLabel l = sender as LinkLabel;
-            if (l != null)
+            try
             {
-                currentPage1 = Convert.ToInt32(l.Text) - 1;
-                UpdatePag(); 
-                FillCount();
+                dataGridView1.ClearSelection();
+                dataGridView1.CurrentCell = null;
+                // узнаём какая страница выбрана
+                LinkLabel l = sender as LinkLabel;
+                if (l != null)
+                {
+                    currentPage1 = Convert.ToInt32(l.Text) - 1;
+                    UpdatePag();
+                    FillCount();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -243,72 +257,86 @@ namespace kursovoy
         /// </summary>
         private void UpdatePag()
         {
-            dataGridView1.Rows.Clear();
-            int startIndex = currentPage1 * rowsPerPage1;
-            int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
-            // Добавляем строки для текущей страницы
-            for (int i = startIndex; i < endIndex; i++)
+            try
             {
-                dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
-            }
-            // Удаляем старые LinkLabel страниц
-            foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
-            {
-                this.Controls.Remove(control);
-            }
-            // Рассчитываем общее количество страниц
-            int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
-            int step = 15;
-            int x = labelCount.Location.X + 68;
-            int y = labelCount.Location.Y + 38;
-            // Создаем новые LinkLabel для страниц
-            for (int i = 0; i < totalPages; i++)
-            {
-                var linkLabel = new LinkLabel();
-                linkLabel.Text = (i + 1).ToString();
-                linkLabel.Name = "page" + i;
-                // Устанавливаем цвет ссылок
-                linkLabel.LinkColor = Color.Black;     
-                linkLabel.VisitedLinkColor = Color.Black; 
-                linkLabel.ActiveLinkColor = Color.Black; 
-
-                linkLabel.Font = new Font(linkLabel.Font.FontFamily, 14);
-                linkLabel.AutoSize = true;
-                linkLabel.Location = new Point(x, y);
-                linkLabel.Click += LinkLabel_Click;
-                linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;
-
-                if (i == currentPage1)
+                dataGridView1.Rows.Clear();
+                int startIndex = currentPage1 * rowsPerPage1;
+                int endIndex = Math.Min(startIndex + rowsPerPage1, totalRows1);
+                // Добавляем строки для текущей страницы
+                for (int i = startIndex; i < endIndex; i++)
                 {
-                    linkLabel.BackColor = Color.LightGreen;
+                    dataGridView1.Rows.Add(allRows1[i].Cells.Cast<DataGridViewCell>().Select(cell => cell.Value).ToArray());
                 }
-                else
+                // Удаляем старые LinkLabel страниц
+                foreach (var control in this.Controls.OfType<LinkLabel>().Where(c => c.Name?.StartsWith("page") == true).ToList())
                 {
-                    linkLabel.BackColor = Color.Honeydew;
+                    this.Controls.Remove(control);
                 }
-                this.Controls.Add(linkLabel);
-                x += step;
-            }
-            // Обновляем состояние кнопок
-            buttonPag1.Enabled = currentPage1 > 0;
-            buttonPag2.Enabled = currentPage1 < totalPages - 1;
+                // Рассчитываем общее количество страниц
+                int totalPages = (int)Math.Ceiling((double)totalRows1 / rowsPerPage1);
+                int step = 15;
+                int x = labelCount.Location.X + 68;
+                int y = labelCount.Location.Y + 38;
+                // Создаем новые LinkLabel для страниц
+                for (int i = 0; i < totalPages; i++)
+                {
+                    var linkLabel = new LinkLabel();
+                    linkLabel.Text = (i + 1).ToString();
+                    linkLabel.Name = "page" + i;
+                    // Устанавливаем цвет ссылок
+                    linkLabel.LinkColor = Color.Black;
+                    linkLabel.VisitedLinkColor = Color.Black;
+                    linkLabel.ActiveLinkColor = Color.Black;
 
-            labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+                    linkLabel.Font = new Font(linkLabel.Font.FontFamily, 14);
+                    linkLabel.AutoSize = true;
+                    linkLabel.Location = new Point(x, y);
+                    linkLabel.Click += LinkLabel_Click;
+                    linkLabel.LinkBehavior = LinkBehavior.NeverUnderline;
+
+                    if (i == currentPage1)
+                    {
+                        linkLabel.BackColor = Color.LightGreen;
+                    }
+                    else
+                    {
+                        linkLabel.BackColor = Color.Honeydew;
+                    }
+                    this.Controls.Add(linkLabel);
+                    x += step;
+                }
+                // Обновляем состояние кнопок
+                buttonPag1.Enabled = currentPage1 > 0;
+                buttonPag2.Enabled = currentPage1 < totalPages - 1;
+
+                labelCount.Text = $"Количество записей: {dataGridView1.Rows.Count}" + labelVSE.Text;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
         }
         /// <summary>
         /// Количество строк всего
         /// </summary>
         public void FillCount()
         {
-            string conStr = Authorization.Program.ConnectionString;
-            using (MySqlConnection connection = new MySqlConnection(conStr))
+            try
             {
-                connection.Open();
-                using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM Product", connection))
+                string conStr = Authorization.Program.ConnectionString;
+                using (MySqlConnection connection = new MySqlConnection(conStr))
                 {
-                    totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
+                    connection.Open();
+                    using (MySqlCommand totalCommand = new MySqlCommand("SELECT COUNT(*) FROM Product", connection))
+                    {
+                        totalRecords = Convert.ToInt32(totalCommand.ExecuteScalar());
+                    }
+                    labelVSE.Text = $"/{totalRecords}";
                 }
-                labelVSE.Text = $"/{totalRecords}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -341,30 +369,37 @@ namespace kursovoy
         /// </summary>
         private void UpdateDataGrid()
         {
-            string searchStr = SearchText.Text;
-            string orderByClause; 
-            if (comboBox1.SelectedItem?.ToString() == "По убыванию")
+            try
             {
-                orderByClause = "Cost DESC";
+                string searchStr = SearchText.Text;
+                string orderByClause;
+                if (comboBox1.SelectedItem?.ToString() == "По убыванию")
+                {
+                    orderByClause = "Cost DESC";
+                }
+                else if (comboBox1.SelectedItem?.ToString() == "По возрастанию")
+                {
+                    orderByClause = "Cost ASC";
+                }
+                else
+                {
+                    orderByClause = "ProductArticul ASC";  // сортировка по артикулу
+                }
+                string selectedCategory = comboBox2.SelectedItem?.ToString();
+                int categoryId = -1;
+                if (!string.IsNullOrEmpty(selectedCategory) && selectedCategory != "Все категории")
+                {
+                    categoryId = GetCategoryIdByName(selectedCategory);
+                }
+                string strCmd = BuildSqlQuery(searchStr, orderByClause, categoryId);
+                FillDataGrid(strCmd, categoryId);
+                currentPage1 = 0; // Сбрасываем на первую страницу
+                UpdatePag(); // Обновляем пагинацию
             }
-            else if (comboBox1.SelectedItem?.ToString() == "По возрастанию")
+            catch (Exception ex)
             {
-                orderByClause = "Cost ASC";
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
-            else 
-            {
-                orderByClause = "ProductArticul ASC";  // сортировка по артикулу
-            }
-            string selectedCategory = comboBox2.SelectedItem?.ToString();
-            int categoryId = -1;
-            if (!string.IsNullOrEmpty(selectedCategory) && selectedCategory != "Все категории")
-            {
-                categoryId = GetCategoryIdByName(selectedCategory);
-            }
-            string strCmd = BuildSqlQuery(searchStr, orderByClause, categoryId);
-            FillDataGrid(strCmd, categoryId);
-            currentPage1 = 0; // Сбрасываем на первую страницу
-            UpdatePag(); // Обновляем пагинацию
         }
 
         private string BuildSqlQuery(string searchStr, string orderByClause, int categoryId)
@@ -436,23 +471,30 @@ namespace kursovoy
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            if (Authorization.User2.Role == 1)
+            try
             {
-                Admin ad = new Admin();
-                ad.Show();
-                this.Close();
+                if (Authorization.User2.Role == 1)
+                {
+                    Admin ad = new Admin();
+                    ad.Show();
+                    this.Close();
+                }
+                else if (Authorization.User2.Role == 2)
+                {
+                    СommoditySpecialist CS = new СommoditySpecialist();
+                    CS.Show();
+                    this.Close();
+                }
+                else if (Authorization.User2.Role == 3)
+                {
+                    Seller sl = new Seller();
+                    sl.Show();
+                    this.Close();
+                }
             }
-            else if (Authorization.User2.Role == 2)
+            catch (Exception ex)
             {
-                СommoditySpecialist CS = new СommoditySpecialist();
-                CS.Show();
-                this.Close();
-            }
-            else if (Authorization.User2.Role == 3)
-            {
-                Seller sl = new Seller();
-                sl.Show();
-                this.Close();
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -462,17 +504,24 @@ namespace kursovoy
         /// <param name="e"></param>
         private void orderADD(object sender, EventArgs e)
         {
-            if (Value.clearOrder == true)
+            try
             {
-                currentOrder.Clear();
-                Value.clearOrder = false;
+                if (Value.clearOrder == true)
+                {
+                    currentOrder.Clear();
+                    Value.clearOrder = false;
+                }
+                OrderForm orderForm = new OrderForm(currentOrder);
+                if (orderForm.ShowDialog() == DialogResult.OK)
+                {
+                    currentOrder = orderForm.UpdatedOrder;
+                }
+                UpdateDataGrid();
             }
-            OrderForm orderForm = new OrderForm(currentOrder);
-            if (orderForm.ShowDialog() == DialogResult.OK)
+            catch (Exception ex)
             {
-                currentOrder = orderForm.UpdatedOrder;
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
-            UpdateDataGrid();
         }
         /// <summary>
         /// Метод добавления товара в корзину
@@ -481,31 +530,38 @@ namespace kursovoy
         /// <param name="e"></param>
         private void AddToOrderMenuClick(object sender, EventArgs e)
         {
-            if (dataGridView1.CurrentRow != null)
+            try
             {
-                string productArticleNumber = dataGridView1.CurrentRow.Cells["ProductArticul"].Value.ToString();
-                int productCount = Convert.ToInt32(dataGridView1.CurrentRow.Cells["ProductQuantityInStock"].Value); 
-                if (currentOrder.ContainsKey(productArticleNumber))
+                if (dataGridView1.CurrentRow != null)
                 {
-                    // Проверяем, не превысит ли добавление товара количество на складе
-                    if (currentOrder[productArticleNumber] + 1 > productCount)
+                    string productArticleNumber = dataGridView1.CurrentRow.Cells["ProductArticul"].Value.ToString();
+                    int productCount = Convert.ToInt32(dataGridView1.CurrentRow.Cells["ProductQuantityInStock"].Value);
+                    if (currentOrder.ContainsKey(productArticleNumber))
                     {
-                        MessageBox.Show("Невозможно добавить больше товара, чем есть на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
+                        // Проверяем, не превысит ли добавление товара количество на складе
+                        if (currentOrder[productArticleNumber] + 1 > productCount)
+                        {
+                            MessageBox.Show("Невозможно добавить больше товара, чем есть на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+                        currentOrder[productArticleNumber]++;
+                        Value.clearOrder = false;
                     }
-                    currentOrder[productArticleNumber]++;
-                    Value.clearOrder = false;
-                }
-                else
-                {
-                    if (productCount <= 0)
+                    else
                     {
-                        MessageBox.Show("Товара нет на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
+                        if (productCount <= 0)
+                        {
+                            MessageBox.Show("Товара нет на складе.", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+                        currentOrder[productArticleNumber] = 1;
+                        Value.clearOrder = false;
                     }
-                    currentOrder[productArticleNumber] = 1;
-                    Value.clearOrder = false;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         /// <summary>
@@ -594,19 +650,26 @@ namespace kursovoy
         /// <param name="e"></param>
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex == dataGridView1.Columns["ProductQuantityInStock"].Index && e.Value != null)
+            try
             {
-                int ProductQuantityInStock = Convert.ToInt32(e.Value);
-
-                if (ProductQuantityInStock == 0)
+                if (e.ColumnIndex == dataGridView1.Columns["ProductQuantityInStock"].Index && e.Value != null)
                 {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightCoral;
+                    int ProductQuantityInStock = Convert.ToInt32(e.Value);
 
+                    if (ProductQuantityInStock == 0)
+                    {
+                        dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightCoral;
+
+                    }
+                    else if (ProductQuantityInStock <= 3)
+                    {
+                        dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff66");
+                    }
                 }
-                else if (ProductQuantityInStock <= 3)
-                {
-                    dataGridView1.Rows[e.RowIndex].DefaultCellStyle.BackColor = ColorTranslator.FromHtml("#ffff66");
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         private void buttonPag1_Click(object sender, EventArgs e)
@@ -634,18 +697,25 @@ namespace kursovoy
         }
         private void dataGridView1_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
+            try
             {
-                var hit = dataGridView1.HitTest(e.X, e.Y);
-                if (hit.RowIndex >= 0)
+                if (e.Button == MouseButtons.Right)
                 {
-                    dataGridView1.ClearSelection();
-                    dataGridView1.Rows[hit.RowIndex].Selected = true;
+                    var hit = dataGridView1.HitTest(e.X, e.Y);
+                    if (hit.RowIndex >= 0)
+                    {
+                        dataGridView1.ClearSelection();
+                        dataGridView1.Rows[hit.RowIndex].Selected = true;
 
-                    dataGridView1.CurrentCell = dataGridView1.Rows[hit.RowIndex].Cells[0];
+                        dataGridView1.CurrentCell = dataGridView1.Rows[hit.RowIndex].Cells[0];
 
-                    contextMenuStrip1.Show(dataGridView1, e.Location);
+                        contextMenuStrip1.Show(dataGridView1, e.Location);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
             }
         }
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
